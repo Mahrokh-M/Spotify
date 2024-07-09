@@ -39,7 +39,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="page">
      <widget class="QLineEdit" name="username">
@@ -55,7 +55,7 @@
        <string notr="true">border-radius: 30px;
 background-color: rgb(255, 255, 255);
 padding: 10px;
-font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -77,7 +77,7 @@ font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
        <string notr="true">border-radius: 30px;
 background-color: rgb(255, 255, 255);
 padding: 10px;
-font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -119,26 +119,6 @@ color: rgb(255, 255, 255);</string>
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="forgetPass">
-      <property name="geometry">
-       <rect>
-        <x>730</x>
-        <y>530</y>
-        <width>221</width>
-        <height>71</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">font: 700 14pt &quot;UD Digi Kyokasho NP-B&quot;;
-color: rgb(99, 100, 103);</string>
-      </property>
-      <property name="text">
-       <string>Forgot Password</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
      <widget class="QPushButton" name="sign_button">
       <property name="geometry">
        <rect>
@@ -147,6 +127,9 @@ color: rgb(99, 100, 103);</string>
         <width>401</width>
         <height>61</height>
        </rect>
+      </property>
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
       </property>
       <property name="styleSheet">
        <string notr="true">font: 15pt &quot;Segoe UI Historic&quot;;
@@ -160,10 +143,10 @@ color: rgb(255, 255, 255);</string>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>690</x>
+        <x>680</x>
         <y>230</y>
-        <width>301</width>
-        <height>51</height>
+        <width>321</width>
+        <height>41</height>
        </rect>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
@@ -195,13 +178,26 @@ color: rgb(255, 255, 255);
        </item>
       </layout>
      </widget>
+     <widget class="QPushButton" name="forgetPass">
+      <property name="geometry">
+       <rect>
+        <x>750</x>
+        <y>550</y>
+        <width>191</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Forget Password</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="page_2">
      <widget class="QLineEdit" name="password_2">
       <property name="geometry">
        <rect>
         <x>640</x>
-        <y>570</y>
+        <y>500</y>
         <width>401</width>
         <height>61</height>
        </rect>
@@ -210,7 +206,7 @@ color: rgb(255, 255, 255);
        <string notr="true">border-radius: 30px;
 background-color: rgb(255, 255, 255);
 padding: 10px;
-font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       </property>
       <property name="text">
        <string/>
@@ -226,7 +222,7 @@ font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       <property name="geometry">
        <rect>
         <x>640</x>
-        <y>500</y>
+        <y>430</y>
         <width>401</width>
         <height>61</height>
        </rect>
@@ -235,7 +231,7 @@ font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
        <string notr="true">border-radius: 30px;
 background-color: rgb(255, 255, 255);
 padding: 10px;
-font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -283,7 +279,7 @@ color: rgb(255, 255, 255);</string>
         <x>690</x>
         <y>230</y>
         <width>301</width>
-        <height>51</height>
+        <height>41</height>
        </rect>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -315,29 +311,7 @@ color: rgb(255, 255, 255);
        </item>
       </layout>
      </widget>
-     <widget class="QLineEdit" name="username_3">
-      <property name="geometry">
-       <rect>
-        <x>640</x>
-        <y>360</y>
-        <width>401</width>
-        <height>61</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">border-radius: 30px;
-background-color: rgb(255, 255, 255);
-padding: 10px;
-font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-      </property>
-      <property name="placeholderText">
-       <string>Date of Birth</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="username_4">
+     <widget class="QLineEdit" name="email">
       <property name="geometry">
        <rect>
         <x>640</x>
@@ -350,7 +324,7 @@ font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
        <string notr="true">border-radius: 30px;
 background-color: rgb(255, 255, 255);
 padding: 10px;
-font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -363,7 +337,7 @@ font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       <property name="geometry">
        <rect>
         <x>640</x>
-        <y>430</y>
+        <y>360</y>
         <width>401</width>
         <height>61</height>
        </rect>
@@ -372,7 +346,7 @@ font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
        <string notr="true">border-radius: 30px;
 background-color: rgb(255, 255, 255);
 padding: 10px;
-font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -381,14 +355,134 @@ font: 700 10pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
        <string>Country</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="sign_button_2">
+     <widget class="QComboBox" name="year">
       <property name="geometry">
        <rect>
         <x>640</x>
-        <y>660</y>
+        <y>610</y>
+        <width>121</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-radius: 20px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 12pt &quot;UD Digi Kyokasho NP-B&quot;;
+placeholder  color: rgba(255, 255, 255, 128); 
+color: gray;</string>
+      </property>
+      <property name="placeholderText">
+       <string>Year</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="month">
+      <property name="geometry">
+       <rect>
+        <x>770</x>
+        <y>610</y>
+        <width>131</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-radius: 20px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 12pt &quot;UD Digi Kyokasho NP-B&quot;;
+placeholder  color: rgba(255, 255, 255, 128); 
+color: gray;</string>
+      </property>
+      <property name="placeholderText">
+       <string>Month</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="day">
+      <property name="geometry">
+       <rect>
+        <x>910</x>
+        <y>610</y>
+        <width>121</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-radius: 20px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 12pt &quot;UD Digi Kyokasho NP-B&quot;;
+placeholder  color: rgba(255, 255, 255, 128); 
+color: gray;</string>
+      </property>
+      <property name="placeholderText">
+       <string>Day</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>560</y>
+        <width>141</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-radius: 30px;
+color: rgb(255, 255, 255);
+padding: 10px;
+font: 12pt &quot;Segoe UI Historic&quot;;
+background-color: rgba(255, 255, 255, 0);</string>
+      </property>
+      <property name="text">
+       <string>Birth Day:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="wrong_email">
+      <property name="geometry">
+       <rect>
+        <x>1050</x>
+        <y>310</y>
+        <width>401</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(255, 0, 0);
+font: 11pt &quot;Segoe UI&quot;;</string>
+      </property>
+      <property name="text">
+       <string>* Invalid Email,  Please enter a valid email address.</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="wrong_pass">
+      <property name="geometry">
+       <rect>
+        <x>1050</x>
+        <y>510</y>
+        <width>621</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(255, 0, 0);
+font: 11pt &quot;Segoe UI&quot;;</string>
+      </property>
+      <property name="text">
+       <string>*Invalid Password, Password must be at least 8 characters long</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="sign_button_3">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>670</y>
         <width>401</width>
         <height>61</height>
        </rect>
+      </property>
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
       </property>
       <property name="styleSheet">
        <string notr="true">font: 15pt &quot;Segoe UI Historic&quot;;
@@ -399,8 +493,300 @@ color: rgb(255, 255, 255);</string>
        <string>SIGN UP</string>
       </property>
      </widget>
+     <widget class="QLabel" name="message_succ">
+      <property name="geometry">
+       <rect>
+        <x>700</x>
+        <y>670</y>
+        <width>281</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 15pt &quot;Segoe UI Historic&quot;;
+color: rgb(0, 170, 0);</string>
+      </property>
+      <property name="text">
+       <string>Signed Up Successfully!</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
     </widget>
-    <widget class="QWidget" name="page_3"/>
+    <widget class="QWidget" name="page_3">
+     <widget class="QLabel" name="Spotify_name_3">
+      <property name="geometry">
+       <rect>
+        <x>820</x>
+        <y>150</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 700 16pt &quot;UD Digi Kyokasho NP-B&quot;;
+color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="text">
+       <string>Spotify</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="Back">
+      <property name="geometry">
+       <rect>
+        <x>750</x>
+        <y>550</y>
+        <width>191</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Back to Sign in</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="username_3">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>300</y>
+        <width>401</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>Username</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="Verify">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>460</y>
+        <width>401</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 15pt &quot;Segoe UI Historic&quot;;
+background-color: rgb(46, 189, 89);border-radius: 30px;
+color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="text">
+       <string>Verify</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="Email_3">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>380</y>
+        <width>401</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>Email</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="spotify_logo_3">
+      <property name="geometry">
+       <rect>
+        <x>750</x>
+        <y>130</y>
+        <width>61</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/new/prefix1/spotify logo.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>660</x>
+        <y>230</y>
+        <width>371</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 17pt &quot;Segoe UI Historic&quot;;
+color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="text">
+       <string>Enter Username &amp; Email Address</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="page_4">
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>660</x>
+        <y>230</y>
+        <width>371</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 17pt &quot;Segoe UI Historic&quot;;
+color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="text">
+       <string>Enter New Password</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="username_4">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>300</y>
+        <width>401</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string>8 symbols at least</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="spotify_logo_4">
+      <property name="geometry">
+       <rect>
+        <x>750</x>
+        <y>130</y>
+        <width>61</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-image: url(:/new/prefix1/spotify logo.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="password_3">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>440</y>
+        <width>401</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+      <property name="placeholderText">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="Spotify_name_4">
+      <property name="geometry">
+       <rect>
+        <x>820</x>
+        <y>150</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 700 16pt &quot;UD Digi Kyokasho NP-B&quot;;
+color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="text">
+       <string>Spotify</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4">
+      <property name="geometry">
+       <rect>
+        <x>660</x>
+        <y>370</y>
+        <width>371</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 17pt &quot;Segoe UI Historic&quot;;
+color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="text">
+       <string>Confirm Password</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="Submit">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>520</y>
+        <width>401</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 15pt &quot;Segoe UI Historic&quot;;
+background-color: rgb(46, 189, 89);border-radius: 30px;
+color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="text">
+       <string>Submit</string>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
