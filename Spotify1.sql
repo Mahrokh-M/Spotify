@@ -6,7 +6,7 @@ CREATE TABLE Users (
     birth_date DATE,
     location NVARCHAR(100)
 );
-----------------------------------------------------
+-----------------------------------------------------
 CREATE TABLE Permium(
     user_id INT PRIMARY KEY IDENTITY,  
 	Start_time DATE,
@@ -15,10 +15,11 @@ CREATE TABLE Permium(
 );
 -----------------------------------------------------
 CREATE TABLE Play_list(
-    user_id INT PRIMARY KEY IDENTITY,
-	name NVARCHAR(50) NOT NULL PRIMARY KEY,
+    user_id INT ,
+	name NVARCHAR(50) NOT NULL ,
     ispublic BIT DEFAULT 0,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+	PRIMARY KEY(user_id,name)
 );
 -----------------------------------------------------
 CREATE TABLE Digital_wallet (
@@ -29,9 +30,9 @@ CREATE TABLE Digital_wallet (
 );
 -----------------------------------------------------
 CREATE TABLE Artists (
-    Artists_id INT PRIMARY KEY IDENTITY,
+    artists_id INT PRIMARY KEY IDENTITY,
     bio NVARCHAR(MAX),
-    FOREIGN KEY (Artists_id) REFERENCES Users(user_id)
+    FOREIGN KEY (artists_id) REFERENCES Users(user_id)
 );
 -----------------------------------------------------
 CREATE TABLE Songs (
@@ -45,15 +46,16 @@ CREATE TABLE Songs (
 	Age_category CHAR(2),
 	country NVARCHAR(50),
     can_be_added BIT DEFAULT 0,
-	FOREIGN KEY (album_id) REFERENCES Albums(album_id)
-	FOREIGN KEY (artists_id_added) REFERENCES Artists(Artists_id)
+	FOREIGN KEY (album_id) REFERENCES Albums(album_id),
+	FOREIGN KEY (artists_id_added) REFERENCES Artists(artists_id)
 );
 ----------------------------------------------------
 CREATE TABLE Concerts (
-    artist_id INT  PRIMARY KEY,
+    artist_id INT ,
     location NVARCHAR(100),
-    date DATETIME PRIMARY KEY,
-    FOREIGN KEY (artist_id) REFERENCES Artists(artist_id)
+    [date] DATETIME ,
+    FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
+	PRIMARY KEY (artist_id,[date])
 );
 ----------------------------------------------------
 CREATE TABLE Tickets (
@@ -81,96 +83,106 @@ CREATE TABLE Albums (
 );
 ---------------------------------------------------
 CREATE TABLE Favorite_Play_list(
-    user_id INT PRIMARY KEY IDENTITY,
-	name NVARCHAR(50) NOT NULL PRIMARY KEY,
+    user_id INT,
+	[name] NVARCHAR(50) NOT NULL ,
     FOREIGN KEY (user_id) REFERENCES Permium(user_id),
-	FOREIGN KEY (name) REFERENCES Play_list(name)
+	FOREIGN KEY ([name]) REFERENCES Play_list([name]),
+	PRIMARY KEY (user_id,[name])
 );
 ---------------------------------------------------
 CREATE TABLE Comment_Play_list(
-    user_id INT PRIMARY KEY IDENTITY,
-	name NVARCHAR(50) NOT NULL PRIMARY KEY,
+    user_id INT ,
+	[name] NVARCHAR(50) NOT NULL ,
 	text NVARCHAR(100),
     FOREIGN KEY (user_id) REFERENCES Permium(user_id),
-	FOREIGN KEY (name) REFERENCES Play_list(name)
+	FOREIGN KEY ([name]) REFERENCES Play_list([name]),
+	PRIMARY KEY (user_id,[name])
 );
 ---------------------------------------------------
 CREATE TABLE Like_Play_list(
-    user_id INT PRIMARY KEY IDENTITY,
-	name NVARCHAR(50) NOT NULL PRIMARY KEY,
+    user_id INT ,
+	[name] NVARCHAR(50) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES Permium(user_id),
-	FOREIGN KEY (name) REFERENCES Play_list(name)
+	FOREIGN KEY ([name]) REFERENCES Play_list([name]),
+	PRIMARY KEY(user_id,[name])
 );
 ----------------------------------------------------
 CREATE TABLE Friend(
-    user_id1 INT PRIMARY KEY IDENTITY,
-	user_id2 INT PRIMARY KEY IDENTITY,
+    user_id1 INT,
+	user_id2 INT,
 	accept BIT DEFAULT 0,
     FOREIGN KEY (user_id1) REFERENCES Permium(user_id),
 	FOREIGN KEY (user_id2) REFERENCES Permium(user_id),
+	PRIMARY KEY(user_id1,user_id2)
 );
 ----------------------------------------------------
-CREATE TABLE Message_Permium(
-    user_id1 INT PRIMARY KEY IDENTITY,
-	user_id2 INT PRIMARY KEY IDENTITY,
-	text NVARCHAR(100),
-	--accept BIT DEFAULT 0,
+CREATE TABLE Message_Premium (
+    user_id1 INT,
+    user_id2 INT,
+    text VARCHAR(100),
     FOREIGN KEY (user_id1) REFERENCES Permium(user_id),
-	FOREIGN KEY (user_id2) REFERENCES Permium(user_id),
+    FOREIGN KEY (user_id2) REFERENCES Permium(user_id),
+    PRIMARY KEY (user_id1, user_id2)
 );
+
 -------------------------------------------------------
 CREATE TABLE follower(
-    user_id INT PRIMARY KEY IDENTITY,
-	name NVARCHAR(50) NOT NULL PRIMARY KEY,
+    user_id INT,
+	[name] VARCHAR(50) NOT NULL ,
     FOREIGN KEY (user_id) REFERENCES Permium(user_id),
-	FOREIGN KEY (name) REFERENCES Play_list(name)
+	FOREIGN KEY ([name]) REFERENCES Play_list([name]),
+	PRIMARY KEY(user_id,[name]) 
 );
 -------------------------------------------------------
 CREATE TABLE Favorite_Song(
-    user_id INT PRIMARY KEY IDENTITY,
-	artist_id INT PRIMARY KEY IDENTITY,
-	title NVARCHAR(100) PRIMARY KEY NOT NULL,
+    user_id INT,
+	artist_id INT,
     FOREIGN KEY (user_id) REFERENCES Permium(user_id),
-	FOREIGN KEY (title) REFERENCES Songs(title)
-	FOREIGN KEY (artist_id) REFERENCES Artists(artist_id)
+	FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
+	PRIMARY KEY(user_id,artist_id)
 );
 ------------------------------------------------------
-CREATE TABLE Comment_Album(
-    user_id INT IDENTITY,
-	album_id INT IDENTITY
-	text NVARCHAR(100),
+CREATE TABLE Comment_Album (
+    user_id INT,
+    album_id INT,
+    text VARCHAR(100),
     FOREIGN KEY (user_id) REFERENCES Permium(user_id),
-	FOREIGN KEY (album_id) REFERENCES Album(album_id)
+    FOREIGN KEY (album_id) REFERENCES Album(album_id)
 );
+
 ------------------------------------------------------
 CREATE TABLE artist_has_song(
-    song_id INT PRIMARY KEY IDENTITY,
-	artist_id INT PRIMARY KEY IDENTITY,
+    song_id INT ,
+	artist_id INT ,
     FOREIGN KEY (song_id) REFERENCES Songs(song_id),
-	FOREIGN KEY (artist_id) REFERENCES Artists(artist_id)
+	FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
+	PRIMARY KEY(song_id,artist_id)
 );
 -------------------------------------------------------
 CREATE TABLE artist_has_album(
-    album_id INT PRIMARY KEY IDENTITY,
-	artist_id INT PRIMARY KEY IDENTITY,
+    album_id INT,
+	artist_id INT ,
     FOREIGN KEY (album_id) REFERENCES Albums(album_id),
-	FOREIGN KEY (artist_id) REFERENCES Artists(artist_id)
+	FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
+	PRIMARY KEY(album_id,artist_id)
 );
 -------------------------------------------------------
 CREATE TABLE Playlist_has_song(
-    name INT PRIMARY KEY IDENTITY,
-	song_id INT PRIMARY KEY IDENTITY,
-	user_id INT PRIMARY KEY IDENTITY,
-    FOREIGN KEY (name) REFERENCES Play_list(name),
+    [name] INT,
+	song_id INT ,
+	user_id INT ,
+    FOREIGN KEY ([name]) REFERENCES Play_list([name]),
 	FOREIGN KEY (song_id) REFERENCES Songs(song_id),
-	FOREIGN KEY (user_id) REFERENCES Play_list(user_id)
+	FOREIGN KEY (user_id) REFERENCES Play_list(user_id),
+	PRIMARY KEY([name],song_id,user_id)
 );
 -------------------------------------------------------
 CREATE TABLE Favorite_Song(
-    user_id INT PRIMARY KEY IDENTITY,
-	song_id NVARCHAR(50) NOT NULL PRIMARY KEY,
+    user_id INT,
+	song_id NVARCHAR(50) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES Permium(user_id),
-	FOREIGN KEY (song_id) REFERENCES Songs(song_id)
+	FOREIGN KEY (song_id) REFERENCES Songs(song_id),
+	PRIMARY KEY(user_id,song_id)
 );
 -------------------------------------------------------
 CREATE TABLE Comment_song(
