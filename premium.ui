@@ -18,12 +18,15 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1541</width>
+     <width>1551</width>
      <height>801</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(46, 47, 51);</string>
+   </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>3</number>
    </property>
    <widget class="QWidget" name="songs_tab">
     <attribute name="title">
@@ -33,13 +36,14 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>0</y>
-       <width>1531</width>
-       <height>761</height>
+       <y>50</y>
+       <width>1551</width>
+       <height>701</height>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(46, 47, 51);</string>
+      <string notr="true">background-color: rgb(46, 47, 51);
+color: rgb(255, 255, 255);</string>
      </property>
      <property name="widgetResizable">
       <bool>true</bool>
@@ -49,27 +53,308 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1529</width>
-        <height>759</height>
+        <width>1549</width>
+        <height>699</height>
        </rect>
       </property>
      </widget>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>10</y>
+       <width>1461</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton">
+     <property name="geometry">
+      <rect>
+       <x>1490</x>
+       <y>0</y>
+       <width>41</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border-image: url(:/new/prefix1/search.png);</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="favorites_tab">
     <attribute name="title">
      <string>Favorites</string>
     </attribute>
+    <widget class="QScrollArea" name="scrollArea_2">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>90</y>
+       <width>1501</width>
+       <height>251</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1499</width>
+        <height>249</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="favorites_label">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>40</y>
+       <width>101</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>Your Favorites</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="suggested_label">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>400</y>
+       <width>121</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>Suggested</string>
+     </property>
+    </widget>
+    <widget class="QScrollArea" name="scrollArea_3">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>480</y>
+       <width>1501</width>
+       <height>231</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents_4">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1499</width>
+        <height>229</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
    </widget>
    <widget class="QWidget" name="playlist_tab">
     <attribute name="title">
      <string>Playlists</string>
     </attribute>
+    <widget class="QScrollArea" name="friend_playlist_scrollbar">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>290</y>
+       <width>1501</width>
+       <height>181</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents_5">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1499</width>
+        <height>179</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="friendsP_label">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>230</y>
+       <width>141</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>Your Friends Playlist</string>
+     </property>
+    </widget>
+    <widget class="QScrollArea" name="your_playlist_scrollbar">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>40</y>
+       <width>1501</width>
+       <height>171</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents_6">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1499</width>
+        <height>169</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="playlist_label">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>10</y>
+       <width>101</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>Your Playlists</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="public_playlist_label">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>480</y>
+       <width>141</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>Public Playlists</string>
+     </property>
+    </widget>
+    <widget class="QScrollArea" name="publicPlaylist_scrollbar">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>540</y>
+       <width>1501</width>
+       <height>181</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents_8">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1499</width>
+        <height>179</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
    </widget>
    <widget class="QWidget" name="friends_tab">
     <attribute name="title">
      <string>Friends</string>
     </attribute>
+    <widget class="QScrollArea" name="friends_scrollArea">
+     <property name="geometry">
+      <rect>
+       <x>460</x>
+       <y>80</y>
+       <width>781</width>
+       <height>671</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents_7">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>779</width>
+        <height>669</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>810</x>
+       <y>30</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>Your Friends</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="followings_tab">
     <attribute name="title">

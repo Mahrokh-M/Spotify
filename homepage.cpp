@@ -24,78 +24,36 @@ HomePage::HomePage(QWidget *parent) :
 
 
     // Example songs
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("Song 2", ":/new/prefix1/spotify logo.png");
+    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
+    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
+    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
+    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
+    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
+    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
+    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
+    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
+    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
+    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
+    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
+    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
     // Add more songs as needed
 }
 
@@ -104,7 +62,7 @@ HomePage::~HomePage()
     delete ui;
 }
 
-void HomePage::addSongItem(const QString &songName, const QString &imagePath)
+void HomePage::addSongItem(const QString &songID,const QString &songName, const QString &imagePath)
 {
     int row = songCount / 8;
     int col = songCount % 8;
@@ -117,7 +75,7 @@ void HomePage::addSongItem(const QString &songName, const QString &imagePath)
 
     // Create button for song name
     QPushButton *songButton = new QPushButton(songName, this);
-    //songButton->setProperty("songPath", songName);
+    songButton->setProperty("ID", songID);
     connect(songButton, &QPushButton::clicked, this, &HomePage::playSong);
     gridLayout->addWidget(songButton, row * 2 + 1, col);
 
@@ -129,7 +87,7 @@ void HomePage::playSong()
     QPushButton *button = qobject_cast<QPushButton*>(sender());
     if (button)
     {
-        QString songPath = button->property("songPath").toString();
+        QString songPath = button->property("songID").toString();
 //        player->setMedia(QUrl::fromLocalFile(songPath));
 //        player->play();
     }

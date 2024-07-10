@@ -6,6 +6,7 @@ Singer::Singer(QWidget *parent) :
     ui(new Ui::Singer)
 {
     ui->setupUi(this);
+    ui->tabWidget->setCurrentIndex(0);
 }
 
 Singer::~Singer()
