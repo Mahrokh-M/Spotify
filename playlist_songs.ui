@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>playlist_songs</class>
+ <widget class="QWidget" name="playlist_songs">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1371</width>
+    <height>728</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <widget class="QScrollArea" name="scrollArea">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>250</y>
+     <width>541</width>
+     <height>471</height>
+    </rect>
+   </property>
+   <property name="widgetResizable">
+    <bool>true</bool>
+   </property>
+   <widget class="QWidget" name="scrollAreaWidgetContents">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>539</width>
+      <height>469</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="playlist_pic">
+   <property name="geometry">
+    <rect>
+     <x>640</x>
+     <y>50</y>
+     <width>171</width>
+     <height>121</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>pic</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="playlist_name">
+   <property name="geometry">
+    <rect>
+     <x>650</x>
+     <y>170</y>
+     <width>141</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string>name</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="Backgound">
+   <property name="geometry">
+    <rect>
+     <x>2</x>
+     <y>-1</y>
+     <width>1631</width>
+     <height>791</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(46, 47, 51);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Back">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>81</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Back</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Like_button">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>130</y>
+     <width>61</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Like</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="num_likes">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>190</y>
+     <width>63</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <zorder>Backgound</zorder>
+  <zorder>scrollArea</zorder>
+  <zorder>playlist_pic</zorder>
+  <zorder>playlist_name</zorder>
+  <zorder>Back</zorder>
+  <zorder>Like_button</zorder>
+  <zorder>num_likes</zorder>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

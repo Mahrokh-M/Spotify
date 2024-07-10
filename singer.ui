@@ -22,8 +22,11 @@
      <height>801</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(46, 47, 51);</string>
+   </property>
    <property name="currentIndex">
-    <number>3</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="songs_tab">
     <attribute name="title">

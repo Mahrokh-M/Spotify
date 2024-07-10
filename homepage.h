@@ -31,7 +31,7 @@ private:
     QScrollArea *scrollArea;
     int songCount;
 
-    void addSongItem(const QString &songName, const QString &imagePath);
+    void addSongItem(const QString &songID,const QString &songName, const QString &imagePath);
 signals:
     void logoutSuccessful();  // Add this signal
 };

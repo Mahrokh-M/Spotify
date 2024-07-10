@@ -9,23 +9,32 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    chatbox.cpp \
+    comment_like.cpp \
     homepage.cpp \
     main.cpp \
     mainwindow.cpp \
+    playlist_songs.cpp \
     premium.cpp \
     register.cpp \
     singer.cpp
 
 HEADERS += \
+    chatbox.h \
+    comment_like.h \
     homepage.h \
     mainwindow.h \
+    playlist_songs.h \
     premium.h \
     register.h \
     singer.h
 
 FORMS += \
+    chatbox.ui \
+    comment_like.ui \
     homepage.ui \
     mainwindow.ui \
+    playlist_songs.ui \
     premium.ui \
     register.ui \
     singer.ui
