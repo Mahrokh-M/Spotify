@@ -315,3 +315,34 @@ if (timer) {
 }
 }
 
+
+void Register::on_sign_button_clicked()
+{
+    //check if the information is valid
+    //if not show error
+//    QString email = ui->email->text();
+//    QString password = ui->password->text();
+
+//    if (!isValidEmail(email)) {
+//        ui->wrong_email->show();
+//    } else {
+//        ui->wrong_email->hide();
+//    }
+
+//    if (!isValidPassword(password)) {
+//        ui->wrong_pass->show();
+//    } else {
+//        ui->wrong_pass->hide();
+//    }
+
+//    if (isValidEmail(email) && isValidPassword(password)) {
+//        emit loginSuccessful();  // Emit the signal
+//    }
+    // basic user
+    // emit loginSuccessful();  // Emit the signal
+    // premium user
+    //emit loginPSuccessful();
+    // singer
+    emit loginSSuccessful();
+}
+

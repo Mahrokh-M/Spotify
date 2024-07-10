@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Premium</class>
+ <widget class="QWidget" name="Premium">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1552</width>
+    <height>801</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QTabWidget" name="tabWidget">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1541</width>
+     <height>801</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="songs_tab">
+    <attribute name="title">
+     <string>Songs</string>
+    </attribute>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>1531</width>
+       <height>761</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(46, 47, 51);</string>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1529</width>
+        <height>759</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="favorites_tab">
+    <attribute name="title">
+     <string>Favorites</string>
+    </attribute>
+   </widget>
+   <widget class="QWidget" name="playlist_tab">
+    <attribute name="title">
+     <string>Playlists</string>
+    </attribute>
+   </widget>
+   <widget class="QWidget" name="friends_tab">
+    <attribute name="title">
+     <string>Friends</string>
+    </attribute>
+   </widget>
+   <widget class="QWidget" name="followings_tab">
+    <attribute name="title">
+     <string>Followings</string>
+    </attribute>
+   </widget>
+   <widget class="QWidget" name="followers_tab">
+    <attribute name="title">
+     <string>Followers</string>
+    </attribute>
+   </widget>
+   <widget class="QWidget" name="tab">
+    <attribute name="title">
+     <string>Concerts</string>
+    </attribute>
+   </widget>
+   <widget class="QWidget" name="wallet_tab">
+    <attribute name="title">
+     <string>Wallet</string>
+    </attribute>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
