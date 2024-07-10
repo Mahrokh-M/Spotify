@@ -1,0 +1,43 @@
+-- ایجاد پروسیجر GetUserInterests
+CREATE PROCEDURE GetUserInterests
+    @user_id INT
+AS
+BEGIN
+    -- علاقه‌مندی به خواننده‌ها بر اساس لایک‌های آهنگ‌ها
+    SELECT 
+        u.user_id,
+        a.username AS Artist_Name,
+        COUNT(ls.song_id) AS Likes_Count
+    FROM 
+        Like_song ls
+    JOIN 
+        Songs s ON ls.song_id = s.song_id
+    JOIN 
+        Artists ar ON s.artist_id_added = ar.artist_id
+    JOIN 
+        Users u ON ar.artist_id = u.user_id
+    WHERE 
+        ls.user_id = @user_id
+    GROUP BY 
+        u.user_id, a.username
+    ORDER BY 
+        Likes_Count DESC;
+
+    -- علاقه‌مندی به ژانرها بر اساس لایک‌های آهنگ‌ها
+    SELECT 
+        s.genre AS Genre,
+        COUNT(ls.song_id) AS Likes_Count
+    FROM 
+        Like_song ls
+    JOIN 
+        Songs s ON ls.song_id = s.song_id
+    WHERE 
+        ls.user_id = @user_id
+    GROUP BY 
+        s.genre
+    ORDER BY 
+        Likes_Count DESC;
+END;
+
+-- فراخوانی پروسیجر برای نمایش علاقه‌مندی‌های کاربر با user_id = 1
+EXEC GetUserInterests @user_id = 1;

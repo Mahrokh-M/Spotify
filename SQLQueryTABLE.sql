@@ -45,7 +45,7 @@ CREATE TABLE Play_list(
 CREATE TABLE Digital_wallet (
     Digital_wallet_id INT PRIMARY KEY IDENTITY,
     user_id INT,
-    amount DECIMAL(10, 2),
+    amount DECIMAL(10, 2) DEFAULT 0.00,
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
 );
 -----------------------------------------------------
