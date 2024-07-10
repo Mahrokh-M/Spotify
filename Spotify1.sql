@@ -75,7 +75,7 @@ CREATE TABLE Tickets (
 	artist_id INT,
 	price DECIMAL(10, 2),
     purchase_date DATETIME DEFAULT GETDATE(),--**
-	date_concert DATETIME DEFAULT GETDATE(),--**
+	date_concert DATETIME ,--**
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
 	FOREIGN KEY (artist_id,date_concert) REFERENCES Concerts(artist_id,[date])
 );
@@ -193,10 +193,12 @@ CREATE TABLE Like_song(
 	PRIMARY KEY(user_id,song_id)
 );
 -------------------------------------------------------
+--DROP TABLE Like_album;
 CREATE TABLE Like_album(
     user_id INT ,
 	album_id INT ,
     FOREIGN KEY (user_id) REFERENCES Permium(user_id),
+	FOREIGN KEY (album_id) REFERENCES Albums(album_id),
 	PRIMARY KEY(user_id,album_id)
 
 );
