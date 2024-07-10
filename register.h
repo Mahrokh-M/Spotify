@@ -37,6 +37,12 @@ private slots:
 
     void on_sign_button_3_clicked();
 
+    void on_sign_button_clicked();
+signals:
+    void loginSuccessful();  // Add this signal
+    void loginPSuccessful();
+    void loginSSuccessful();
+
 private:
     Ui::Register *ui;
         QTimer *timer;  // Declare the QTimer pointer
