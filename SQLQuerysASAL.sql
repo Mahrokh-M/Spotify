@@ -172,7 +172,7 @@ RETURN
         t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 0
 );
 
-----SHOW ALL TICKET THAT BUY(1):
+--SHOW ALL TICKET THAT BUY(1):
 CREATE FUNCTION SHOWALLTICKET1 (@user_id INT)
 RETURNS TABLE
 AS
@@ -355,3 +355,59 @@ BEGIN
     WHERE s.song_id = @song_id;
 END;
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--------------------------------------------------------------------------------------------------------------------------------------------
+--ADD FUND TO WALLET:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CREATE PROCEDURE AddFundsToWallet
+    @UserID INT,
+    @Amount DECIMAL(10, 2)
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Digital_wallet WHERE user_id = @UserID)
+    BEGIN
+        UPDATE Digital_wallet
+        SET amount = amount + @Amount
+        WHERE user_id = @UserID;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO Digital_wallet (user_id, amount)
+        VALUES (@UserID, @Amount);
+    END
+END;
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+---------------------------------------------------------------------------------------------------------------------------------------------
+--UPDATE WALLET:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CREATE PROCEDURE UpdateWalletBalance
+    @UserID INT,
+    @Amount DECIMAL(10, 2)
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Digital_wallet WHERE user_id = @UserID)
+    BEGIN
+        DECLARE @CurrentBalance DECIMAL(10, 2);
+        SELECT @CurrentBalance = amount FROM Digital_wallet WHERE user_id = @UserID;
+        IF @Amount < 0 AND @CurrentBalance + @Amount < 0
+        BEGIN
+            RAISERROR('Insufficient funds in the digital wallet.', 16, 1);
+        END
+        ELSE
+        BEGIN
+            UPDATE Digital_wallet
+            SET amount = amount + @Amount
+            WHERE user_id = @UserID;
+        END
+    END
+    ELSE
+    BEGIN
+        IF @Amount >= 0
+        BEGIN
+            INSERT INTO Digital_wallet (user_id, amount)
+            VALUES (@UserID, @Amount);
+        END
+        ELSE
+        BEGIN
+            RAISERROR('User does not have a digital wallet to deduct funds from.', 16, 1);
+        END
+    END
+END;
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

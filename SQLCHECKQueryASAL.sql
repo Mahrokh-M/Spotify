@@ -26,6 +26,7 @@ EXEC ToggleFavoritePlaylist  @user_id_added=1,
                              @user_id_owner=2,
 							  @playlist_name='Playlist3';
 EXEC GetFavoritePlaylistsByUserID @UserID = 1;
+EXEC AddFundsToWallet @UserID = 1, @Amount = -50.00;
 UPDATE Digital_wallet		
 SET amount=100
 WHERE user_id=10;
@@ -38,6 +39,9 @@ EXEC SearchMusicAndAlbum @age_category = 'PG';
 EXEC SearchMusicAndAlbum @name = 'Imagine', @artist_name = 'John Doe', @genre = 'Rock', @country = 'USA', @age_category = 'PG';
 EXEC GetSongDetails @song_id=5;
 EXEC GetSongLyrics  @song_id=5;
+EXEC UpdateWalletBalance @UserID = 1, @Amount = 50.00;
+EXEC UpdateWalletBalance @UserID = 1, @Amount = -20.00;
+EXEC UpdateWalletBalance @UserID = 5, @Amount = -20.00;
 SELECT*
 FROM follower;
 SELECT*
