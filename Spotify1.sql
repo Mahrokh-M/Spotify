@@ -18,6 +18,7 @@ CREATE TABLE Play_list(
     user_id INT ,
 	[name] VARCHAR(50) NOT NULL ,
     ispublic BIT DEFAULT 0,
+	address_of_picture VARCHAR(100),
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
 	PRIMARY KEY(user_id,[name])
 );
@@ -43,6 +44,7 @@ CREATE TABLE Albums (
     release_date DATE,
 	Age_category CHAR(2),
 	country VARCHAR(50),
+	address_of_picture VARCHAR(100),
 	FOREIGN KEY (artist_id_added) REFERENCES Artists(artist_id)
 );
 -----------------------------------------------------
@@ -56,6 +58,7 @@ CREATE TABLE Songs (
     lyrics VARCHAR(MAX),
 	Age_category CHAR(2),
 	country VARCHAR(50),
+	address_of_picture VARCHAR(100),
     can_be_added BIT DEFAULT 0,
 	FOREIGN KEY (album_id) REFERENCES Albums(album_id),
 	FOREIGN KEY (artist_id_added) REFERENCES Artists(artist_id)
@@ -74,7 +77,8 @@ CREATE TABLE Tickets (
     user_id INT,
 	artist_id INT,
 	price DECIMAL(10, 2),
-    purchase_date DATETIME DEFAULT GETDATE(),--**
+    Expiration BIT DEFAULT 1,-- 1
+	is_sold BIT DEFAULT 0,-- 0 
 	date_concert DATETIME ,--**
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
 	FOREIGN KEY (artist_id,date_concert) REFERENCES Concerts(artist_id,[date])
@@ -127,7 +131,6 @@ CREATE TABLE Message_Premium (
 CREATE TABLE follower(
 	user_id1 INT,
 	user_id2 INT,
-	accept BIT DEFAULT 0,
     FOREIGN KEY (user_id1) REFERENCES Permium(user_id),
 	FOREIGN KEY (user_id2) REFERENCES Permium(user_id),
 	PRIMARY KEY(user_id1,user_id2)
