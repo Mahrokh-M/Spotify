@@ -195,7 +195,7 @@ RETURN
 );
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
---ADD SONG TO FSVORITE:
+--ADD SONG TO FSVORITE:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 CREATE PROCEDURE ToggleFavoriteSong
 @user_id INT,
 @song_id INT
@@ -215,26 +215,42 @@ BEGIN
 	VALUES (@user_id, @song_id);
 END
 END;
+--DISPLAY FAVORITE SONGS:
+CREATE PROCEDURE GetFavoriteSongs
+    @user_id INT
+AS
+BEGIN
+    SELECT 
+        s.song_id,
+        s.title AS Song_Title
+    FROM 
+        Favorite_Song fs
+    JOIN 
+        Songs s ON fs.song_id = s.song_id
+    WHERE 
+        fs.user_id = @user_id;
+END;
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 --ADD PLAY LIST TO FSVORITE:
 CREATE PROCEDURE ToggleFavoritePlaylist
-@user_id INT,
+@user_id_added INT,
+@user_id_owner INT,
 @playlist_name VARCHAR(50)
 AS
 BEGIN
 -- Check if the playlist is already a favorite
-IF EXISTS (SELECT 1 FROM Favorite_Play_list WHERE user_id = @user_id AND [name] = @playlist_name)
+IF EXISTS (SELECT 1 FROM Favorite_Play_list WHERE user_id_owner = @user_id_owner AND [name] = @playlist_name)
 BEGIN
 	-- If the playlist is already a favorite, remove it
 	DELETE FROM Favorite_Play_list 
-	WHERE user_id = @user_id AND [name] = @playlist_name;
+	WHERE user_id_owner = @user_id_owner AND [name] = @playlist_name;
 END
 ELSE
 BEGIN
 	-- If the playlist is not a favorite, add it
-	INSERT INTO Favorite_Play_list (user_id, [name])
-	VALUES (@user_id, @playlist_name);
-END
+	INSERT INTO Favorite_Play_list (user_id_owner,user_id, [name])
+	VALUES (user_id_owner,@user_id_added, @playlist_name);
 END
 END;
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------

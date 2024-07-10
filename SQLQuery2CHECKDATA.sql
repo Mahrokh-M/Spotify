@@ -119,7 +119,7 @@ VALUES
 -- INSERT INTO Playlist_has_song
 INSERT INTO Playlist_has_song ([name], song_id, user_id)
 VALUES 
-('Playlist1', 1, 1),
+('Playlist1', 3, 1),
 ('Playlist3', 2, 2);
 
 -- INSERT INTO Favorite_Song
