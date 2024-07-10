@@ -9,25 +9,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Initialize your pages
     registerPage = new Register();
-    homepage = new HomePage();
-    singer = new Singer();
     premium = new Premium();
     comment_like= new Comment_Like();
     playlist= new playlist_songs();
     chatbox= new ChatBox();
     // Add pages to the QStackedWidget
     ui->stackedWidget->addWidget(registerPage);
-    ui->stackedWidget->addWidget(homepage);
     ui->stackedWidget->addWidget(premium);
-    ui->stackedWidget->addWidget(singer);
     ui->stackedWidget->addWidget(comment_like); // Add the Comment_Like page
     ui->stackedWidget->addWidget(playlist);
     ui->stackedWidget->addWidget(chatbox);
     // Connect the signal to the slot
-    connect(registerPage, &Register::loginSuccessful, this, &MainWindow::showHomePage);
-    connect(homepage, &HomePage::logoutSuccessful, this, &MainWindow::showRegister);
     connect(registerPage, &Register::loginPSuccessful, this, &MainWindow::showPremium);
-    connect(registerPage, &Register::loginSSuccessful, this, &MainWindow::showSinger);
     connect(premium, &Premium::open_comment, this, &MainWindow::showComment);
     connect(comment_like, &Comment_Like::goBack, this, &::MainWindow::goBacktoHome);
     connect(premium, &Premium::open_playlist, this, &::MainWindow::showPlaylist);
@@ -45,17 +38,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::showHomePage()
-{
-    ui->stackedWidget->setCurrentWidget(homepage);
-}
 void MainWindow::showRegister(){
     ui->stackedWidget->setCurrentWidget(registerPage);
 }
 
-void MainWindow::showSinger(){
-    ui->stackedWidget->setCurrentWidget(singer);
-}
 void MainWindow::showPremium(){
     ui->stackedWidget->setCurrentWidget(premium);
 }

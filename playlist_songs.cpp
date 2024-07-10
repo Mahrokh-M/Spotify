@@ -6,6 +6,7 @@ playlist_songs::playlist_songs(QWidget *parent) :
     ui(new Ui::playlist_songs)
 {
     ui->setupUi(this);
+    setstyle();
 }
 
 playlist_songs::~playlist_songs()
@@ -46,6 +47,7 @@ void playlist_songs::fillPlaylist(const QString &listID)
 
     // Set the content widget as the scroll area's widget
     ui->scrollArea->setWidget(contentWidget);
+    setstyle();
 }
 
 void playlist_songs::onSongButtonClicked()
@@ -56,4 +58,17 @@ void playlist_songs::onSongButtonClicked()
         QString songID = button->property("ID").toString();
         emit open_comment(songID);
     }
+}
+
+void playlist_songs::setstyle(){
+    QString styleSheet = R"(
+        /* Global font style */
+        * {
+            font: 700 12pt "UD Digi Kyokasho NK-B";
+        }
+
+    )";
+
+    // Apply the stylesheet to all child widgets of this widget
+    this->setStyleSheet(styleSheet);
 }

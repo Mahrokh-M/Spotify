@@ -24,36 +24,12 @@ HomePage::HomePage(QWidget *parent) :
 
 
     // Example songs
-    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("1","Song 1", ":/new/prefix1/spotify logo.png");
-    addSongItem("2","Song 2", ":/new/prefix1/spotify logo.png");
-    addSongItem("3","Song 1", ":/new/prefix1/spotify logo.png");
+    for (int i = 0; i < 100; ++i) {
+        addSongItem("1", "Song 1", ":/new/prefix1/spotify logo.png");
+        addSongItem("2", "Song 2", ":/new/prefix1/spotify logo.png");
+        addSongItem("3", "Song 3", ":/new/prefix1/spotify logo.png");
+    }
+
     // Add more songs as needed
 }
 

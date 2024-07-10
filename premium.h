@@ -6,6 +6,7 @@
 #include <QScrollArea>
 #include <QPushButton>
 #include <QLabel>
+#include <QMessageBox>
 
 namespace Ui {
 class Premium;
@@ -34,6 +35,25 @@ private:
     void friendPlaylist();
     void publicPlaylist();
     void onStartChatClicked();
+    void fill_follow();
+    void fill_concerts();
+    void addConcertItem(QHBoxLayout *layout, const QString &concertName, const QString &imagePath);
+    void showTicketOptions();
+    void buyTicket();
+    double getUserBalance();
+    void toggleTicketOptions();
+    void fill_wallet();
+    double calculateTotalBalance(const QList<QPair<QString, double>>& validTickets);
+    void updateBalanceLabel(double balance);
+    void populateTickets(const QList<QPair<QString, double>>& tickets, QScrollArea* scrollArea, bool horizontal);
+    void setstyle();
+    void fillFriendshipRequests();
+    void acceptFriendshipRequest(const QString &);
+    void declineFriendshipRequest(const QString &userName);
+    void sendFriendshipRequest(const QString &userName);
+    void fillAllUsers();
+
+
 signals:
     void open_comment(const QString);
     void open_playlist(const QString);

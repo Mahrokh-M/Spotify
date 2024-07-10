@@ -21,10 +21,15 @@ public:
 private:
     Ui::Comment_Like *ui;
     void onSongButtonClicked();
+    void fillPlaylists();
+    void setstyle();
 public slots:
     void setCommentDetails(const QString &songID);
 private slots:
     void on_Back_clicked();
+    void on_add_playlist_clicked();
+    void on_addNewPlaylist_clicked();
+    void on_playlistButtonClicked();
 signals:
     void goBack();
      void open_comment(const QString);
