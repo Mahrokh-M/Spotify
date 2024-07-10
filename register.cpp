@@ -242,12 +242,6 @@ void Register::on_Verify_clicked()
 }
 
 
-
-
-
-
-
-
 void Register::on_Submit_clicked()
 {
 
@@ -274,9 +268,6 @@ void Register::on_Submit_clicked()
 }
 
 
-
-
-
 void Register::on_sign_button_3_clicked()
 {
 
@@ -301,6 +292,7 @@ if(isValidPassword(password)&&isValidEmail(email)){
     timer->start(3000);
 }
 }
+
 
 void Register::onTimeout()
 {

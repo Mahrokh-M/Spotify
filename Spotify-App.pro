@@ -11,33 +11,27 @@ CONFIG += c++17
 SOURCES += \
     chatbox.cpp \
     comment_like.cpp \
-    homepage.cpp \
     main.cpp \
     mainwindow.cpp \
     playlist_songs.cpp \
     premium.cpp \
-    register.cpp \
-    singer.cpp
+    register.cpp
 
 HEADERS += \
     chatbox.h \
     comment_like.h \
-    homepage.h \
     mainwindow.h \
     playlist_songs.h \
     premium.h \
-    register.h \
-    singer.h
+    register.h
 
 FORMS += \
     chatbox.ui \
     comment_like.ui \
-    homepage.ui \
     mainwindow.ui \
     playlist_songs.ui \
     premium.ui \
-    register.ui \
-    singer.ui
+    register.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
