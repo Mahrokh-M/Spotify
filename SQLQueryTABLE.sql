@@ -1,4 +1,3 @@
-SELECT DB_NAME() AS CurrentDatabase;
 -- DELETE FOREIGN KEY constraints
 DECLARE @sql NVARCHAR(MAX) = '';
 
@@ -19,7 +18,7 @@ SELECT DB_NAME() AS CurrentDatabase;
 
 --------------------------------------------------------------------------------------------------------------------
 CREATE TABLE Users (
-    user_id INT PRIMARY KEY,
+    user_id INT PRIMARY KEY IDENTITY,
     username VARCHAR(50) NOT NULL,
     [password] VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL,
@@ -28,7 +27,7 @@ CREATE TABLE Users (
 );
 -----------------------------------------------------
 CREATE TABLE Permium(
-    user_id INT PRIMARY KEY,  
+    user_id INT PRIMARY KEY IDENTITY,  
 	Start_time DATE,
 	End_time DATE
 	FOREIGN KEY (user_id) REFERENCES Users(user_id)
@@ -44,20 +43,20 @@ CREATE TABLE Play_list(
 );
 -----------------------------------------------------
 CREATE TABLE Digital_wallet (
-    Digital_wallet_id INT PRIMARY KEY,
+    Digital_wallet_id INT PRIMARY KEY IDENTITY,
     user_id INT,
-    amount DECIMAL(10, 2),
+    amount DECIMAL(10, 2) DEFAULT 0.00,
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
 );
 -----------------------------------------------------
 CREATE TABLE Artists (
-    artist_id INT PRIMARY KEY,
+    artist_id INT PRIMARY KEY IDENTITY,
     bio VARCHAR(MAX),
     FOREIGN KEY (artist_id) REFERENCES Users(user_id)
 );
 ------------------------------------------------------------
 CREATE TABLE Albums (
-    album_id INT PRIMARY KEY,
+    album_id INT PRIMARY KEY IDENTITY,
 	title VARCHAR(100) NOT NULL,
 	artist_id_added INT,
     genre VARCHAR(50),
@@ -69,7 +68,7 @@ CREATE TABLE Albums (
 );
 -----------------------------------------------------
 CREATE TABLE Songs (
-    song_id INT PRIMARY KEY,
+    song_id INT PRIMARY KEY IDENTITY,
 	artist_id_added INT,
 	title VARCHAR(100)  NOT NULL,
 	album_id INT,

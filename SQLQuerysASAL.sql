@@ -1,4 +1,4 @@
---ADD Fllowers:
+--ADD Fllowers:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 CREATE PROCEDURE AddFollower
     @UserId1 INT,
     @UserId2 INT
@@ -8,10 +8,40 @@ BEGIN
     VALUES (@UserId1, @UserId2);
 END;
 GO
---EXECUTE:
-EXEC AddFollower @UserId1 = 1, @UserId2 = 2;--from some one that cklick and the profile that clicked
+--DISPLAY ALL FOLLOWER FOR ONE PERSON:
+CREATE PROCEDURE GetFollowers
+    @user_id INT
+AS
+BEGIN
+    SELECT
+        u.user_id,
+        u.username
+    FROM
+        follower f
+    JOIN
+        Users u ON f.user_id1 = u.user_id
+    WHERE
+        f.user_id2 = @user_id;
+END;
+--DISPLAY ALL FOLLOWING FOR ONE PERSON:
+CREATE PROCEDURE GetFollowing
+    @user_id INT
+AS
+BEGIN
+    SELECT
+        u.user_id,
+        u.username
+    FROM
+        follower f
+    JOIN
+        Users u ON f.user_id2 = u.user_id 
+    WHERE
+        f.user_id1 = @user_id;  
+END;
+
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ------------------------------------------------------------------------------------------------------------------
---ADD Wallet to the User
+--ADD Wallet to the User !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 CREATE TRIGGER CreateWalletAfterUserInsert
 ON Users
 AFTER INSERT
@@ -22,8 +52,9 @@ BEGIN
     FROM inserted;
 END;
 GO
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --------------------------------------------------------------------------------------------------------------------
---ADD Ticket For evry Concert
+--ADD Ticket For evry Concert!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 CREATE PROCEDURE AddTicketsForConcert
     @artist_id INT,
     @date_concert DATETIME,
@@ -59,22 +90,14 @@ BEGIN
         SET @i = @i + 1;
     END
 END;
---EXECUTE:
-EXEC AddTicketsForConcert
-    @artist_id = 1,-- from artist that added concert
-    @date_concert = '2024-08-15 20:00:00',-- from information about concert
-    @price1 = 2000.00,-- input 
-    @quantity1 = 100,-- input 
-    @price2 = 2500.00,-- input 
-    @quantity2 = 50,-- input 
-    @price3 = 3000.00,-- input 
-    @quantity3 = 30;-- input 
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ----------------------------------------------------------------------------------------------------------------------
---SHOW ALL  Available CONCERT:
+--SHOW ALL  Available CONCERT:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SELECT artist_id, location, [date]
 FROM Concerts
 WHERE [date] > GETDATE();
---SHOW ALL Available Tickets:
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--SHOW ALL Available Tickets:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 CREATE PROCEDURE GetAvailableTickets
     @artist_id INT,
     @date_concert DATETIME
@@ -87,7 +110,8 @@ BEGIN
       AND is_sold = 0
       AND Expiration = 1;
 END;
---BUY TICKET AND UPDATE WALLET:
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--BUY TICKET AND UPDATE WALLET:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 CREATE PROCEDURE BuyTicket
     @user_id INT,       
     @ticket_id INT      
@@ -114,8 +138,6 @@ BEGIN
         ROLLBACK TRANSACTION;
         RETURN;
     END;
-
-   
     UPDATE Tickets
     SET user_id = @user_id, is_sold = 1
     WHERE ticket_id = @ticket_id;
@@ -126,9 +148,10 @@ BEGIN
 
     COMMIT TRANSACTION;
 END;
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -----------------------------------------------------------------------------------------------------------------
---SHOW ALL TICKET THAT BUY(0):
-CREATE FUNCTION SHOWALLTICKET (@user_id INT)
+--SHOW ALL TICKET THAT BUY(0):!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CREATE FUNCTION SHOWALLTICKET0 (@user_id INT)
 RETURNS TABLE
 AS
 RETURN
@@ -150,7 +173,7 @@ RETURN
 );
 
 ----SHOW ALL TICKET THAT BUY(1):
-CREATE FUNCTION SHOWALLTICKET (@user_id INT)
+CREATE FUNCTION SHOWALLTICKET1 (@user_id INT)
 RETURNS TABLE
 AS
 RETURN
@@ -170,6 +193,7 @@ RETURN
     WHERE 
         t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 1
 );
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 --ADD SONG TO FSVORITE:
 CREATE PROCEDURE ToggleFavoriteSong
