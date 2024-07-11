@@ -24,6 +24,7 @@ public:
     Register(QWidget *parent = nullptr);
     ~Register();
      void onTimeout();
+     QSqlDatabase db;
 
 
 private slots:
@@ -43,9 +44,9 @@ private slots:
 
     void on_sign_button_clicked();
 signals:
-    void loginSuccessful();  // Add this signal
-    void loginPSuccessful();
-    void loginSSuccessful();
+
+    void loginPSuccessful(const int &, const QString &);
+
 
 private:
     Ui::Register *ui;

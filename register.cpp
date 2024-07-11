@@ -7,6 +7,9 @@ Register::Register(QWidget *parent)
 {
 
     ui->setupUi(this);
+    if (!initializeDatabase(db)) {
+       QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database");
+    }
     ui->sign_button->setStyleSheet(
                 "QPushButton {"
                 "    font: 15pt 'Segoe UI Historic';"
@@ -300,7 +303,7 @@ void Register::on_sign_button_3_clicked() {
         return;
     }
 
-    QSqlDatabase db;
+
     if (initializeDatabase(db)) {
         QSqlQuery query(db);
         query.prepare("{CALL InsertUser(?, ?, ?, ?, ?)}");
@@ -344,31 +347,45 @@ void Register::onTimeout()
 
 void Register::on_sign_button_clicked()
 {
-    //check if the information is valid
-    //if not show error
-    //    QString email = ui->email->text();
-    //    QString password = ui->password->text();
+        QString username = ui->username->text();
+        QString password = ui->password->text();
 
-    //    if (!isValidEmail(email)) {
-    //        ui->wrong_email->show();
-    //    } else {
-    //        ui->wrong_email->hide();
-    //    }
+        // Connect to the database
+        if (initializeDatabase(db)) {
+            QSqlQuery query(db);
 
-    //    if (!isValidPassword(password)) {
-    //        ui->wrong_pass->show();
-    //    } else {
-    //        ui->wrong_pass->hide();
-    //    }
+            // Prepare the query to call stored procedure
+            query.prepare("{CALL CheckUserType(?, ?)}");
+            query.addBindValue(username);
+            query.addBindValue(password);
 
-    //    if (isValidEmail(email) && isValidPassword(password)) {
-    //        emit loginSuccessful();  // Emit the signal
-    //    }
-    // basic user
-    // emit loginSuccessful();  // Emit the signal
-    // premium user
-    emit loginPSuccessful();
-    // singer
-    // emit loginSSuccessful();
-}
+            // Execute the query
+            if (query.exec()) {
+                // Check the result
+                if (query.next()) {
+                    QString userType = query.value(0).toString();
+                    int userId = query.value(1).toInt();
+
+                    if (userType == "Regular User") {
+                        emit loginPSuccessful(userId,userType);  // Signal for regular user
+                    } else if (userType == "Premium User") {
+                        emit loginPSuccessful(userId,userType); // Signal for premium user
+                    }
+                } else {
+                    qDebug() << "No rows returned.";
+                    // Handle case where no rows were returned (user does not exist)
+                    QMessageBox::critical(this, "Login Error", "Invalid username or password.");
+                }
+            } else {
+                qDebug() << "Stored procedure execution error:" << query.lastError().text();
+                QMessageBox::critical(this, "Database Error", "Failed to execute stored procedure.");
+            }
+        } else {
+            QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database.");
+        }
+    }
+
+
+
+
 
