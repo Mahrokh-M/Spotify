@@ -7,7 +7,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QMessageBox>
-
+#include<QFileDialog>
 namespace Ui {
 class Premium;
 }
@@ -22,6 +22,7 @@ public:
 
 private:
     Ui::Premium *ui;
+    QString m_imagePath;
 private:
     QGridLayout *gridLayout;
     QWidget *contentWidget;
@@ -51,7 +52,7 @@ private:
     void acceptFriendshipRequest(const QString &);
     void declineFriendshipRequest(const QString &userName);
     void sendFriendshipRequest(const QString &userName);
-    void fillAllUsers();
+    void fillAllUsers();;
 
 
 signals:
@@ -64,6 +65,8 @@ private slots:
     void showPlaylist();
 
 
+    void on_UploadPhoto_clicked();
+    void on_submit_song_clicked();
 };
 
 #endif // PREMIUM_H
