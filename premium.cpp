@@ -1,4 +1,7 @@
 #include "premium.h"
+#include "qsqlerror.h"
+#include "qsqlquery.h"
+#include "qurlquery.h"
 #include "ui_premium.h"
 
 
@@ -25,32 +28,24 @@ Premium::Premium(QWidget *parent) :
     // Set layout of HomePage to include the scroll area
 
 
-    // Example songs
-    for (int i = 0; i < 100; ++i) {
-        addSongItem("1", "Song 1", ":/new/prefix1/spotify logo.png");
-        addSongItem("2", "Song 2", ":/new/prefix1/spotify logo.png");
-        addSongItem("3", "Song 3", ":/new/prefix1/spotify logo.png");
-    }
+    fillSongs();
 
     // Add more songs as needed
     fill_favorites();
     fill_playlists();
     fill_friends();
     fill_follow();
+    fillAllUsers();
     fill_concerts();
     fill_wallet();
     fillFriendshipRequests();
-    fillAllUsers();
     fill_my_belongings();
-    //if is premium
-//        ui->tabWidget->removeTab(7);
-//         ui->tabWidget->removeTab(7);
-    //if is simple user
-//    while (ui->tabWidget->count() > 1) {
-//        ui->tabWidget->removeTab(1);
-//    }
+
     // Define the stylesheet
     setstyle();
+    if (!initializeDatabase(db)) {
+        QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database");
+    }
 
 }
 
@@ -72,7 +67,42 @@ void Premium::setstyle(){
     this->setStyleSheet(styleSheet);
 }
 
+
+void Premium::setUserID(const int &userId,const QString &userType){
+    ID=userId;
+    Type=userType;
+//    //  if is premium
+//    if(userType=="Premium User"){
+//    ui->tabWidget->removeTab(7);
+//    ui->tabWidget->removeTab(7);}
+//    // if is simple user
+//    if(userType=="Regular User"){
+//        while (ui->tabWidget->count() > 1) {
+//            ui->tabWidget->removeTab(1);
+//        }
+//    }
+}
+
+bool Premium::initializeDatabase(QSqlDatabase &db) {
+    db = QSqlDatabase::addDatabase("QODBC");
+    db.setDatabaseName("DRIVER={ODBC Driver 17 for SQL Server};SERVER=LOCALHOST\\SQLEXPRESS;DATABASE=Spotify;Trusted_Connection=Yes;");
+
+    if (!db.open()) {
+        qDebug() << "Database connection error:" << db.lastError().text();
+        return false;
+    }
+
+    qDebug() << "Database connected!";
+    return true;
+}
+
+int Premium::getCurrentUserId(){
+    //return the persons ID
+    return ID;
+}
+
 void Premium::addSongItem(const QString &songID,const QString &songName, const QString &imagePath)
+
 {
     int row = songCount / 8;
     int col = songCount % 8;
@@ -84,11 +114,10 @@ void Premium::addSongItem(const QString &songID,const QString &songName, const Q
     gridLayout->addWidget(imageLabel, row * 2, col);
 
     // Create button for song name
-    QPushButton *songButton = new QPushButton(songName, this);
+    QPushButton *songButton = new QPushButton(songName, this);  // Use songName as the text of the button
     songButton->setProperty("ID", songID);
-    songButton->setProperty("name", songName);
     songButton->setProperty("pic_path", imagePath);
-    connect(songButton, &QPushButton::clicked, this, &::Premium::addComment_like);
+    connect(songButton, &QPushButton::clicked, this, &Premium::addComment_like);
     gridLayout->addWidget(songButton, row * 2 + 1, col);
 
     songCount++;
@@ -101,6 +130,18 @@ void Premium::addComment_like()
     {
         QString songID = button->property("ID").toString();
         emit open_comment(songID); // Emit signal with songID
+    }
+}
+//**
+void Premium::fillSongs()
+{
+    QSqlQuery query("SELECT song_id, address_of_picture, title FROM Songs");
+    while (query.next()) {
+        QString songID = query.value(0).toString();
+        QString picturePath = query.value(1).toString();
+        QString songName = query.value(2).toString();
+        QString imagePath = picturePath.isEmpty() ? ":/new/prefix1/spotify logo.png" : picturePath;
+        addSongItem(songID, songName, imagePath);  // Pass songID, songName, and imagePath
     }
 }
 
@@ -382,37 +423,58 @@ void Premium::onStartChatClicked()
     }
 }
 
-void Premium::fill_follow(){
-    // Example content: add several QLabel with images or text
-    QWidget *contentWidget = new QWidget(this);
-    QVBoxLayout *layout = new QVBoxLayout(contentWidget);
-    for (int i = 1; i <= 100; ++i)
-    {
-        QHBoxLayout *hLayout = new QHBoxLayout();
+void Premium::fill_follow() {
+    int user_id = getCurrentUserId(); // Replace with your logic to get current user's ID
 
-        QLabel *label = new QLabel("Friend " + QString::number(i), contentWidget);
-        hLayout->addWidget(label);
-        layout->addLayout(hLayout);
+    // Display followers
+    QSqlQuery followersQuery(db);
+    followersQuery.prepare("EXEC GetFollowers @user_id = :user_id");
+    followersQuery.bindValue(":user_id", user_id);
+
+    if (!followersQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to execute GetFollowers: " + followersQuery.lastError().text());
+        return;
     }
 
-    // Set the content widget as the scroll area's widget
-    ui->followin_scrollBar->setWidget(contentWidget);
-    // Example content: add several QLabel with images or text
-    QWidget *contentWidget_2 = new QWidget(this);
-    QVBoxLayout *layout_2 = new QVBoxLayout(contentWidget_2);
-    for (int i = 1; i <= 100; ++i)
-    {
-        QHBoxLayout *hLayout = new QHBoxLayout();
+    QWidget *contentWidgetFollower = new QWidget(this);
+    QVBoxLayout *layoutFollower = new QVBoxLayout(contentWidgetFollower);
 
-        QLabel *label = new QLabel("Friend " + QString::number(i), contentWidget_2);
+    while (followersQuery.next()) {
+        int follower_id = followersQuery.value(0).toInt();
+        QString follower_username = followersQuery.value(1).toString();
+
+        QHBoxLayout *hLayout = new QHBoxLayout();
+        QLabel *label = new QLabel(follower_username, contentWidgetFollower);
         hLayout->addWidget(label);
-        layout_2->addLayout(hLayout);
+        layoutFollower->addLayout(hLayout);
     }
 
-    // Set the content widget as the scroll area's widget
-    ui->follower_scrollBar->setWidget(contentWidget_2);
+    ui->follower_scrollBar->setWidget(contentWidgetFollower);
 
+    // Display following
+    QSqlQuery followingQuery(db);
+    followingQuery.prepare("EXEC GetFollowing @user_id = :user_id"); // Corrected binding here
+    followingQuery.bindValue(":user_id", user_id);
 
+    if (!followingQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to execute GetFollowing: " + followingQuery.lastError().text());
+        return;
+    }
+
+    QWidget *contentWidgetFollowing = new QWidget(this);
+    QVBoxLayout *layoutFollowing = new QVBoxLayout(contentWidgetFollowing);
+
+    while (followingQuery.next()) {
+        int following_id = followingQuery.value(0).toInt();
+        QString following_username = followingQuery.value(1).toString();
+
+        QHBoxLayout *hLayout = new QHBoxLayout();
+        QLabel *label = new QLabel(following_username, contentWidgetFollowing);
+        hLayout->addWidget(label);
+        layoutFollowing->addLayout(hLayout);
+    }
+
+    ui->followin_scrollBar->setWidget(contentWidgetFollowing);
 }
 
 void Premium::fill_concerts()
@@ -613,18 +675,33 @@ void Premium::fillFriendshipRequests()
     ui->friendship_requests->setWidget(contentWidget);
 }
 
-void Premium::fillAllUsers()
-{
-    // Assuming you have a list of all users available
-    QStringList allUsers;
-    for (int i = 1; i <= 100; ++i) {
-        allUsers.append("User" + QString::number(i));
-    }
+void Premium::fillAllUsers() {
+    // Replace this with your logic to get the current user's ID
+    int currentUserId = getCurrentUserId();
 
+    // Create a content widget and a vertical layout for it
     QWidget *contentWidget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(contentWidget);
 
-    for (const QString &userName : allUsers) {
+    // Create a query object
+    QSqlQuery query(db);
+
+    // Prepare the query to select all usernames and their corresponding user IDs
+    if (!query.exec("SELECT user_id, username FROM Users")) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve users: " + query.lastError().text());
+        return;
+    }
+
+    // Iterate over the results
+    while (query.next()) {
+        int userId = query.value(0).toInt();
+        QString userName = query.value(1).toString();
+
+        // Skip the current user's information
+        if (userId == currentUserId) {
+            continue;
+        }
+
         // Create a horizontal layout for each row
         QHBoxLayout *rowLayout = new QHBoxLayout();
 
@@ -640,12 +717,43 @@ void Premium::fillAllUsers()
         });
         rowLayout->addWidget(sendRequestButton);
 
+        // Button to follow the user
+        QPushButton *followButton = new QPushButton("Follow", this);
+        // Connect followButton clicked signal to slot
+        connect(followButton, &QPushButton::clicked, this, [=]() {
+            followUser(userId, userName);
+        });
+        rowLayout->addWidget(followButton);
+
         // Add row layout to main vertical layout
         layout->addLayout(rowLayout);
     }
 
     // Set the content widget for the scroll area
     ui->allUsers_scrollBar->setWidget(contentWidget);
+}
+
+void Premium::sendFriendshipRequest(const QString &userName) {
+    // Your logic to send a friendship request to the user
+    QMessageBox::information(this, "Friendship Request", "Friendship request sent to " + userName);
+}
+
+void Premium::followUser(int userId, const QString &userName) {
+    // Your logic to follow the user
+    int currentUserId = getCurrentUserId(); // Replace this with your logic to get the current user's ID
+
+    QSqlQuery query(db);
+    query.prepare("EXEC AddFollower @UserId1 = :userId1, @UserId2 = :userId2");
+    query.bindValue(":userId1", currentUserId);
+    query.bindValue(":userId2", userId);
+
+    if (!query.exec()) {
+        QMessageBox::information(this, "Error", "You are already following "+ userName);
+        return;
+    }
+
+    QMessageBox::information(this, "Follow User", "You are now following " + userName);
+    fill_follow();
 }
 
 void Premium::acceptFriendshipRequest(const QString &userName)
@@ -656,11 +764,6 @@ void Premium::acceptFriendshipRequest(const QString &userName)
 void Premium::declineFriendshipRequest(const QString &userName)
 {
     // Logic to decline friendship request for userName
-}
-
-void Premium::sendFriendshipRequest(const QString &userName)
-{
-    // Logic to send friendship request to userName
 }
 
 void Premium::on_UploadPhoto_clicked()
@@ -859,4 +962,93 @@ void Premium::on_SubmitSongs_clicked()
 
     // Optionally clear the dynamically created widgets after submission
     clearScrollArea();
+}
+
+void Premium::displaySearchResults(const QList<QVariantMap> &results) {
+    int songCount = 0;
+    for (const QVariantMap &result : results) {
+        QString type = result["Type"].toString();
+        QString title = result["Title"].toString();
+        QString address_of_picture = result["address_of_picture"].toString();
+        QString labelText = QString("%1: %2").arg(type == "Song" ? "Song" : "Album").arg(title);
+
+        int row = songCount / 8;
+        int col = songCount % 8;
+
+        // Create label for song/album image
+        QLabel *imageLabel = new QLabel(this);
+        QPixmap pixmap;
+        if (!address_of_picture.isEmpty() && pixmap.load(address_of_picture)) {
+            imageLabel->setPixmap(pixmap.scaled(100, 100, Qt::KeepAspectRatio));
+        } else {
+            imageLabel->setPixmap(QPixmap(":/new/prefix1/spotify logo.png").scaled(100, 100, Qt::KeepAspectRatio));
+        }
+        gridLayout->addWidget(imageLabel, row * 2, col);
+
+        // Create button for song/album name
+        QPushButton *button = new QPushButton(labelText, this);
+        button->setProperty("ID", result["ID"]);
+        button->setProperty("Type", type);
+        connect(button, &QPushButton::clicked, this, &Premium::addComment_like);
+        gridLayout->addWidget(button, row * 2 + 1, col);
+
+        songCount++;
+    }
+}
+
+QList<QVariantMap> Premium::searchMusicAndAlbum(const QString &name, const QString &artistName, const QString &genre, const QString &country, const QString &ageCategory) {
+    QSqlQuery query;
+    query.prepare("EXEC SearchMusicAndAlbum :name, :artist_name, :genre, :country, :age_category");
+    query.bindValue(":name", name);
+    query.bindValue(":artist_name", artistName);
+    query.bindValue(":genre", genre);
+    query.bindValue(":country", country);
+    query.bindValue(":age_category", ageCategory);
+    query.exec();
+
+    QList<QVariantMap> results;
+    while (query.next()) {
+        QVariantMap result;
+        result["Type"] = query.value("Type");
+        result["ID"] = query.value("ID");
+        result["Title"] = query.value("Title");
+        result["address_of_picture"] = query.value("address_of_picture");
+        results.append(result);
+    }
+
+    if (query.lastError().isValid()) {
+        qDebug() << "SQL Error: " << query.lastError().text();
+    }
+
+    return results;
+}
+
+void Premium::on_Search_pushButton_clicked()
+{
+    QString name, artistName, genre, country, ageCategory;
+
+    // Check which radio button is selected
+    if (ui->SearchNameMusic->isChecked()) {
+        name = ui->SearchLineEdit->text();
+    } else if (ui->SearchNameArtist->isChecked()) {
+        artistName = ui->SearchLineEdit->text();
+    } else if (ui->SearchGenre->isChecked()) {
+        genre = ui->SearchLineEdit->text();
+    } else if (ui->SearchCountry->isChecked()) {
+        country = ui->SearchLineEdit->text();
+    } else if (ui->SearchAgeCategory->isChecked()) {
+        ageCategory = ui->SearchLineEdit->text();
+    }
+
+    QList<QVariantMap> results = searchMusicAndAlbum(name, artistName, genre, country, ageCategory);
+
+    clearScrollAreaSearch();
+    displaySearchResults(results);
+}
+void Premium::clearScrollAreaSearch() {
+    QLayoutItem *item;
+    while ((item = gridLayout->takeAt(0)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
 }

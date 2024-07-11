@@ -12,6 +12,9 @@
 #include<QVector>
 #include<QFormLayout>
 #include<QGroupBox>
+#include<QMessageBox>
+#include <QSqlError>
+#include<QSqlQuery>
 namespace Ui {
 class Premium;
 }
@@ -28,6 +31,9 @@ private:
     Ui::Premium *ui;
     QString m_imagePath;
     int songCount;
+    QSqlDatabase db;
+    int ID;
+    QString Type;
     QVector<QLineEdit*> titleEdits;
     QVector<QLineEdit*> albumEdits;
     QVector<QLineEdit*> genreEdits;
@@ -38,9 +44,10 @@ private:
     QGridLayout *gridLayout;
     QWidget *contentWidget;
     QScrollArea *scrollArea;
-    void addSongItem(const QString &songID,const QString &songName, const QString &imagePath);
+    void addSongItem(const QString &songID, const QString &songName, const QString &imagePath);
     void fill_favorites();
     void fill_playlists();
+    void fillSongs();
     void fill_friends();
     void myPlaylist();
     void friendPlaylist();
@@ -69,6 +76,12 @@ private:
     void onDeleteButtonClicked(const QString& type, const QString& itemName);
     void onNameButtonClicked(const QString& type, const QString& itemName);
     void fillScrollArea(QScrollArea* scrollArea, const QString& type);
+    QList<QVariantMap> searchMusicAndAlbum(const QString &name, const QString &artistName, const QString &genre, const QString &country, const QString &ageCategory);
+    void displaySearchResults(const QList<QVariantMap> &results);
+    void clearScrollAreaSearch();
+    int getCurrentUserId();
+    bool initializeDatabase(QSqlDatabase &db);
+    void followUser(int userId, const QString &userName);
 
 
 signals:
@@ -79,12 +92,13 @@ signals:
 private slots:
     void addComment_like();
     void showPlaylist();
-
-
     void on_UploadPhoto_clicked();
     void on_submit_song_clicked();
     void on_OK_clicked();
 
+    void on_Search_pushButton_clicked();
+public slots:
+    void setUserID(const int &userId,const QString &userType);
 };
 
 #endif // PREMIUM_H

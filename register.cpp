@@ -8,7 +8,7 @@ Register::Register(QWidget *parent)
 
     ui->setupUi(this);
     if (!initializeDatabase(db)) {
-       QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database");
+        QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database");
     }
     ui->sign_button->setStyleSheet(
                 "QPushButton {"
@@ -413,17 +413,15 @@ void Register::onTimeout()
 
 void Register::on_sign_button_clicked()
 {
-        QString username = ui->username->text();
-        QString password = ui->password->text();
+    QString username = ui->username->text();
+    QString password = ui->password->text();
 
-        // Connect to the database
-        if (initializeDatabase(db)) {
-            QSqlQuery query(db);
+    QSqlQuery query(db);
 
-            // Prepare the query to call stored procedure
-            query.prepare("{CALL CheckUserType(?, ?)}");
-            query.addBindValue(username);
-            query.addBindValue(password);
+    // Prepare the query to call stored procedure
+    query.prepare("{CALL CheckUserType(?, ?)}");
+    query.addBindValue(username);
+    query.addBindValue(password);
 
             // Execute the query
             if (query.exec()) {
@@ -446,9 +444,16 @@ void Register::on_sign_button_clicked()
                 QMessageBox::critical(this, "Database Error", "Failed to execute stored procedure.");
             }
         } else {
-            QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database.");
+            qDebug() << "No rows returned.";
+            // Handle case where no rows were returned (user does not exist)
+            QMessageBox::critical(this, "Login Error", "Invalid username or password.");
         }
+    } else {
+        qDebug() << "Stored procedure execution error:" << query.lastError().text();
+        QMessageBox::critical(this, "Database Error", "Failed to execute stored procedure.");
     }
+}
+
 
 
 

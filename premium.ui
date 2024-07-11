@@ -26,7 +26,7 @@
     <string notr="true">background-color: rgb(46, 47, 51);</string>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>4</number>
    </property>
    <widget class="QWidget" name="songs_tab">
     <attribute name="title">
@@ -36,9 +36,9 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>50</y>
-       <width>1551</width>
-       <height>701</height>
+       <y>70</y>
+       <width>1521</width>
+       <height>681</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -53,13 +53,13 @@ color: rgb(255, 255, 255);</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1549</width>
-        <height>699</height>
+        <width>1519</width>
+        <height>679</height>
        </rect>
       </property>
      </widget>
     </widget>
-    <widget class="QLineEdit" name="lineEdit">
+    <widget class="QLineEdit" name="SearchLineEdit">
      <property name="geometry">
       <rect>
        <x>12</x>
@@ -72,22 +72,89 @@ color: rgb(255, 255, 255);</string>
       <string notr="true">color: rgb(255, 255, 255);</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QRadioButton" name="SearchNameArtist">
+     <property name="geometry">
+      <rect>
+       <x>11</x>
+       <y>41</y>
+       <width>149</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Name of the artist</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="SearchAgeCategory">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>40</y>
+       <width>118</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Age category</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="SearchNameMusic">
+     <property name="geometry">
+      <rect>
+       <x>320</x>
+       <y>40</y>
+       <width>201</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>The name of the music</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="SearchCountry">
+     <property name="geometry">
+      <rect>
+       <x>520</x>
+       <y>40</y>
+       <width>80</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Country</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="SearchGenre">
+     <property name="geometry">
+      <rect>
+       <x>620</x>
+       <y>40</y>
+       <width>68</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Genre</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Search_pushButton">
      <property name="geometry">
       <rect>
        <x>1490</x>
-       <y>0</y>
-       <width>41</width>
-       <height>41</height>
+       <y>10</y>
+       <width>51</width>
+       <height>51</height>
       </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border-image: url(:/new/prefix1/search.png);</string>
      </property>
      <property name="text">
       <string/>
      </property>
     </widget>
+   </widget>
+   <widget class="QWidget" name="premium_tab">
+    <attribute name="title">
+     <string>Premium</string>
+    </attribute>
    </widget>
    <widget class="QWidget" name="favorites_tab">
     <attribute name="title">
