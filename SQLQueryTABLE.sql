@@ -1213,3 +1213,165 @@ BEGIN
     WHERE pl.[name] = @playlist_name;
 END;
 GO
+
+----------------------------------------------------------------------Mahrokh---------------------------------------------------------------------
+CREATE PROCEDURE GetFavoriteSongsAndAlbums
+    @user_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Retrieve favorite songs
+    SELECT 
+        s.song_id, 
+        s.title AS item_name, 
+        'Song' AS item_type 
+    FROM 
+        Like_song ls
+    JOIN 
+        Songs s ON ls.song_id = s.song_id
+    WHERE 
+        ls.user_id = @user_id
+
+    UNION ALL
+
+    -- Retrieve favorite albums
+    SELECT 
+        a.album_id, 
+        a.title AS item_name, 
+        'Album' AS item_type 
+    FROM 
+        Like_album la
+    JOIN 
+        Albums a ON la.album_id = a.album_id
+    WHERE 
+        la.user_id = @user_id;
+END;
+GO
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------Random Inserts---------------------------------------------------------------------
+
+--INSERT INTO Users (username, [password], email, birth_date, [location])
+--VALUES ('user1', 'password1', 'user1@example.com', '1990-01-01', 'New York'),
+--       ('user2', 'password2', 'user2@example.com', '1992-05-15', 'Los Angeles'),
+--       ('user3', 'password3', 'user3@example.com', '1985-08-20', 'Chicago');
+
+--INSERT INTO Premium (user_id, Start_time, End_time)
+--VALUES (1, '2023-01-01 10:00:00', '2023-12-31 23:59:59'),
+--       (2, '2023-02-15 08:30:00', '2023-12-31 23:59:59'),
+--       (3, '2023-03-20 12:00:00', '2023-12-31 23:59:59');
+
+--INSERT INTO Play_list (user_id, [name], ispublic, address_of_picture)
+--VALUES (1, 'My Playlist', 1, '/images/my_playlist.jpg'),
+--       (1, 'Favorites', 1, '/images/favorites.jpg'),
+--       (2, 'Road Trip Mix', 0, '/images/road_trip.jpg');
+
+--INSERT INTO Digital_wallet (user_id, amount)
+--VALUES (1, 100.00),
+--       (2, 50.00),
+--       (3, 75.00);
+
+--INSERT INTO Artists (artist_id, bio)
+--VALUES (1, 'Bio for Artist 1'),
+--       (2, 'Bio for Artist 2'),
+--       (3, 'Bio for Artist 3');
+
+--INSERT INTO Albums (title, artist_id_added, genre, release_date, Age_category, country, address_of_picture)
+--VALUES ('Album 1', 1, 'Pop', '2023-01-15', 'PG', 'USA', '/images/album1.jpg'),
+--       ('Album 2', 2, 'Rock', '2023-02-20', 'PG', 'UK', '/images/album2.jpg'),
+--       ('Album 3', 3, 'Electronic', '2023-03-10', 'PG', 'Canada', '/images/album3.jpg');
+
+--INSERT INTO Songs (artist_id_added, title, album_id, genre, release_date, lyrics, Age_category, country, address_of_picture, can_be_added)
+--VALUES (1, 'Song 1', 1, 'Pop', '2023-01-15', 'Lyrics for Song 1', 'PG', 'USA', '/images/song1.jpg', 1),
+--       (2, 'Song 2', 2, 'Rock', '2023-02-20', 'Lyrics for Song 2', 'PG', 'UK', '/images/song2.jpg', 1),
+--       (3, 'Song 3', 3, 'Electronic', '2023-03-10', 'Lyrics for Song 3', 'PG', 'Canada', '/images/song3.jpg', 1);
+
+--INSERT INTO Concerts (artist_id, [location], [date], address_of_picture)
+--VALUES (1, 'New York Concert Hall', '2023-04-01 19:00:00', '/images/concert1.jpg'),
+--       (2, 'LA Stadium', '2023-05-15 20:00:00', '/images/concert2.jpg'),
+--       (3, 'Chicago Arena', '2023-06-20 18:30:00', '/images/concert3.jpg');
+
+--INSERT INTO Tickets (user_id, artist_id, price, Expiration, is_sold, date_concert)
+--VALUES (1, 1, 50.00, 1, 0, '2023-04-01 19:00:00'),
+--       (2, 2, 75.00, 1, 0, '2023-05-15 20:00:00'),
+--       (3, 3, 60.00, 1, 0, '2023-06-20 18:30:00');
+
+--INSERT INTO Favorite_Play_list (user_id, user_id_owner, [name])
+--VALUES (1, 2, 'Favorites'),
+--       (2, 1, 'Road Trip Mix'),
+--       (3, 1, 'Favorites');
+
+--INSERT INTO Comment_Play_list (user_id, [name], [text])
+--VALUES (1, 'My Playlist', 'Great selection of songs!'),
+--       (2, 'Favorites', 'Love this playlist!'),
+--       (3, 'Road Trip Mix', 'Perfect for long drives.');
+
+--INSERT INTO Like_Play_list (user_id, [name])
+--VALUES (1, 'My Playlist'),
+--       (2, 'Favorites'),
+--       (3, 'Road Trip Mix');
+
+--INSERT INTO Friend (user_id1, user_id2, accept)
+--VALUES (1, 2, 1),
+--       (2, 3, 1),
+--       (3, 1, 0);
+
+--INSERT INTO Message_Premium (user_id1, user_id2, [text])
+--VALUES (1, 2, 'Hey, how are you?'),
+--       (2, 1, 'Doing great, thanks!'),
+--       (3, 1, 'Need to catch up soon.');
+
+--INSERT INTO follower (user_id1, user_id2)
+--VALUES (1, 2),
+--       (2, 3),
+--       (3, 1);
+
+--INSERT INTO Comment_Album (user_id, album_id, [text])
+--VALUES (1, 1, 'Awesome album!'),
+--       (2, 2, 'Great tracks!'),
+--       (3, 3, 'Love the beats.');
+
+--INSERT INTO artist_has_song (song_id, artist_id)
+--VALUES (1, 1),
+--       (2, 2),
+--       (3, 3);
+
+--INSERT INTO Playlist_has_song ([name], song_id, user_id)
+--VALUES ('My Playlist', 1, 1),
+--       ('Favorites', 2, 2),
+--       ('Road Trip Mix', 3, 3);
+
+--INSERT INTO Favorite_Song (user_id, song_id)
+--VALUES (1, 1),
+--       (2, 2),
+--       (3, 3);
+
+--INSERT INTO Like_album (user_id, album_id)
+--VALUES (1, 1),
+--       (2, 2),
+--       (3, 3);
+
+--INSERT INTO User_Artist_Likes (user_id, artist_id, song_id, Likes_Count)
+--VALUES (1, 1, 1, 100),
+--       (2, 2, 2, 150),
+--       (3, 3, 3, 80);
+
+--INSERT INTO User_Genre_Likes (user_id, song_id, Likes_Count)
+--VALUES (1, 1, 200),
+--       (2, 2, 120),
+--       (3, 3, 90);
+
+
+
