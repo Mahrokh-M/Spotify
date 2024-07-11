@@ -397,7 +397,7 @@ void Register::on_sign_button_clicked()
     QSqlQuery query(db);
 
     // Prepare the query to call stored procedure
-    query.prepare("{CALL CheckU(?, ?)}");
+    query.prepare("{CALL CheckS(?, ?)}");
     query.addBindValue(username);
     query.addBindValue(password);
 

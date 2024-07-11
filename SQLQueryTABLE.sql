@@ -1113,7 +1113,7 @@
 --END;
 --GO
 ---------------------------------------
---CREATE PROCEDURE CheckU
+--CREATE PROCEDURE CheckS
 --    @username VARCHAR(50),
 --    @password VARCHAR(50)
 --AS
@@ -1128,7 +1128,7 @@
 --    BEGIN
 --        SELECT @user_id AS User_Id,
 --            CASE
---                WHEN EXISTS (SELECT 1 FROM Premium WHERE user_id = @user_id) THEN 'Premium User'
+--                WHEN EXISTS (SELECT 1 FROM Premium WHERE user_id = @user_id AND GETDATE() < End_time) THEN 'Premium User'
 --                ELSE 'Regular User'
 --            END AS User_Type;
 --    END
@@ -1197,5 +1197,19 @@ BEGIN
     INNER JOIN Songs s ON ps.song_id = s.song_id
     WHERE ps.user_id = @user_id
     AND ps.[name] = @playlist_name;
+END;
+GO
+--------------------------------------
+CREATE PROCEDURE GetSongsByPlaylist
+    @playlist_name VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT  s.title
+    FROM Songs s
+    INNER JOIN Playlist_has_song ps ON s.song_id = ps.song_id
+    INNER JOIN Play_list pl ON ps.user_id = pl.user_id AND ps.[name] = pl.[name]
+    WHERE pl.[name] = @playlist_name;
 END;
 GO
