@@ -1172,3 +1172,30 @@
 --    SELECT @@ROWCOUNT AS AffectedRows; -- Return the number of affected rows
 --END;
 --GO
+--------------------------------------------------------
+CREATE PROCEDURE GetPlaylistsByUserId
+    @user_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT [name], address_of_picture
+    FROM Play_list
+    WHERE user_id = @user_id;
+END;
+GO
+--------------------------------------------
+CREATE PROCEDURE GetSongsInPlaylist
+    @user_id INT,
+    @playlist_name VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT s.title AS Song_Title
+    FROM Playlist_has_song ps
+    INNER JOIN Songs s ON ps.song_id = s.song_id
+    WHERE ps.user_id = @user_id
+    AND ps.[name] = @playlist_name;
+END;
+GO
