@@ -41,6 +41,7 @@ Premium::Premium(QWidget *parent) :
     fill_wallet();
     fillFriendshipRequests();
     fillAllUsers();
+    fill_my_belongings();
     //if is premium
 //        ui->tabWidget->removeTab(7);
 //         ui->tabWidget->removeTab(7);
@@ -165,6 +166,90 @@ void Premium::fill_playlists()
     friendPlaylist();
     publicPlaylist();
 
+}
+
+void Premium::fill_my_belongings()
+{
+    fillScrollArea(ui->my_songs_scrollBar, "Song");
+    fillScrollArea(ui->my_albums_scrollBar, "Album");
+    fillScrollArea(ui->my_concerts_scrollBar, "Concert");
+}
+
+void Premium::fillScrollArea(QScrollArea* scrollArea, const QString& type)
+{
+    // Create a horizontal layout for the scroll area
+    QHBoxLayout* scrollLayout = new QHBoxLayout();
+
+    // Example data for demonstration purposes
+    // Replace this with your actual data source
+    QStringList itemNames;
+    if (type == "Song") {
+        itemNames << "Song 1" << "Song 2" << "Song 3";
+    } else if (type == "Album") {
+        itemNames << "Album 1" << "Album 2" << "Album 3";
+    } else if (type == "Concert") {
+        itemNames << "Concert 1" << "Concert 2" << "Concert 3";
+    }
+
+    for (const QString& itemName : itemNames) {
+        // Create a vertical layout for each item
+        QVBoxLayout* itemLayout = new QVBoxLayout();
+
+        // Create a label for the image
+        QLabel* imageLabel = new QLabel();
+        QPixmap pixmap(":/new/prefix1/spotify logo.png"); // Use the provided image path
+        imageLabel->setPixmap(pixmap.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        imageLabel->setAlignment(Qt::AlignCenter);
+
+        // Create buttons for the name and delete action
+        QPushButton* nameButton = new QPushButton(itemName);
+        QPushButton* deleteButton = new QPushButton("Delete");
+
+        // Set styles for buttons
+        QString buttonStyle = "font: 12pt 'Segoe UI Historic';"
+                              "background-color: rgb(46, 189, 89);"
+                              "border-radius: 10px;"
+                              "color: rgb(255, 255, 255);";
+        nameButton->setStyleSheet(buttonStyle);
+        deleteButton->setStyleSheet(buttonStyle);
+
+        // Add widgets to the item layout
+        itemLayout->addWidget(imageLabel);
+        itemLayout->addWidget(nameButton);
+        itemLayout->addWidget(deleteButton);
+
+        // Add the item layout to the scroll layout
+        QWidget* itemWidget = new QWidget();
+        itemWidget->setLayout(itemLayout);
+        scrollLayout->addWidget(itemWidget);
+
+        // Connect the delete button to the appropriate slot
+        connect(deleteButton, &QPushButton::clicked, [this, type, itemName]() {
+            onDeleteButtonClicked(type, itemName);
+        });
+
+        // Connect the name button to the appropriate slot (if needed)
+        connect(nameButton, &QPushButton::clicked, [this, type, itemName]() {
+            onNameButtonClicked(type, itemName);
+        });
+    }
+
+    // Set the layout to the scroll area
+    QWidget* scrollAreaWidget = new QWidget();
+    scrollAreaWidget->setLayout(scrollLayout);
+    scrollArea->setWidget(scrollAreaWidget);
+}
+
+void Premium::onDeleteButtonClicked(const QString& type, const QString& itemName)
+{
+    // Handle the deletion of the item (e.g., remove from data source and UI)
+    qDebug() << "Delete" << type << ":" << itemName;
+}
+
+void Premium::onNameButtonClicked(const QString& type, const QString& itemName)
+{
+    // Handle the action for the name button (e.g., open details or play the song/album/concert)
+    qDebug() << "Clicked on" << type << ":" << itemName;
 }
 
 void Premium::myPlaylist(){
@@ -632,3 +717,146 @@ void Premium::on_submit_song_clicked()
     ui->Song_photo->clear();
 }
 
+void Premium::on_OK_clicked()
+{
+    // Clear previous dynamically added widgets
+    clearScrollArea();
+
+    // Get the number of songs from num_songs line edit
+    int numSongs = ui->num_songs->text().toInt();
+    if (numSongs <= 0) {
+        qDebug() << "Invalid number of songs";
+        return;
+    }
+
+    songCount = numSongs;
+
+    // Create a layout to hold the dynamically added widgets
+    QVBoxLayout *scrollLayout = new QVBoxLayout();
+
+    QString lineEditStyle = "border-radius: 15px;"
+                            "background-color: rgb(255, 255, 255);"
+                            "padding: 10px;"
+                            "font: 700 12pt 'UD Digi Kyokasho NP-B';";
+
+    QString labelStyle = "color: rgb(255, 255, 255);"
+                         "font: 700 12pt 'UD Digi Kyokasho NP-B';";
+
+    for (int i = 0; i < songCount; ++i) {
+        QGroupBox *songGroup = new QGroupBox(tr("Song %1").arg(i + 1), this);
+        QFormLayout *formLayout = new QFormLayout();
+
+        // Create line edits for each song's properties
+        QLineEdit *titleEdit = new QLineEdit();
+        QLineEdit *albumEdit = new QLineEdit();
+        QLineEdit *genreEdit = new QLineEdit();
+        QLineEdit *releaseDateEdit = new QLineEdit();
+        QLineEdit *ageCategoryEdit = new QLineEdit();
+        QLineEdit *countryEdit = new QLineEdit();
+
+        // Set the stylesheet for line edits
+        titleEdit->setStyleSheet(lineEditStyle);
+        albumEdit->setStyleSheet(lineEditStyle);
+        genreEdit->setStyleSheet(lineEditStyle);
+        releaseDateEdit->setStyleSheet(lineEditStyle);
+        ageCategoryEdit->setStyleSheet(lineEditStyle);
+        countryEdit->setStyleSheet(lineEditStyle);
+
+        // Create custom labels with the specified stylesheet
+        QLabel *titleLabel = new QLabel(tr("Title"));
+        QLabel *albumLabel = new QLabel(tr("Album"));
+        QLabel *genreLabel = new QLabel(tr("Genre"));
+        QLabel *releaseDateLabel = new QLabel(tr("Release Date"));
+        QLabel *ageCategoryLabel = new QLabel(tr("Age Category"));
+        QLabel *countryLabel = new QLabel(tr("Country"));
+
+        // Set the stylesheet for labels
+        titleLabel->setStyleSheet(labelStyle);
+        albumLabel->setStyleSheet(labelStyle);
+        genreLabel->setStyleSheet(labelStyle);
+        releaseDateLabel->setStyleSheet(labelStyle);
+        ageCategoryLabel->setStyleSheet(labelStyle);
+        countryLabel->setStyleSheet(labelStyle);
+
+        // Add line edits and labels to the form layout
+        formLayout->addRow(titleLabel, titleEdit);
+        formLayout->addRow(albumLabel, albumEdit);
+        formLayout->addRow(genreLabel, genreEdit);
+        formLayout->addRow(releaseDateLabel, releaseDateEdit);
+        formLayout->addRow(ageCategoryLabel, ageCategoryEdit);
+        formLayout->addRow(countryLabel, countryEdit);
+
+        // Add the form layout to the group box
+        songGroup->setLayout(formLayout);
+
+        // Add the group box to the scroll layout
+        scrollLayout->addWidget(songGroup);
+
+        // Store pointers to the line edits for later use
+        titleEdits.append(titleEdit);
+        albumEdits.append(albumEdit);
+        genreEdits.append(genreEdit);
+        releaseDateEdits.append(releaseDateEdit);
+        ageCategoryEdits.append(ageCategoryEdit);
+        countryEdits.append(countryEdit);
+    }
+
+    // Create and add the submit button to the layout
+    submitSongsButton = new QPushButton(tr("Submit All Songs"));
+    QString buttonStyle = "font: 12pt 'Segoe UI Historic';"
+                          "background-color: rgb(46, 189, 89);"
+                          "border-radius: 30px;"
+                          "color: rgb(255, 255, 255);";
+    submitSongsButton->setStyleSheet(buttonStyle);
+    scrollLayout->addWidget(submitSongsButton);
+
+    // Connect the submit button to the appropriate slot
+    connect(submitSongsButton, &QPushButton::clicked, this, &Premium::on_SubmitSongs_clicked);
+
+    // Set the layout to the scroll area
+    QWidget *scrollAreaWidget = new QWidget();
+    scrollAreaWidget->setLayout(scrollLayout);
+    ui->song_scroll_area->setWidget(scrollAreaWidget);
+}
+
+void Premium::clearScrollArea()
+{
+    // Remove all dynamically created widgets from the scroll area
+    QWidget *scrollAreaWidget = ui->song_scroll_area->widget();
+    if (scrollAreaWidget) {
+        delete scrollAreaWidget;
+    }
+
+    // Clear the stored pointers to the line edits
+    titleEdits.clear();
+    albumEdits.clear();
+    genreEdits.clear();
+    releaseDateEdits.clear();
+    ageCategoryEdits.clear();
+    countryEdits.clear();
+}
+
+void Premium::on_SubmitSongs_clicked()
+{
+    // Collect data from all dynamically created line edits
+    for (int i = 0; i < songCount; ++i) {
+        QString title = titleEdits[i]->text();
+        QString album = albumEdits[i]->text();
+        QString genre = genreEdits[i]->text();
+        QString releaseDate = releaseDateEdits[i]->text();
+        QString ageCategory = ageCategoryEdits[i]->text();
+        QString country = countryEdits[i]->text();
+
+        // Process the collected data (e.g., save to file, database, etc.)
+        qDebug() << "Song " << i + 1 << ": "
+                 << title << ", "
+                 << album << ", "
+                 << genre << ", "
+                 << releaseDate << ", "
+                 << ageCategory << ", "
+                 << country;
+    }
+
+    // Optionally clear the dynamically created widgets after submission
+    clearScrollArea();
+}

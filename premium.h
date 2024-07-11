@@ -8,6 +8,10 @@
 #include <QLabel>
 #include <QMessageBox>
 #include<QFileDialog>
+#include<QLineEdit>
+#include<QVector>
+#include<QFormLayout>
+#include<QGroupBox>
 namespace Ui {
 class Premium;
 }
@@ -23,11 +27,17 @@ public:
 private:
     Ui::Premium *ui;
     QString m_imagePath;
-private:
+    int songCount;
+    QVector<QLineEdit*> titleEdits;
+    QVector<QLineEdit*> albumEdits;
+    QVector<QLineEdit*> genreEdits;
+    QVector<QLineEdit*> releaseDateEdits;
+    QVector<QLineEdit*> ageCategoryEdits;
+    QVector<QLineEdit*> countryEdits;
+    QPushButton *submitSongsButton;
     QGridLayout *gridLayout;
     QWidget *contentWidget;
     QScrollArea *scrollArea;
-    int songCount;
     void addSongItem(const QString &songID,const QString &songName, const QString &imagePath);
     void fill_favorites();
     void fill_playlists();
@@ -52,7 +62,13 @@ private:
     void acceptFriendshipRequest(const QString &);
     void declineFriendshipRequest(const QString &userName);
     void sendFriendshipRequest(const QString &userName);
-    void fillAllUsers();;
+    void fillAllUsers();
+    void clearScrollArea();
+    void on_SubmitSongs_clicked();
+    void fill_my_belongings();
+    void onDeleteButtonClicked(const QString& type, const QString& itemName);
+    void onNameButtonClicked(const QString& type, const QString& itemName);
+    void fillScrollArea(QScrollArea* scrollArea, const QString& type);
 
 
 signals:
@@ -67,6 +83,7 @@ private slots:
 
     void on_UploadPhoto_clicked();
     void on_submit_song_clicked();
+    void on_OK_clicked();
 };
 
 #endif // PREMIUM_H

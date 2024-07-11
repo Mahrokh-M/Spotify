@@ -764,14 +764,14 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
     <widget class="QToolBox" name="toolBox">
      <property name="geometry">
       <rect>
-       <x>60</x>
-       <y>10</y>
+       <x>160</x>
+       <y>40</y>
        <width>1251</width>
        <height>681</height>
       </rect>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="add_single">
       <property name="geometry">
@@ -1080,11 +1080,11 @@ color: rgb(255, 255, 255);</string>
       <attribute name="label">
        <string>Add Concert</string>
       </attribute>
-      <widget class="QLineEdit" name="title_2">
+      <widget class="QLineEdit" name="signer">
        <property name="geometry">
         <rect>
          <x>440</x>
-         <y>60</y>
+         <y>30</y>
          <width>401</width>
          <height>61</height>
         </rect>
@@ -1099,14 +1099,14 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
         <set>Qt::AlignCenter</set>
        </property>
        <property name="placeholderText">
-        <string>Title</string>
+        <string>Singer</string>
        </property>
       </widget>
       <widget class="QPushButton" name="submit_song_2">
        <property name="geometry">
         <rect>
          <x>450</x>
-         <y>300</y>
+         <y>450</y>
          <width>391</width>
          <height>61</height>
         </rect>
@@ -1127,7 +1127,7 @@ color: rgb(255, 255, 255);</string>
        <property name="geometry">
         <rect>
          <x>440</x>
-         <y>220</y>
+         <y>170</y>
          <width>401</width>
          <height>61</height>
         </rect>
@@ -1149,7 +1149,7 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
        <property name="geometry">
         <rect>
          <x>440</x>
-         <y>140</y>
+         <y>100</y>
          <width>401</width>
          <height>61</height>
         </rect>
@@ -1167,6 +1167,72 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
         <string>Release Date</string>
        </property>
       </widget>
+      <widget class="QLineEdit" name="ticket1">
+       <property name="geometry">
+        <rect>
+         <x>440</x>
+         <y>240</y>
+         <width>401</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string> ticket 1 price</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="ticket2">
+       <property name="geometry">
+        <rect>
+         <x>440</x>
+         <y>310</y>
+         <width>401</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>ticket 2 price</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="ticket3">
+       <property name="geometry">
+        <rect>
+         <x>440</x>
+         <y>380</y>
+         <width>401</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>ticket 3 price</string>
+       </property>
+      </widget>
      </widget>
     </widget>
    </widget>
@@ -1174,6 +1240,132 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
     <attribute name="title">
      <string>My songs and Concerts</string>
     </attribute>
+    <widget class="QScrollArea" name="my_albums_scrollBar">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>290</y>
+       <width>1501</width>
+       <height>181</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents_13">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1499</width>
+        <height>179</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="myConcerts_label">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>480</y>
+       <width>141</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>My Concerts</string>
+     </property>
+    </widget>
+    <widget class="QScrollArea" name="my_concerts_scrollBar">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>540</y>
+       <width>1501</width>
+       <height>181</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents_16">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1499</width>
+        <height>179</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QScrollArea" name="my_songs_scrollBar">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>1501</width>
+       <height>171</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents_18">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1499</width>
+        <height>169</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="myAlbums_label">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>230</y>
+       <width>231</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>My Albums</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="mySongs_label">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>10</y>
+       <width>151</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>My Songs</string>
+     </property>
+    </widget>
    </widget>
   </widget>
  </widget>
