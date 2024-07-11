@@ -391,10 +391,15 @@ void Register::on_sign_button_clicked()
     QString username = ui->username->text();
     QString password = ui->password->text();
 
+    if (username.isEmpty() || password.isEmpty()) {
+        QMessageBox::critical(this, "Login Error", "Please fill in all fields.");
+        return;
+    }
+
     QSqlQuery query(db);
 
     // Prepare the query to call stored procedure
-    query.prepare("{CALL CheckUserType(?, ?)}");
+    query.prepare("{CALL CheckU(?, ?)}");
     query.addBindValue(username);
     query.addBindValue(password);
 
@@ -402,26 +407,29 @@ void Register::on_sign_button_clicked()
     if (query.exec()) {
         // Check the result
         if (query.next()) {
-            QString userType = query.value(0).toString();
-            int userId = query.value(1).toInt();
-            if (userType == "Regular User") {
-                emit loginPSuccessful(userId,userType);  // Signal for regular user
-            } else if (userType == "Premium User") {
-                emit loginPSuccessful(userId,userType); // Signal for premium user
+            int userId = query.value("User_Id").toInt();
+            QString userType = query.value("User_Type").toString();
+
+            if (userType == "Invalid User") {
+                qDebug() << "Invalid username or password.";
+                QMessageBox::critical(this, "Login Error", "Invalid username or password.");
+            } else {
+                if (userType == "Regular User") {
+                    emit loginPSuccessful(userId, userType);  // Signal for regular user
+                } else if (userType == "Premium User") {
+                    emit loginPSuccessful(userId, userType); // Signal for premium user
+                }
             }
         } else {
-            qDebug() << "No rows returned.";
-            // Handle case where no rows were returned (user does not exist)
+            qDebug() << "Query did not return any result.";
             QMessageBox::critical(this, "Login Error", "Invalid username or password.");
         }
+    } else {
+        qDebug() << "Query execution error:" << query.lastError().text();
+        QMessageBox::critical(this, "Database Error", "Failed to execute query.");
     }
-    else {
-        qDebug() << "No rows returned.";
-        // Handle case where no rows were returned (user does not exist)
-        QMessageBox::critical(this, "Login Error", "Invalid username or password.");
-    }
-
 }
+
 
 
 
