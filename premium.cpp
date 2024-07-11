@@ -40,17 +40,11 @@ Premium::Premium(QWidget *parent) :
     fill_wallet();
     fillFriendshipRequests();
     fill_my_belongings();
-    //if is premium
-    //        ui->tabWidget->removeTab(7);
-    //         ui->tabWidget->removeTab(7);
-    //if is simple user
-    //    while (ui->tabWidget->count() > 1) {
-    //        ui->tabWidget->removeTab(1);
-    //    }
+
     // Define the stylesheet
     setstyle();
     if (!initializeDatabase(db)) {
-       QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database");
+        QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database");
     }
 
 }
@@ -74,8 +68,19 @@ void Premium::setstyle(){
 }
 
 
-void Premium::setUserID(){
-    //
+void Premium::setUserID(const int &userId,const QString &userType){
+    ID=userId;
+    Type=userType;
+//    //  if is premium
+//    if(userType=="Premium User"){
+//    ui->tabWidget->removeTab(7);
+//    ui->tabWidget->removeTab(7);}
+//    // if is simple user
+//    if(userType=="Regular User"){
+//        while (ui->tabWidget->count() > 1) {
+//            ui->tabWidget->removeTab(1);
+//        }
+//    }
 }
 
 bool Premium::initializeDatabase(QSqlDatabase &db) {
@@ -93,6 +98,7 @@ bool Premium::initializeDatabase(QSqlDatabase &db) {
 
 int Premium::getCurrentUserId(){
     //return the persons ID
+    return ID;
 }
 
 void Premium::addSongItem(const QString &songID,const QString &songName, const QString &imagePath)

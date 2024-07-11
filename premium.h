@@ -33,6 +33,7 @@ private:
     int songCount;
     QSqlDatabase db;
     int ID;
+    QString Type;
     QVector<QLineEdit*> titleEdits;
     QVector<QLineEdit*> albumEdits;
     QVector<QLineEdit*> genreEdits;
@@ -96,7 +97,7 @@ private slots:
     void on_OK_clicked();
     void on_Search_pushButton_clicked();
 public slots:
-    void setUserID();
+    void setUserID(const int &userId,const QString &userType);
 };
 
 #endif // PREMIUM_H
