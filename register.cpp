@@ -367,6 +367,7 @@ void Register::on_sign_button_clicked()
     // basic user
     // emit loginSuccessful();  // Emit the signal
     // premium user
+
     emit loginPSuccessful();
     // singer
     // emit loginSSuccessful();

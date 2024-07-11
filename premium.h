@@ -12,6 +12,9 @@
 #include<QVector>
 #include<QFormLayout>
 #include<QGroupBox>
+#include<QMessageBox>
+#include <QSqlError>
+#include<QSqlQuery>
 namespace Ui {
 class Premium;
 }
@@ -28,6 +31,7 @@ private:
     Ui::Premium *ui;
     QString m_imagePath;
     int songCount;
+    QSqlDatabase db;
     QVector<QLineEdit*> titleEdits;
     QVector<QLineEdit*> albumEdits;
     QVector<QLineEdit*> genreEdits;
@@ -69,6 +73,9 @@ private:
     void onDeleteButtonClicked(const QString& type, const QString& itemName);
     void onNameButtonClicked(const QString& type, const QString& itemName);
     void fillScrollArea(QScrollArea* scrollArea, const QString& type);
+    int getCurrentUserId();
+    bool initializeDatabase(QSqlDatabase &db);
+    void followUser(int userId, const QString &userName);
 
 
 signals:
