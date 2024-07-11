@@ -26,7 +26,7 @@
     <string notr="true">background-color: rgb(46, 47, 51);</string>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>3</number>
    </property>
    <widget class="QWidget" name="songs_tab">
     <attribute name="title">
@@ -248,7 +248,7 @@ color: rgb(255, 255, 255);</string>
       <string notr="true">color: rgb(255, 255, 255);</string>
      </property>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>772</x>
@@ -277,7 +277,7 @@ color: rgb(255, 255, 255);</string>
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>511</x>
@@ -453,7 +453,7 @@ color: rgb(255, 255, 255);</string>
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>510</x>
@@ -801,7 +801,7 @@ color: rgb(255, 255, 255);</string>
       <rect>
        <x>290</x>
        <y>20</y>
-       <width>81</width>
+       <width>111</width>
        <height>31</height>
       </rect>
      </property>
@@ -869,7 +869,7 @@ color: rgb(255, 255, 255);</string>
       <rect>
        <x>620</x>
        <y>20</y>
-       <width>81</width>
+       <width>101</width>
        <height>31</height>
       </rect>
      </property>
@@ -1468,7 +1468,7 @@ color: rgb(255, 255, 255);</string>
         <x>0</x>
         <y>0</y>
         <width>1251</width>
-        <height>591</height>
+        <height>576</height>
        </rect>
       </property>
       <attribute name="label">

@@ -741,15 +741,6 @@ BEGIN
     VALUES (@artist_id, @title, @album_id, @genre, GETDATE(), @lyrics, @Age_category, @country, @address_of_picture, @can_be_added);
 END;
 GO
-exec AddSong
-    @artist_id =1,
-    @title ='asal khanoom',
-    @genre ='Rock',
-    @lyrics ='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaakkkkkkkkkkkkkkkkkldkkskfldsjfkdsjfkjdsfkjsdhfjkdshdfkjshkjfs',
-    @Age_category='pg',
-    @country= 'iran',
-	@address_of_picture='aaaa',
-	@can_be_added=1;
 --ADD SONG WITH OTHE ARTIST :
 CREATE TYPE ArtistIdTableType AS TABLE 
 (
@@ -1452,3 +1443,389 @@ BEGIN
     END
 END;
 GO
+
+----EXEC GetUserInterests @user_id = 1;
+---------------------------------------------------------
+--CREATE PROCEDURE GetRecommendedAlb
+--(
+--    @user_id INT
+--)
+--AS
+--BEGIN
+--    SELECT TOP 10
+--        A.album_id,
+--        A.title AS album_title,
+--        U.username AS artist_name,
+--        A.genre,
+--        A.release_date
+--    FROM 
+--        Albums A
+--    INNER JOIN 
+--        artist_has_album AHA ON A.album_id = AHA.album_id
+--	INNER JOIN	 User_Artist_Likes UAL ON  UAL.user_id = @user_id
+--    INNER JOIN 
+--        Artists AR ON AHA.artist_id = AR.artist_id
+--    INNER JOIN 
+--        Users U ON AR.artist_id = U.user_id
+--    WHERE 
+--        A.album_id  IN (SELECT album_id FROM Like_album WHERE user_id = @user_id)
+--    ORDER BY 
+--        NEWID(); -- Random order for diversity in recommendations
+--END;
+
+--------------------------------------------------------------------------
+--CREATE PROCEDURE GetRecommendedSongsByArtistLike
+--(
+--    @user_id INT
+--)
+--AS
+--BEGIN
+--    SELECT TOP 10
+--        S.song_id,
+--        S.title AS song_title,
+--        U.username AS artist_name,
+--        S.genre,
+--        S.release_date
+--    FROM
+--        Songs S
+--    INNER JOIN
+--        artist_has_song ASHS ON ASHS.song_id = S.song_id
+--    INNER JOIN
+--        Artists A ON ASHS.artist_id = A.artist_id
+--    INNER JOIN
+--        User_Artist_Likes UAL ON A.artist_id = UAL.artist_id
+--	INNER JOIN 
+--        Users U ON A.artist_id = U.user_id
+--    WHERE
+--        UAL.user_id = @user_id
+--    AND
+--        S.song_id IN (SELECT song_id FROM Like_song WHERE user_id = @user_id)
+--    ORDER BY
+--        UAL.Likes_Count DESC, NEWID();
+--END;
+--GO
+--CREATE PROCEDURE GetRecommendedSongsByGenreLike
+--(
+--    @user_id INT
+--)
+--AS
+--BEGIN
+--    WITH GenreLikes AS (
+--        SELECT 
+--            UGL.user_id,
+--            S.song_id,
+--            S.title AS song_title,
+--            S.genre,
+--            UGL.Likes_Count
+--        FROM 
+--            User_Genre_Likes UGL
+--        INNER JOIN 
+--            Songs S ON UGL.song_id = S.song_id
+--        WHERE 
+--            UGL.user_id = @user_id
+--    )
+    
+--    SELECT TOP 10
+--        S.song_id,
+--        S.title AS song_title,
+--        U.username AS artist_name,
+--        S.genre,
+--        S.release_date
+--    FROM 
+--        Songs S
+--    INNER JOIN 
+--        artist_has_song ASHS ON ASHS.song_id = S.song_id
+--    INNER JOIN 
+--        Artists A ON ASHS.artist_id = A.artist_id
+--    INNER JOIN 
+--        GenreLikes GL ON S.song_id = GL.song_id
+--	INNER JOIN 
+--        Users U ON A.artist_id = U.user_id
+--    WHERE 
+--        S.song_id IN (SELECT song_id FROM Like_song WHERE user_id = @user_id) -- Exclude songs liked by the user
+--    ORDER BY 
+--        GL.Likes_Count DESC, NEWID(); -- Order by likes count of genre and then randomize
+--END;
+--GO
+---------------------------------------
+--CREATE PROCEDURE CheckS
+--    @username VARCHAR(50),
+--    @password VARCHAR(50)
+--AS
+--BEGIN
+--    SET NOCOUNT ON;
+--    DECLARE @user_id INT;
+--    SELECT @user_id = user_id
+--    FROM Users
+--    WHERE username = @username AND [password] = @password;
+    
+--    IF @user_id IS NOT NULL
+--    BEGIN
+--        SELECT @user_id AS User_Id,
+--            CASE
+--                WHEN EXISTS (SELECT 1 FROM Premium WHERE user_id = @user_id AND GETDATE() < End_time) THEN 'Premium User'
+--                ELSE 'Regular User'
+--            END AS User_Type;
+--    END
+--    ELSE
+--    BEGIN
+--        SELECT NULL AS User_Id, 'Invalid User' AS User_Type;
+--    END
+--END;
+--GO 
+----------------------------------------------
+--CREATE PROCEDURE CheckUserByEmailAndUsername
+--    @username VARCHAR(50),
+--    @email VARCHAR(100)
+--AS
+--BEGIN
+--    SET NOCOUNT ON;
+
+--    DECLARE @user_id INT;
+--    SELECT @user_id = user_id
+--    FROM Users
+--    WHERE username = @username AND email = @email;
+--    SELECT 
+--        CASE
+--            WHEN @user_id IS NOT NULL THEN 'Valid'
+--            ELSE 'Invalid'
+--        END AS Result;
+--END;
+--GO
+------------------------------------------------
+--CREATE PROCEDURE UpdatePassword
+--    @username VARCHAR(50),
+--    @newPassword VARCHAR(50)
+--AS
+--BEGIN
+--    SET NOCOUNT ON;
+
+--    UPDATE Users
+--    SET [password] = @newPassword
+--    WHERE username = @username;
+
+--    SELECT @@ROWCOUNT AS AffectedRows; -- Return the number of affected rows
+--END;
+--GO
+--------------------------------------------------------
+CREATE PROCEDURE GetPlaylistsByUserId
+    @user_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT [name], address_of_picture
+    FROM Play_list
+    WHERE user_id = @user_id;
+END;
+GO
+--------------------------------------------
+CREATE PROCEDURE GetSongsInPlaylist
+    @user_id INT,
+    @playlist_name VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT s.title AS Song_Title
+    FROM Playlist_has_song ps
+    INNER JOIN Songs s ON ps.song_id = s.song_id
+    WHERE ps.user_id = @user_id
+    AND ps.[name] = @playlist_name;
+END;
+GO
+--------------------------------------
+CREATE PROCEDURE GetSongsByPlaylist
+    @playlist_name VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT  s.title
+    FROM Songs s
+    INNER JOIN Playlist_has_song ps ON s.song_id = ps.song_id
+    INNER JOIN Play_list pl ON ps.user_id = pl.user_id AND ps.[name] = pl.[name]
+    WHERE pl.[name] = @playlist_name;
+END;
+----------------------------------------------
+GO
+CREATE PROCEDURE GetFriendPlaylists
+    @user_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    CREATE TABLE #FriendUserIds (
+        user_id INT
+    );
+    INSERT INTO #FriendUserIds (user_id)
+    SELECT user_id2
+    FROM Friend
+    WHERE user_id1 = @user_id AND accept = 1;
+
+    SELECT pl.[name] AS Playlist_Name
+    FROM Play_list pl
+    INNER JOIN #FriendUserIds f ON pl.user_id = f.user_id;
+    DROP TABLE #FriendUserIds;
+END;
+GO
+----------------------------------------------------------------------Mahrokh---------------------------------------------------------------------
+CREATE PROCEDURE GetFavoriteSongsAndAlbums
+    @user_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Retrieve favorite songs
+    SELECT 
+        s.song_id, 
+        s.title AS item_name, 
+        'Song' AS item_type 
+    FROM 
+        Like_song ls
+    JOIN 
+        Songs s ON ls.song_id = s.song_id
+    WHERE 
+        ls.user_id = @user_id
+
+    UNION ALL
+
+    -- Retrieve favorite albums
+    SELECT 
+        a.album_id, 
+        a.title AS item_name, 
+        'Album' AS item_type 
+    FROM 
+        Like_album la
+    JOIN 
+        Albums a ON la.album_id = a.album_id
+    WHERE 
+        la.user_id = @user_id;
+END;
+GO
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------Random Inserts---------------------------------------------------------------------
+
+--INSERT INTO Users (username, [password], email, birth_date, [location])
+--VALUES ('user1', 'password1', 'user1@example.com', '1990-01-01', 'New York'),
+--       ('user2', 'password2', 'user2@example.com', '1992-05-15', 'Los Angeles'),
+--       ('user3', 'password3', 'user3@example.com', '1985-08-20', 'Chicago');
+
+--INSERT INTO Premium (user_id, Start_time, End_time)
+--VALUES (1, '2023-01-01 10:00:00', '2023-12-31 23:59:59'),
+--       (2, '2023-02-15 08:30:00', '2023-12-31 23:59:59'),
+--       (3, '2023-03-20 12:00:00', '2023-12-31 23:59:59');
+
+--INSERT INTO Play_list (user_id, [name], ispublic, address_of_picture)
+--VALUES (1, 'My Playlist', 1, '/images/my_playlist.jpg'),
+--       (1, 'Favorites', 1, '/images/favorites.jpg'),
+--       (2, 'Road Trip Mix', 0, '/images/road_trip.jpg');
+
+--INSERT INTO Digital_wallet (user_id, amount)
+--VALUES (1, 100.00),
+--       (2, 50.00),
+--       (3, 75.00);
+
+--INSERT INTO Artists (artist_id, bio)
+--VALUES (1, 'Bio for Artist 1'),
+--       (2, 'Bio for Artist 2'),
+--       (3, 'Bio for Artist 3');
+
+--INSERT INTO Albums (title, artist_id_added, genre, release_date, Age_category, country, address_of_picture)
+--VALUES ('Album 1', 1, 'Pop', '2023-01-15', 'PG', 'USA', '/images/album1.jpg'),
+--       ('Album 2', 2, 'Rock', '2023-02-20', 'PG', 'UK', '/images/album2.jpg'),
+--       ('Album 3', 3, 'Electronic', '2023-03-10', 'PG', 'Canada', '/images/album3.jpg');
+
+--INSERT INTO Songs (artist_id_added, title, album_id, genre, release_date, lyrics, Age_category, country, address_of_picture, can_be_added)
+--VALUES (1, 'Song 1', 1, 'Pop', '2023-01-15', 'Lyrics for Song 1', 'PG', 'USA', '/images/song1.jpg', 1),
+--       (2, 'Song 2', 2, 'Rock', '2023-02-20', 'Lyrics for Song 2', 'PG', 'UK', '/images/song2.jpg', 1),
+--       (3, 'Song 3', 3, 'Electronic', '2023-03-10', 'Lyrics for Song 3', 'PG', 'Canada', '/images/song3.jpg', 1);
+
+--INSERT INTO Concerts (artist_id, [location], [date], address_of_picture)
+--VALUES (1, 'New York Concert Hall', '2023-04-01 19:00:00', '/images/concert1.jpg'),
+--       (2, 'LA Stadium', '2023-05-15 20:00:00', '/images/concert2.jpg'),
+--       (3, 'Chicago Arena', '2023-06-20 18:30:00', '/images/concert3.jpg');
+
+--INSERT INTO Tickets (user_id, artist_id, price, Expiration, is_sold, date_concert)
+--VALUES (1, 1, 50.00, 1, 0, '2023-04-01 19:00:00'),
+--       (2, 2, 75.00, 1, 0, '2023-05-15 20:00:00'),
+--       (3, 3, 60.00, 1, 0, '2023-06-20 18:30:00');
+
+--INSERT INTO Favorite_Play_list (user_id, user_id_owner, [name])
+--VALUES (1, 2, 'Favorites'),
+--       (2, 1, 'Road Trip Mix'),
+--       (3, 1, 'Favorites');
+
+--INSERT INTO Comment_Play_list (user_id, [name], [text])
+--VALUES (1, 'My Playlist', 'Great selection of songs!'),
+--       (2, 'Favorites', 'Love this playlist!'),
+--       (3, 'Road Trip Mix', 'Perfect for long drives.');
+
+--INSERT INTO Like_Play_list (user_id, [name])
+--VALUES (1, 'My Playlist'),
+--       (2, 'Favorites'),
+--       (3, 'Road Trip Mix');
+
+--INSERT INTO Friend (user_id1, user_id2, accept)
+--VALUES (1, 2, 1),
+--       (2, 3, 1),
+--       (3, 1, 0);
+
+--INSERT INTO Message_Premium (user_id1, user_id2, [text])
+--VALUES (1, 2, 'Hey, how are you?'),
+--       (2, 1, 'Doing great, thanks!'),
+--       (3, 1, 'Need to catch up soon.');
+
+--INSERT INTO follower (user_id1, user_id2)
+--VALUES (1, 2),
+--       (2, 3),
+--       (3, 1);
+
+--INSERT INTO Comment_Album (user_id, album_id, [text])
+--VALUES (1, 1, 'Awesome album!'),
+--       (2, 2, 'Great tracks!'),
+--       (3, 3, 'Love the beats.');
+
+--INSERT INTO artist_has_song (song_id, artist_id)
+--VALUES (1, 1),
+--       (2, 2),
+--       (3, 3);
+
+--INSERT INTO Playlist_has_song ([name], song_id, user_id)
+--VALUES ('My Playlist', 1, 1),
+--       ('Favorites', 2, 2),
+--       ('Road Trip Mix', 3, 3);
+
+--INSERT INTO Favorite_Song (user_id, song_id)
+--VALUES (1, 1),
+--       (2, 2),
+--       (3, 3);
+
+--INSERT INTO Like_album (user_id, album_id)
+--VALUES (1, 1),
+--       (2, 2),
+--       (3, 3);
+
+--INSERT INTO User_Artist_Likes (user_id, artist_id, song_id, Likes_Count)
+--VALUES (1, 1, 1, 100),
+--       (2, 2, 2, 150),
+--       (3, 3, 3, 80);
+
+--INSERT INTO User_Genre_Likes (user_id, song_id, Likes_Count)
+--VALUES (1, 1, 200),
+--       (2, 2, 120),
+--       (3, 3, 90);
+
+
+

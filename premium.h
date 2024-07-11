@@ -79,12 +79,14 @@ private:
     void clearScrollAreaSearch();
     bool initializeDatabase(QSqlDatabase &db);
     void followUser(int userId, const QString &userName);
+    void show_album_page();
 
 
 signals:
     void open_comment(const QString);
     void open_playlist(const QString);
     void startChat(const QString);
+    void open_album(const QString);
 
 private slots:
     void addComment_like();
@@ -95,7 +97,7 @@ private slots:
 
     void on_Search_pushButton_clicked();
 public slots:
-    void setUserID(const int &userId,const QString &userType);
+    void setUserID(const QString &userType);
 };
 
 #endif // PREMIUM_H
