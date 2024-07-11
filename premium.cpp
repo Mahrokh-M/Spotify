@@ -72,8 +72,31 @@ void Premium::setstyle(){
     // Apply the stylesheet to all child widgets of this widget
     this->setStyleSheet(styleSheet);
 }
-//**
-void Premium::addSongItem(const QString &songID, const QString &songName, const QString &imagePath)
+
+
+void Premium::setUserID(){
+    //
+}
+
+bool Premium::initializeDatabase(QSqlDatabase &db) {
+    db = QSqlDatabase::addDatabase("QODBC");
+    db.setDatabaseName("DRIVER={ODBC Driver 17 for SQL Server};SERVER=LOCALHOST\\SQLEXPRESS;DATABASE=Spotify;Trusted_Connection=Yes;");
+
+    if (!db.open()) {
+        qDebug() << "Database connection error:" << db.lastError().text();
+        return false;
+    }
+
+    qDebug() << "Database connected!";
+    return true;
+}
+
+int Premium::getCurrentUserId(){
+    //return the persons ID
+}
+
+void Premium::addSongItem(const QString &songID,const QString &songName, const QString &imagePath)
+
 {
     int row = songCount / 8;
     int col = songCount % 8;
