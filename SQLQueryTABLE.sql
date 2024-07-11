@@ -1,21 +1,20 @@
--- DELETE FOREIGN KEY constraints
-DECLARE @sql NVARCHAR(MAX) = '';
+---- DELETE FOREIGN KEY constraints
+--DECLARE @sql NVARCHAR(MAX) = '';
 
-SELECT @sql = @sql + 'ALTER TABLE ' + t.name + ' DROP CONSTRAINT ' + fk.name + '; '
-FROM sys.foreign_keys AS fk
-JOIN sys.tables AS t ON fk.parent_object_id = t.object_id;
+--SELECT @sql = @sql + 'ALTER TABLE ' + t.name + ' DROP CONSTRAINT ' + fk.name + '; '
+--FROM sys.foreign_keys AS fk
+--JOIN sys.tables AS t ON fk.parent_object_id = t.object_id;
 
-EXEC sp_executesql @sql;
-------
-DECLARE @sql NVARCHAR(MAX) = '';
+--EXEC sp_executesql @sql;
+--------
+--DECLARE @sql NVARCHAR(MAX) = '';
 
-SELECT @sql = @sql + 'DROP TABLE ' + t.name + '; '
-FROM sys.tables AS t;
+--SELECT @sql = @sql + 'DROP TABLE ' + t.name + '; '
+--FROM sys.tables AS t;
 
-EXEC sp_executesql @sql;
--------------------------------
-SELECT DB_NAME() AS CurrentDatabase;
-
+--EXEC sp_executesql @sql;
+---------------------------------
+--SELECT DB_NAME() AS CurrentDatabase;
 --------------------------------------------------------------------------------------------------------------------
 CREATE TABLE Users (
     user_id INT PRIMARY KEY IDENTITY,
@@ -26,10 +25,10 @@ CREATE TABLE Users (
     [location] VARCHAR(100)
 );
 -----------------------------------------------------
-CREATE TABLE Permium(
-    user_id INT PRIMARY KEY IDENTITY,  
-	Start_time DATE,
-	End_time DATE
+CREATE TABLE Premium(
+    user_id INT PRIMARY KEY,  
+	Start_time DATETIME,
+	End_time DATETIME,
 	FOREIGN KEY (user_id) REFERENCES Users(user_id)
 );
 -----------------------------------------------------
@@ -50,7 +49,7 @@ CREATE TABLE Digital_wallet (
 );
 -----------------------------------------------------
 CREATE TABLE Artists (
-    artist_id INT PRIMARY KEY IDENTITY,
+    artist_id INT PRIMARY KEY,
     bio VARCHAR(MAX),
     FOREIGN KEY (artist_id) REFERENCES Users(user_id)
 );
@@ -71,7 +70,7 @@ CREATE TABLE Songs (
     song_id INT PRIMARY KEY IDENTITY,
 	artist_id_added INT,
 	title VARCHAR(100)  NOT NULL,
-	album_id INT,
+	album_id INT NULL,
     genre VARCHAR(50),
     release_date DATE,
     lyrics VARCHAR(MAX),
@@ -79,7 +78,7 @@ CREATE TABLE Songs (
 	country VARCHAR(50),
 	address_of_picture VARCHAR(100),
     can_be_added BIT DEFAULT 0,
-	FOREIGN KEY (album_id) REFERENCES Albums(album_id),
+	FOREIGN KEY (album_id) REFERENCES Albums(album_id)ON DELETE CASCADE,
 	FOREIGN KEY (artist_id_added) REFERENCES Artists(artist_id)
 );
 ----------------------------------------------------
@@ -108,7 +107,7 @@ CREATE TABLE Favorite_Play_list(
     user_id INT,
 	user_id_owner INT,
     [name] VARCHAR(50) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES Permium(user_id),
+    FOREIGN KEY (user_id) REFERENCES Premium(user_id),
     FOREIGN KEY (user_id_owner, [name]) REFERENCES Play_list(user_id, [name]),
     PRIMARY KEY (user_id_owner,user_id, [name])
 );
@@ -117,7 +116,7 @@ CREATE TABLE Comment_Play_list(
     user_id INT ,
 	[name] VARCHAR(50) NOT NULL ,
 	[text] VARCHAR(100),
-    FOREIGN KEY (user_id) REFERENCES Permium(user_id),
+    FOREIGN KEY (user_id) REFERENCES Premium(user_id),
 	FOREIGN KEY (user_id, [name]) REFERENCES Play_list(user_id, [name]),
 	PRIMARY KEY (user_id,[name])
 );
@@ -125,7 +124,7 @@ CREATE TABLE Comment_Play_list(
 CREATE TABLE Like_Play_list(
     user_id INT ,
 	[name] VARCHAR(50) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES Permium(user_id),
+    FOREIGN KEY (user_id) REFERENCES Premium(user_id),
 	FOREIGN KEY (user_id, [name]) REFERENCES Play_list(user_id, [name]),
 	PRIMARY KEY(user_id,[name])
 );
@@ -134,8 +133,8 @@ CREATE TABLE Friend(
     user_id1 INT,
 	user_id2 INT,
 	accept BIT DEFAULT 0,
-    FOREIGN KEY (user_id1) REFERENCES Permium(user_id),
-	FOREIGN KEY (user_id2) REFERENCES Permium(user_id),
+    FOREIGN KEY (user_id1) REFERENCES Premium(user_id),
+	FOREIGN KEY (user_id2) REFERENCES Premium(user_id),
 	PRIMARY KEY(user_id1,user_id2)
 );
 ----------------------------------------------------
@@ -143,16 +142,17 @@ CREATE TABLE Message_Premium (
     user_id1 INT,
     user_id2 INT,
     [text] VARCHAR(100),
-    FOREIGN KEY (user_id1) REFERENCES Permium(user_id),
-    FOREIGN KEY (user_id2) REFERENCES Permium(user_id),
+	CreatedDate DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (user_id1) REFERENCES Premium(user_id),
+    FOREIGN KEY (user_id2) REFERENCES Premium(user_id),
     PRIMARY KEY (user_id1, user_id2)
 );
 -------------------------------------------------------
 CREATE TABLE follower(
 	user_id1 INT,
 	user_id2 INT,
-    FOREIGN KEY (user_id1) REFERENCES Permium(user_id),
-	FOREIGN KEY (user_id2) REFERENCES Permium(user_id),
+    FOREIGN KEY (user_id1) REFERENCES Premium(user_id),
+	FOREIGN KEY (user_id2) REFERENCES Premium(user_id),
 	PRIMARY KEY(user_id1,user_id2)
 );
 -------------------------------------------------------
@@ -160,15 +160,15 @@ CREATE TABLE Comment_Album (
     user_id INT,                  
     album_id INT,
     [text] VARCHAR(100),
-    FOREIGN KEY (user_id) REFERENCES Permium(user_id),
-    FOREIGN KEY (album_id) REFERENCES Albums(album_id),
+    FOREIGN KEY (user_id) REFERENCES Premium(user_id),
+    FOREIGN KEY (album_id) REFERENCES Albums(album_id)ON DELETE CASCADE,
 	PRIMARY KEY(user_id,album_id)
 );
 ------------------------------------------------------
 CREATE TABLE artist_has_song(
     song_id INT ,
 	artist_id INT ,
-    FOREIGN KEY (song_id) REFERENCES Songs(song_id),
+    FOREIGN KEY (song_id) REFERENCES Songs(song_id)ON DELETE CASCADE,
 	FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
 	PRIMARY KEY(song_id,artist_id)
 );
@@ -176,7 +176,7 @@ CREATE TABLE artist_has_song(
 CREATE TABLE artist_has_album(
     album_id INT,
 	artist_id INT ,
-    FOREIGN KEY (album_id) REFERENCES Albums(album_id),
+    FOREIGN KEY (album_id) REFERENCES Albums(album_id)ON DELETE CASCADE,
 	FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
 	PRIMARY KEY(album_id,artist_id)
 );
@@ -186,16 +186,15 @@ CREATE TABLE Playlist_has_song(
 	song_id INT ,
 	user_id INT ,
     FOREIGN KEY (user_id,[name]) REFERENCES Play_list(user_id,[name]),
-	FOREIGN KEY (song_id) REFERENCES Songs(song_id),
+	FOREIGN KEY (song_id) REFERENCES Songs(song_id)ON DELETE CASCADE,
 	PRIMARY KEY([name],song_id,user_id)
 );
 -------------------------------------------------------
---??????
 CREATE TABLE Favorite_Song(
     user_id INT,
 	song_id INT,
-    FOREIGN KEY (user_id) REFERENCES Permium(user_id),
-	FOREIGN KEY (song_id) REFERENCES Songs(song_id),
+    FOREIGN KEY (user_id) REFERENCES Premium(user_id),
+	FOREIGN KEY (song_id) REFERENCES Songs(song_id)ON DELETE CASCADE,
 	PRIMARY KEY(user_id,song_id)
 );
 -------------------------------------------------------
@@ -203,44 +202,62 @@ CREATE TABLE Comment_song(
     song_id INT,
 	[text] VARCHAR(100),
 	user_id INT,
-    FOREIGN KEY (user_id) REFERENCES Permium(user_id),
-	FOREIGN KEY (song_id) REFERENCES Songs(song_id),
+    FOREIGN KEY (user_id) REFERENCES Premium(user_id),
+	FOREIGN KEY (song_id) REFERENCES Songs(song_id)ON DELETE CASCADE,
 	PRIMARY KEY(user_id,song_id)
 );
 -------------------------------------------------------
 CREATE TABLE Like_song(
     song_id INT ,
 	user_id INT ,
-    FOREIGN KEY (user_id) REFERENCES Permium(user_id),
-	FOREIGN KEY (song_id) REFERENCES Songs(song_id),
+    FOREIGN KEY (user_id) REFERENCES Premium(user_id),
+	FOREIGN KEY (song_id) REFERENCES Songs(song_id)ON DELETE CASCADE,
 	PRIMARY KEY(user_id,song_id)
 );
 -------------------------------------------------------
---DROP TABLE Like_album;
 CREATE TABLE Like_album(
     user_id INT ,
 	album_id INT ,
-    FOREIGN KEY (user_id) REFERENCES Permium(user_id),
-	FOREIGN KEY (album_id) REFERENCES Albums(album_id),
+    FOREIGN KEY (user_id) REFERENCES Premium(user_id),
+	FOREIGN KEY (album_id) REFERENCES Albums(album_id)ON DELETE CASCADE,
 	PRIMARY KEY(user_id,album_id)
 
 );
 -------------------------------------------------------
-CREATE TABLE Return_money(
-    Digital_wallet_id INT ,
-	artist_id INT  ,
-    [date] DATETIME ,
-	amount DECIMAL(10, 2), --**
-    FOREIGN KEY (artist_id,[date]) REFERENCES Concerts(artist_id,[date]),
-	FOREIGN KEY (Digital_wallet_id) REFERENCES Digital_wallet(Digital_wallet_id),
-	PRIMARY KEY(artist_id,Digital_wallet_id,[date])
-);
+--CREATE TABLE Return_money(
+--    Digital_wallet_id INT ,
+--	artist_id INT  ,
+--    [date] DATETIME ,
+--	amount DECIMAL(10, 2), --**
+--    FOREIGN KEY (artist_id,[date]) REFERENCES Concerts(artist_id,[date]),
+--	FOREIGN KEY (Digital_wallet_id) REFERENCES Digital_wallet(Digital_wallet_id),
+--	PRIMARY KEY(artist_id,Digital_wallet_id,[date])
+--);
 -------------------------------------------------------
 CREATE TABLE Play_song(
    song_id INT ,
 	user_id INT ,
-    FOREIGN KEY (user_id) REFERENCES Permium(user_id),
+    FOREIGN KEY (user_id) REFERENCES Premium(user_id),
+	FOREIGN KEY (song_id) REFERENCES Songs(song_id)ON DELETE CASCADE,
+	PRIMARY KEY(user_id,song_id)
+);
+-----------------------------------------------------------------------
+CREATE TABLE User_Artist_Likes (
+	user_id INT,
+	artist_id INT,
+	song_id INT ,
+	Likes_Count INT,
+	FOREIGN KEY (song_id) REFERENCES Songs(song_id),
+	FOREIGN KEY (user_id) REFERENCES Premium(user_id),
+	FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
+	PRIMARY KEY(user_id,song_id)
+);
+-----------------------------------------------------------------------
+CREATE TABLE User_Genre_Likes (
+	user_id INT,
+	song_id INT ,
+	Likes_Count INT,
+	FOREIGN KEY (user_id) REFERENCES Premium(user_id),
 	FOREIGN KEY (song_id) REFERENCES Songs(song_id),
 	PRIMARY KEY(user_id,song_id)
 );
--------------------------------------------------------
