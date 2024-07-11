@@ -326,8 +326,6 @@ void Register::on_Submit_clicked()
     }
 }
 
-
-
 void Register::on_sign_button_3_clicked() {
     QString email = ui->email->text();
     QString password = ui->password_2->text();
@@ -390,6 +388,11 @@ void Register::on_sign_button_clicked()
 {
     QString username = ui->username->text();
     QString password = ui->password->text();
+
+    if (username.isEmpty() || password.isEmpty()) {
+        QMessageBox::warning(this, "Input Error", "Please fill in all required fields.");
+        return;
+    }
 
     QSqlQuery query(db);
 
