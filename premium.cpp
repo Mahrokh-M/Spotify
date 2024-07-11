@@ -106,14 +106,63 @@ void Premium::addSongItem(const QString &songID,const QString &songName, const Q
 
 void Premium::fillSongs()
 {
+    // Create a new content widget for the scroll area
+    QWidget *contentWidget = new QWidget(this);
+    QGridLayout *layout = new QGridLayout(contentWidget);
+    layout->setAlignment(Qt::AlignTop | Qt::AlignLeft); // Align content to the top-left
+
     QSqlQuery query("SELECT song_id, address_of_picture, title FROM Songs");
+    int row = 0, col = 0;
+    const int maxColumns = 4; // Adjust this value based on your layout preference
+
     while (query.next()) {
         QString songID = query.value(0).toString();
         QString picturePath = query.value(1).toString();
         QString songName = query.value(2).toString();
         QString imagePath = picturePath.isEmpty() ? ":/new/prefix1/spotify logo.png" : picturePath;
-        addSongItem(songID, songName, imagePath);  // Pass songID, songName, and imagePath
+
+        // Create a frame with a green border
+        QFrame *frame = new QFrame(contentWidget);
+        frame->setFrameShape(QFrame::Box);
+        frame->setLineWidth(2);
+        frame->setFixedSize(150, 200); // Set fixed size for the frame
+        frame->setStyleSheet("border: 2px solid green;");
+
+        // Create a vertical layout to hold image and song name
+        QVBoxLayout *vLayout = new QVBoxLayout(frame);
+
+        // Create label for song image
+        QLabel *imageLabel = new QLabel(frame);
+        QPixmap pixmap;
+        if (!imagePath.isEmpty() && pixmap.load(imagePath)) {
+            imageLabel->setPixmap(pixmap.scaled(100, 100, Qt::KeepAspectRatio));
+        } else {
+            imageLabel->setPixmap(QPixmap(":/new/prefix1/spotify logo.png").scaled(100, 100, Qt::KeepAspectRatio));
+        }
+        vLayout->addWidget(imageLabel);
+
+        // Create button for song name
+        QPushButton *songButton = new QPushButton(songName, frame);
+        songButton->setProperty("ID", songID);
+        songButton->setProperty("name", songName);
+        songButton->setProperty("pic_path", imagePath);
+        connect(songButton, &QPushButton::clicked, this, &Premium::addComment_like);
+        vLayout->addWidget(songButton);
+
+        // Add frame to the grid layout
+        layout->addWidget(frame, row, col);
+
+        // Move to the next column
+        col++;
+        // If we've reached the maximum number of columns, move to the next row
+        if (col >= maxColumns) {
+            col = 0;
+            row++;
+        }
     }
+
+    // Set the content widget as the scroll area's widget
+    ui->scrollArea->setWidget(contentWidget);
 }
 
 void Premium::addComment_like()
@@ -136,8 +185,7 @@ void Premium::show_album_page()
     }
 }
 
-void Premium::fill_favorites()
-{
+void Premium::fill_favorites() {
     // Get user ID from the current session or context
     int userId = 1; // Replace this with your logic to get the current user's ID
 
@@ -160,6 +208,7 @@ void Premium::fill_favorites()
         QString itemName = query.value(1).toString();
         QString itemType = query.value(2).toString();
         QString picPath = query.value(3).toString(); // Get the picture path from the query result
+        QString imagePath = (picPath.isEmpty() || !QFile::exists(picPath)) ? ":/new/prefix1/spotify logo.png" : picPath;
 
         QFrame *frame = new QFrame(contentWidget);
         frame->setFrameShape(QFrame::Box);
@@ -169,13 +218,13 @@ void Premium::fill_favorites()
         QVBoxLayout *vLayout = new QVBoxLayout(frame);
 
         QLabel *label = new QLabel(frame);
-        label->setPixmap(QPixmap(picPath).scaled(100, 100, Qt::KeepAspectRatio));
+        label->setPixmap(QPixmap(imagePath).scaled(100, 100, Qt::KeepAspectRatio));
         vLayout->addWidget(label);
 
         QPushButton *itemButton = new QPushButton(itemName, frame);
         itemButton->setProperty("ID", itemId);
         itemButton->setProperty("name", itemName);
-        itemButton->setProperty("pic_path", picPath);
+        itemButton->setProperty("pic_path", imagePath);
 
         if (itemType == "Song") {
             connect(itemButton, &QPushButton::clicked, this, &Premium::addComment_like);
@@ -208,6 +257,7 @@ void Premium::fill_favorites()
         int albumId = recAlbumsQuery.value(0).toInt();
         QString albumName = recAlbumsQuery.value(1).toString();
         QString picPath = recAlbumsQuery.value(2).toString(); // Get the picture path from the query result
+        QString imagePath = (picPath.isEmpty() || !QFile::exists(picPath)) ? ":/new/prefix1/spotify logo.png" : picPath;
 
         QFrame *frame = new QFrame(contentWidget_2);
         frame->setFrameShape(QFrame::Box);
@@ -217,13 +267,13 @@ void Premium::fill_favorites()
         QVBoxLayout *vLayout = new QVBoxLayout(frame);
 
         QLabel *label = new QLabel(frame);
-        label->setPixmap(QPixmap(picPath).scaled(100, 100, Qt::KeepAspectRatio));
+        label->setPixmap(QPixmap(imagePath).scaled(100, 100, Qt::KeepAspectRatio));
         vLayout->addWidget(label);
 
         QPushButton *albumButton = new QPushButton(albumName, frame);
         albumButton->setProperty("ID", albumId);
         albumButton->setProperty("name", albumName);
-        albumButton->setProperty("pic_path", picPath);
+        albumButton->setProperty("pic_path", imagePath);
         connect(albumButton, &QPushButton::clicked, this, &Premium::show_album_page);
         vLayout->addWidget(albumButton);
 
@@ -244,6 +294,7 @@ void Premium::fill_favorites()
         int songId = recSongsQuery.value(0).toInt();
         QString songName = recSongsQuery.value(1).toString();
         QString picPath = recSongsQuery.value(2).toString(); // Get the picture path from the query result
+        QString imagePath = (picPath.isEmpty() || !QFile::exists(picPath)) ? ":/new/prefix1/spotify logo.png" : picPath;
 
         QFrame *frame = new QFrame(contentWidget_2);
         frame->setFrameShape(QFrame::Box);
@@ -253,13 +304,13 @@ void Premium::fill_favorites()
         QVBoxLayout *vLayout = new QVBoxLayout(frame);
 
         QLabel *label = new QLabel(frame);
-        label->setPixmap(QPixmap(picPath).scaled(100, 100, Qt::KeepAspectRatio));
+        label->setPixmap(QPixmap(imagePath).scaled(100, 100, Qt::KeepAspectRatio));
         vLayout->addWidget(label);
 
         QPushButton *songButton = new QPushButton(songName, frame);
         songButton->setProperty("ID", songId);
         songButton->setProperty("name", songName);
-        songButton->setProperty("pic_path", picPath);
+        songButton->setProperty("pic_path", imagePath);
         connect(songButton, &QPushButton::clicked, this, &Premium::addComment_like);
         vLayout->addWidget(songButton);
 
@@ -275,6 +326,163 @@ void Premium::fill_playlists()
     friendPlaylist();
     publicPlaylist();
 
+}
+
+void Premium::myPlaylist() {
+    // Get user ID from the current session or context
+    int userId = ID; // Replace this with your logic to get the current user's ID
+
+    QWidget *contentWidget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(contentWidget);
+    layout->setAlignment(Qt::AlignLeft); // Align content to the left
+
+    QSqlQuery query(db);
+    query.prepare("EXEC GetPlaylistsByUserId @user_id = :user_id");
+    query.bindValue(":user_id", userId);
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve user's playlists: " + query.lastError().text());
+        return;
+    }
+
+    while (query.next()) {
+        QString playlistName = query.value(0).toString();
+        QString picturePath = query.value(1).toString();
+        QString imagePath = (picturePath.isEmpty() || !QFile::exists(picturePath)) ? ":/new/prefix1/spotify logo.png" : picturePath;
+
+        QVBoxLayout *vLayout = new QVBoxLayout();
+
+        QFrame *frame = new QFrame(contentWidget);
+        frame->setFrameShape(QFrame::Box);
+        frame->setLineWidth(2);
+        frame->setFixedSize(150, 180); // Set fixed size for the frame
+        frame->setStyleSheet("border: 2px solid green;"); // Set green border color
+
+        QLabel *label = new QLabel(frame);
+        label->setPixmap(QPixmap(imagePath).scaled(100, 100, Qt::KeepAspectRatio));
+        vLayout->addWidget(label);
+
+        QPushButton *playlistButton = new QPushButton(playlistName, frame);
+        playlistButton->setProperty("name", playlistName);
+        playlistButton->setProperty("pic_path", imagePath);
+        connect(playlistButton, &QPushButton::clicked, this, &Premium::showPlaylist);
+        vLayout->addWidget(playlistButton);
+
+        frame->setLayout(vLayout);
+        layout->addWidget(frame);
+    }
+
+    ui->your_playlist_scrollbar->setWidget(contentWidget);
+}
+
+void Premium::showPlaylist(){
+    QPushButton *button = qobject_cast<QPushButton*>(sender());
+    if (button)
+    {
+        QString songID = button->property("ID").toString();
+        emit open_playlist(songID); // Emit signal with songID
+    }
+}
+
+void Premium::friendPlaylist() {
+    // Clear previous contents of the scroll area
+    clearScrollArea(ui->friend_playlist_scrollbar);
+
+    // Get user ID from the current session or context
+    int userId = ID; // Replace this with your logic to get the current user's ID
+
+    // Execute the stored procedure to get friend playlists
+    QSqlQuery query;
+    query.prepare("EXEC GetFriendPlaylists @user_id = :user_id");
+    query.bindValue(":user_id", userId);
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve friend playlists: " + query.lastError().text());
+        return;
+    }
+
+    // Create a widget to hold all playlist items
+    QWidget *contentWidget = new QWidget(this);
+    QVBoxLayout *mainLayout = new QVBoxLayout(contentWidget);
+
+    while (query.next()) {
+        QString playlistName = query.value("Playlist_Name").toString();
+
+        // Create layout for each playlist item
+        QFrame *frame = new QFrame(contentWidget);
+        frame->setFrameShape(QFrame::Box);
+        frame->setLineWidth(2);
+        frame->setFixedSize(150, 180); // Set fixed size for the frame
+        frame->setStyleSheet("border: 2px solid green;"); // Set green border color
+        QVBoxLayout *vLayout = new QVBoxLayout(frame);
+
+        // Get the playlist image address (use address_of_picture or default to Spotify logo)
+        QString picPath = query.value("address_of_picture").toString();
+        if (picPath.isEmpty() || !QFile::exists(picPath)) {
+            picPath = ":/new/prefix1/spotify logo.png"; // Default to Spotify logo if path is empty or invalid
+        }
+
+        // Create label for playlist image
+        QLabel *label = new QLabel(frame);
+        label->setPixmap(QPixmap(picPath).scaled(100, 100, Qt::KeepAspectRatio));
+        vLayout->addWidget(label);
+
+        // Create button for playlist name
+        QPushButton *playlistButton = new QPushButton(playlistName, frame);
+        playlistButton->setProperty("Name", playlistName); // Set playlist name property
+        playlistButton->setProperty("pic_path", picPath); // Set playlist image path property
+        connect(playlistButton, &QPushButton::clicked, this, &Premium::showPlaylist); // Connect signal
+        vLayout->addWidget(playlistButton);
+
+        // Add the frame layout to the main layout
+        mainLayout->addWidget(frame);
+    }
+
+    // Set the content widget as the scroll area's widget
+    ui->friend_playlist_scrollbar->setWidget(contentWidget);
+}
+
+void Premium::publicPlaylist() {
+    QWidget *contentWidget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(contentWidget);
+    layout->setAlignment(Qt::AlignLeft); // Align content to the left
+
+    QSqlQuery query(db);
+    query.prepare("SELECT [name], address_of_picture FROM Play_list WHERE ispublic = 1");
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve public playlists: " + query.lastError().text());
+        return;
+    }
+
+    while (query.next()) {
+        QString playlistName = query.value(0).toString();
+        QString picturePath = query.value(1).toString();
+        QString imagePath = (picturePath.isEmpty() || !QFile::exists(picturePath)) ? ":/new/prefix1/spotify logo.png" : picturePath;
+
+        QVBoxLayout *vLayout = new QVBoxLayout();
+
+        QFrame *frame = new QFrame(contentWidget);
+        frame->setFrameShape(QFrame::Box);
+        frame->setLineWidth(2);
+        frame->setFixedSize(150, 180); // Set fixed size for the frame
+        frame->setStyleSheet("border: 2px solid green;"); // Set green border color
+
+        QLabel *label = new QLabel(frame);
+        label->setPixmap(QPixmap(imagePath).scaled(100, 100, Qt::KeepAspectRatio));
+        vLayout->addWidget(label);
+
+        QPushButton *playlistButton = new QPushButton(playlistName, frame);
+        playlistButton->setProperty("name", playlistName);
+        playlistButton->setProperty("pic_path", imagePath);
+        connect(playlistButton, &QPushButton::clicked, this, &Premium::showPlaylist);
+        vLayout->addWidget(playlistButton);
+
+        frame->setLayout(vLayout);
+        layout->addWidget(frame);
+    }
+
+    ui->publicPlaylist_scrollbar->setWidget(contentWidget);
 }
 
 void Premium::fill_my_belongings()
@@ -359,99 +567,6 @@ void Premium::onNameButtonClicked(const QString& type, const QString& itemName)
 {
     // Handle the action for the name button (e.g., open details or play the song/album/concert)
     qDebug() << "Clicked on" << type << ":" << itemName;
-}
-
-void Premium::myPlaylist(){
-    QWidget *contentWidget = new QWidget(this);
-    QHBoxLayout *layout = new QHBoxLayout(contentWidget);
-
-    // Example content: add several QLabel with images and QPushButton for song names
-    for (int i = 1; i <= 100; ++i)
-    {
-        // Create a vertical layout to hold image and song name
-        QVBoxLayout *vLayout = new QVBoxLayout();
-
-        // Create label for song image
-        QLabel *label = new QLabel(contentWidget);
-        label->setPixmap(QPixmap(":/new/prefix1/spotify logo.png").scaled(100, 100, Qt::KeepAspectRatio));
-        vLayout->addWidget(label);
-
-        // Create button for song name
-        QPushButton *songButton = new QPushButton("Song " + QString::number(i), contentWidget);
-        songButton->setProperty("ID", QString::number(i)); // Assuming songID is the same as i for this example
-        songButton->setProperty("name", "Song " + QString::number(i));
-        songButton->setProperty("pic_path", ":/new/prefix1/spotify logo.png");
-        connect(songButton, &QPushButton::clicked, this, &Premium::showPlaylist);
-        vLayout->addWidget(songButton);
-
-        // Add the vertical layout to the horizontal layout
-        layout->addLayout(vLayout);
-    }
-
-    // Set the content widget as the scroll area's widget
-    ui->your_playlist_scrollbar->setWidget(contentWidget);
-}
-
-void Premium::showPlaylist(){
-    QPushButton *button = qobject_cast<QPushButton*>(sender());
-    if (button)
-    {
-        QString songID = button->property("ID").toString();
-        emit open_playlist(songID); // Emit signal with songID
-    }
-}
-
-void Premium::friendPlaylist(){
-
-    // Example content: add several QLabel with images or text
-    QWidget *contentWidget = new QWidget(this);
-    QHBoxLayout *layout = new QHBoxLayout(contentWidget);
-    for (int i = 1; i <= 100; ++i)
-    {
-        QVBoxLayout *vLayout = new QVBoxLayout();
-
-        QLabel *label = new QLabel(contentWidget);
-        label->setPixmap(QPixmap(":/new/prefix1/spotify logo.png").scaled(100, 100, Qt::KeepAspectRatio));
-        vLayout->addWidget(label);
-
-        QPushButton *songButton = new QPushButton("Song " + QString::number(i), contentWidget);
-        songButton->setProperty("ID", QString::number(i));
-        songButton->setProperty("name", "Song " + QString::number(i));
-        songButton->setProperty("pic_path", ":/new/prefix1/spotify logo.png");
-        connect(songButton, &QPushButton::clicked, this, &Premium::showPlaylist);
-        vLayout->addWidget(songButton);
-
-        layout->addLayout(vLayout);
-    }
-
-    // Set the content widget as the scroll area's widget
-    ui->friend_playlist_scrollbar->setWidget(contentWidget);
-}
-
-void Premium::publicPlaylist(){
-    // Example content: add several QLabel with images or text
-    QWidget *contentWidget = new QWidget(this);
-    QHBoxLayout *layout = new QHBoxLayout(contentWidget);
-    for (int i = 1; i <= 100; ++i)
-    {
-        QVBoxLayout *vLayout = new QVBoxLayout();
-
-        QLabel *label = new QLabel(contentWidget);
-        label->setPixmap(QPixmap(":/new/prefix1/spotify logo.png").scaled(100, 100, Qt::KeepAspectRatio));
-        vLayout->addWidget(label);
-
-        QPushButton *songButton = new QPushButton("Song " + QString::number(i), contentWidget);
-        songButton->setProperty("ID", QString::number(i));
-        songButton->setProperty("name", "Song " + QString::number(i));
-        songButton->setProperty("pic_path", ":/new/prefix1/spotify logo.png");
-        connect(songButton, &QPushButton::clicked, this, &Premium::showPlaylist);
-        vLayout->addWidget(songButton);
-
-        layout->addLayout(vLayout);
-    }
-
-    // Set the content widget as the scroll area's widget
-    ui->publicPlaylist_scrollbar->setWidget(contentWidget);
 }
 
 void Premium::fill_friends(){
@@ -1007,6 +1122,31 @@ void Premium::clearScrollArea()
     countryEdits.clear();
 }
 
+void Premium::clearScrollArea(QScrollArea *scrollArea) {
+    // Retrieve the widget from the scroll area
+    QWidget *contentWidget = scrollArea->widget();
+    if (!contentWidget) {
+        return;
+    }
+
+    // Clear layout and widgets
+    QLayout *layout = contentWidget->layout();
+    if (!layout) {
+        return;
+    }
+
+    QLayoutItem *child;
+    while ((child = layout->takeAt(0)) != nullptr) {
+        if (QWidget *widget = child->widget()) {
+            delete widget; // Delete widget
+        }
+        delete child; // Delete layout item
+    }
+
+    delete layout; // Delete layout itself
+    scrollArea->setWidget(nullptr); // Set scroll area's widget to null
+}
+
 void Premium::on_SubmitSongs_clicked()
 {
     // Collect data from all dynamically created line edits
@@ -1033,35 +1173,54 @@ void Premium::on_SubmitSongs_clicked()
 }
 
 void Premium::displaySearchResults(const QList<QVariantMap> &results) {
+    // Create a new content widget for the scroll area
+    QWidget *contentWidget = new QWidget(this);
+    QHBoxLayout *layout = new QHBoxLayout(contentWidget);
+    layout->setAlignment(Qt::AlignLeft); // Align content to the left
+
     int songCount = 0;
     for (const QVariantMap &result : results) {
         QString type = result["Type"].toString();
         QString title = result["Title"].toString();
         QString address_of_picture = result["address_of_picture"].toString();
-        QString labelText = QString("%1: %2").arg(type == "Song" ? "Song" : "Album").arg(title);
 
-        int row = songCount / 8;
-        int col = songCount % 8;
+        // Create a vertical layout to hold image and title/button
+        QVBoxLayout *vLayout = new QVBoxLayout();
+
+        // Create a frame with a green border
+        QFrame *frame = new QFrame(contentWidget);
+        frame->setFrameShape(QFrame::Box);
+        frame->setLineWidth(2);
+        frame->setFixedSize(150, 200); // Set fixed size for the frame
+        frame->setStyleSheet("border: 2px solid green;");
 
         // Create label for song/album image
-        QLabel *imageLabel = new QLabel(this);
+        QLabel *imageLabel = new QLabel(frame);
         QPixmap pixmap;
         if (!address_of_picture.isEmpty() && pixmap.load(address_of_picture)) {
             imageLabel->setPixmap(pixmap.scaled(100, 100, Qt::KeepAspectRatio));
         } else {
             imageLabel->setPixmap(QPixmap(":/new/prefix1/spotify logo.png").scaled(100, 100, Qt::KeepAspectRatio));
         }
-        gridLayout->addWidget(imageLabel, row * 2, col);
+        vLayout->addWidget(imageLabel);
 
         // Create button for song/album name
-        QPushButton *button = new QPushButton(labelText, this);
+        QString labelText = QString("%1: %2").arg(type == "Song" ? "Song" : "Album").arg(title);
+        QPushButton *button = new QPushButton(labelText, frame);
         button->setProperty("ID", result["ID"]);
         button->setProperty("Type", type);
         connect(button, &QPushButton::clicked, this, &Premium::addComment_like);
-        gridLayout->addWidget(button, row * 2 + 1, col);
+        vLayout->addWidget(button);
+
+        // Add vertical layout to frame and frame to the horizontal layout
+        frame->setLayout(vLayout);
+        layout->addWidget(frame);
 
         songCount++;
     }
+
+    // Set the content widget as the scroll area's widget
+    ui->scrollArea->setWidget(contentWidget);
 }
 
 QList<QVariantMap> Premium::searchMusicAndAlbum(const QString &name, const QString &artistName, const QString &genre, const QString &country, const QString &ageCategory) {
@@ -1091,8 +1250,7 @@ QList<QVariantMap> Premium::searchMusicAndAlbum(const QString &name, const QStri
     return results;
 }
 
-void Premium::on_Search_pushButton_clicked()
-{
+void Premium::on_Search_pushButton_clicked() {
     QString name, artistName, genre, country, ageCategory;
 
     // Check which radio button is selected
@@ -1115,9 +1273,21 @@ void Premium::on_Search_pushButton_clicked()
 }
 
 void Premium::clearScrollAreaSearch() {
-    QLayoutItem *item;
-    while ((item = gridLayout->takeAt(0)) != nullptr) {
-        delete item->widget();
-        delete item;
+    // Get the content widget of the scroll area
+    QWidget *contentWidget = ui->scrollArea->widget();
+
+    if (contentWidget) {
+        // Get the layout of the content widget
+        QLayout *layout = contentWidget->layout();
+
+        if (layout) {
+            // Remove all widgets from the layout
+            QLayoutItem *item;
+            while ((item = layout->takeAt(0)) != nullptr) {
+                delete item->widget();
+                delete item;
+            }
+        }
     }
 }
+

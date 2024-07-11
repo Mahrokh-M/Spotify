@@ -77,7 +77,7 @@ color: rgb(255, 255, 255);</string>
       <rect>
        <x>11</x>
        <y>41</y>
-       <width>149</width>
+       <width>181</width>
        <height>26</height>
       </rect>
      </property>
@@ -88,9 +88,9 @@ color: rgb(255, 255, 255);</string>
     <widget class="QRadioButton" name="SearchAgeCategory">
      <property name="geometry">
       <rect>
-       <x>180</x>
+       <x>200</x>
        <y>40</y>
-       <width>118</width>
+       <width>141</width>
        <height>26</height>
       </rect>
      </property>
@@ -101,9 +101,9 @@ color: rgb(255, 255, 255);</string>
     <widget class="QRadioButton" name="SearchNameMusic">
      <property name="geometry">
       <rect>
-       <x>320</x>
+       <x>340</x>
        <y>40</y>
-       <width>201</width>
+       <width>231</width>
        <height>26</height>
       </rect>
      </property>
@@ -114,9 +114,9 @@ color: rgb(255, 255, 255);</string>
     <widget class="QRadioButton" name="SearchCountry">
      <property name="geometry">
       <rect>
-       <x>520</x>
+       <x>570</x>
        <y>40</y>
-       <width>80</width>
+       <width>91</width>
        <height>26</height>
       </rect>
      </property>
@@ -127,9 +127,9 @@ color: rgb(255, 255, 255);</string>
     <widget class="QRadioButton" name="SearchGenre">
      <property name="geometry">
       <rect>
-       <x>620</x>
+       <x>670</x>
        <y>40</y>
-       <width>68</width>
+       <width>101</width>
        <height>26</height>
       </rect>
      </property>
@@ -580,9 +580,9 @@ color: rgb(255, 255, 255);</string>
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>290</y>
+       <y>300</y>
        <width>1501</width>
-       <height>181</height>
+       <height>211</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -597,7 +597,7 @@ color: rgb(255, 255, 255);</string>
         <x>0</x>
         <y>0</y>
         <width>1499</width>
-        <height>179</height>
+        <height>209</height>
        </rect>
       </property>
      </widget>
@@ -605,10 +605,10 @@ color: rgb(255, 255, 255);</string>
     <widget class="QLabel" name="friendsP_label">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>230</y>
+       <x>10</x>
+       <y>270</y>
        <width>231</width>
-       <height>41</height>
+       <height>21</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -624,7 +624,7 @@ color: rgb(255, 255, 255);</string>
        <x>0</x>
        <y>40</y>
        <width>1501</width>
-       <height>171</height>
+       <height>221</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -639,7 +639,7 @@ color: rgb(255, 255, 255);</string>
         <x>0</x>
         <y>0</y>
         <width>1499</width>
-        <height>169</height>
+        <height>219</height>
        </rect>
       </property>
      </widget>
@@ -664,9 +664,9 @@ color: rgb(255, 255, 255);</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>480</y>
+       <y>511</y>
        <width>141</width>
-       <height>51</height>
+       <height>20</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -682,7 +682,7 @@ color: rgb(255, 255, 255);</string>
        <x>0</x>
        <y>540</y>
        <width>1501</width>
-       <height>181</height>
+       <height>201</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -697,7 +697,7 @@ color: rgb(255, 255, 255);</string>
         <x>0</x>
         <y>0</y>
         <width>1499</width>
-        <height>179</height>
+        <height>199</height>
        </rect>
       </property>
      </widget>
