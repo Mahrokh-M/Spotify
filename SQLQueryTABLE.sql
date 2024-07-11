@@ -1212,8 +1212,8 @@ BEGIN
     INNER JOIN Play_list pl ON ps.user_id = pl.user_id AND ps.[name] = pl.[name]
     WHERE pl.[name] = @playlist_name;
 END;
-----------------------------------------------
 GO
+-------------------------------------------------
 CREATE PROCEDURE GetFriendPlaylists
     @user_id INT
 AS
@@ -1552,3 +1552,4 @@ GO
 
 
 
+GO
