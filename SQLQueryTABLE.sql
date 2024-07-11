@@ -1110,4 +1110,27 @@ BEGIN
     ORDER BY 
         GL.Likes_Count DESC, NEWID(); -- Order by likes count of genre and then randomize
 END;
-
+---------------------------------------
+--CREATE PROCEDURE CheckUserType
+--    @username VARCHAR(50),
+--    @password VARCHAR(50)
+--AS
+--BEGIN
+--    SET NOCOUNT ON;
+--    DECLARE @user_id INT;
+--    SELECT @user_id = user_id
+--    FROM Users
+--    WHERE username = @username AND [password] = @password;
+--    IF @user_id IS NOT NULL
+--    BEGIN
+--        SELECT
+--            CASE
+--                WHEN EXISTS (SELECT 1 FROM Premium WHERE user_id = @user_id) THEN 'Premium User'
+--                ELSE 'Regular User'
+--            END AS User_Type;
+--    END
+--    ELSE
+--    BEGIN
+--        PRINT
+--    END
+--END;
