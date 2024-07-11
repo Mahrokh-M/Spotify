@@ -267,69 +267,103 @@ void Register::on_Submit_clicked()
 
 }
 
+bool Register::initializeDatabase(QSqlDatabase &db) {
+    db = QSqlDatabase::addDatabase("QODBC");
+    db.setDatabaseName("DRIVER={ODBC Driver 17 for SQL Server};SERVER=LOCALHOST\\SQLEXPRESS;DATABASE=Spotify;Trusted_Connection=Yes;");
 
-void Register::on_sign_button_3_clicked()
-{
+    if (!db.open()) {
+        qDebug() << "Database connection error:" << db.lastError().text();
+        return false;
+    }
 
-QString email = ui->email->text();
-QString password = ui->password_2->text();
-
-if (!isValidEmail(email)) {
-     ui->wrong_email->show();
+    qDebug() << "Database connected!";
+    return true;
 }
 
-if (!isValidPassword(password)) {
-    ui->wrong_pass->show();
-}
-if(isValidPassword(password)&&isValidEmail(email)){
-    timer = new QTimer(this);  // Initialize the QTimer
-    connect(timer, &QTimer::timeout, this, &Register::onTimeout);
-    ui->message_succ->show();
-    ui->sign_button_3->hide();
-    ui->wrong_email->hide();
-     ui->wrong_pass->hide();
-    // Start the timer with a 3-second timeout (3000 milliseconds)
-    timer->start(3000);
-}
-}
+void Register::on_sign_button_3_clicked() {
+    QString email = ui->email->text();
+    QString password = ui->password_2->text();
+    QString username = ui->username_2->text();
+    QString country = ui->country->text();
+    int year = ui->year->currentText().toInt();
+    int month = ui->month->currentIndex() + 1; // Corrected indexing for month
+    int day = ui->day->currentText().toInt();
+    QDate birthDate(year, month, day);
 
+    if (!isValidEmail(email)) {
+        ui->wrong_email->show();
+        return;
+    }
+
+    if (!isValidPassword(password)) {
+        ui->wrong_pass->show();
+        return;
+    }
+
+    QSqlDatabase db;
+    if (initializeDatabase(db)) {
+        QSqlQuery query(db);
+        query.prepare("{CALL InsertUser(?, ?, ?, ?, ?)}");
+        query.addBindValue(username);
+        query.addBindValue(password);
+        query.addBindValue(birthDate.toString(Qt::ISODate)); // Ensure to pass as string
+        query.addBindValue(country);
+        query.addBindValue(email);
+
+        if (query.exec()) {
+            ui->message_succ->show();
+            ui->sign_button_3->hide();
+            ui->wrong_email->hide();
+            ui->wrong_pass->hide();
+
+            // Start the timer with a 3-second timeout (3000 milliseconds)
+            QTimer *timer = new QTimer(this);
+            connect(timer, &QTimer::timeout, this, &Register::onTimeout);
+            timer->start(3000);
+        } else {
+            qDebug() << "Stored procedure execution error:" << query.lastError().text();
+            QMessageBox::critical(this, "Database Error", "Failed to register user");
+        }
+    } else {
+        QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database");
+    }
+}
 
 void Register::onTimeout()
 {
-ui->stackedWidget->setCurrentIndex(0);
-ui->message_succ->hide();
-ui->sign_button_3->show();
+    ui->stackedWidget->setCurrentIndex(0);
+    ui->message_succ->hide();
+    ui->sign_button_3->show();
 
-if (timer) {
-    timer->stop();
-    delete timer;
-    timer = nullptr;
+    if (timer) {
+        timer->stop();
+        delete timer;
+        timer = nullptr;
+    }
 }
-}
-
 
 void Register::on_sign_button_clicked()
 {
     //check if the information is valid
     //if not show error
-//    QString email = ui->email->text();
-//    QString password = ui->password->text();
+    //    QString email = ui->email->text();
+    //    QString password = ui->password->text();
 
-//    if (!isValidEmail(email)) {
-//        ui->wrong_email->show();
-//    } else {
-//        ui->wrong_email->hide();
-//    }
+    //    if (!isValidEmail(email)) {
+    //        ui->wrong_email->show();
+    //    } else {
+    //        ui->wrong_email->hide();
+    //    }
 
-//    if (!isValidPassword(password)) {
-//        ui->wrong_pass->show();
-//    } else {
-//        ui->wrong_pass->hide();
-//    }
+    //    if (!isValidPassword(password)) {
+    //        ui->wrong_pass->show();
+    //    } else {
+    //        ui->wrong_pass->hide();
+    //    }
 
-//    if (isValidEmail(email) && isValidPassword(password)) {
-//        emit loginSuccessful();  // Emit the signal
-//    }
+    //    if (isValidEmail(email) && isValidPassword(password)) {
+    //        emit loginSuccessful();  // Emit the signal
+    //    }
     // basic user
     // emit loginSuccessful();  // Emit the signal
     // premium user
