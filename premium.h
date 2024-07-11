@@ -15,6 +15,8 @@
 #include<QMessageBox>
 #include <QSqlError>
 #include<QSqlQuery>
+#include <QFile>
+
 namespace Ui {
 class Premium;
 }
@@ -80,6 +82,7 @@ private:
     bool initializeDatabase(QSqlDatabase &db);
     void followUser(int userId, const QString &userName);
     void show_album_page();
+    void clearScrollArea(QScrollArea *scrollArea);
 
 
 signals:
