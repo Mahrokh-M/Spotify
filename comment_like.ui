@@ -71,9 +71,9 @@
   <widget class="QPushButton" name="Like_button">
    <property name="geometry">
     <rect>
-     <x>560</x>
-     <y>150</y>
-     <width>91</width>
+     <x>520</x>
+     <y>60</y>
+     <width>131</width>
      <height>61</height>
     </rect>
    </property>
@@ -84,10 +84,10 @@
   <widget class="QPushButton" name="Add_comment">
    <property name="geometry">
     <rect>
-     <x>1390</x>
-     <y>330</y>
-     <width>101</width>
-     <height>31</height>
+     <x>1380</x>
+     <y>320</y>
+     <width>121</width>
+     <height>51</height>
     </rect>
    </property>
    <property name="text">
@@ -136,15 +136,67 @@
   <widget class="QPushButton" name="add_favorite">
    <property name="geometry">
     <rect>
-     <x>560</x>
-     <y>220</y>
-     <width>91</width>
+     <x>520</x>
+     <y>130</y>
+     <width>131</width>
      <height>61</height>
     </rect>
    </property>
    <property name="text">
     <string>Add Favorite</string>
    </property>
+  </widget>
+  <widget class="QPushButton" name="add_playlist">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>200</y>
+     <width>131</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Add To Playlist</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="question_label">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>10</y>
+     <width>401</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string>Which Play List You want to add the song to?</string>
+   </property>
+  </widget>
+  <widget class="QScrollArea" name="playlists_scrollBar">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>60</y>
+     <width>291</width>
+     <height>231</height>
+    </rect>
+   </property>
+   <property name="widgetResizable">
+    <bool>true</bool>
+   </property>
+   <widget class="QWidget" name="scrollAreaWidgetContents_2">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>289</width>
+      <height>229</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <zorder>background</zorder>
   <zorder>Song_pic</zorder>
@@ -155,6 +207,9 @@
   <zorder>write_comment</zorder>
   <zorder>Back</zorder>
   <zorder>add_favorite</zorder>
+  <zorder>add_playlist</zorder>
+  <zorder>question_label</zorder>
+  <zorder>playlists_scrollBar</zorder>
  </widget>
  <resources/>
  <connections/>

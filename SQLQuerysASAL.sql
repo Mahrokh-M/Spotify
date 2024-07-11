@@ -172,7 +172,7 @@ RETURN
         t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 0
 );
 
-----SHOW ALL TICKET THAT BUY(1):
+--SHOW ALL TICKET THAT BUY(1):
 CREATE FUNCTION SHOWALLTICKET1 (@user_id INT)
 RETURNS TABLE
 AS
@@ -195,7 +195,7 @@ RETURN
 );
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
---ADD SONG TO FSVORITE:
+--ADD SONG TO FSVORITE:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 CREATE PROCEDURE ToggleFavoriteSong
 @user_id INT,
 @song_id INT
@@ -215,30 +215,59 @@ BEGIN
 	VALUES (@user_id, @song_id);
 END
 END;
--------------------------------------------------------------------------------------------------------------------------------------------------------------
---ADD PLAY LIST TO FSVORITE:
-CREATE PROCEDURE ToggleFavoritePlaylist
-@user_id INT,
-@playlist_name VARCHAR(50)
+--DISPLAY FAVORITE SONGS:
+CREATE PROCEDURE GetFavoriteSongs
+    @user_id INT
 AS
 BEGIN
--- Check if the playlist is already a favorite
-IF EXISTS (SELECT 1 FROM Favorite_Play_list WHERE user_id = @user_id AND [name] = @playlist_name)
-BEGIN
-	-- If the playlist is already a favorite, remove it
-	DELETE FROM Favorite_Play_list 
-	WHERE user_id = @user_id AND [name] = @playlist_name;
-END
-ELSE
-BEGIN
-	-- If the playlist is not a favorite, add it
-	INSERT INTO Favorite_Play_list (user_id, [name])
-	VALUES (@user_id, @playlist_name);
-END
-END
+    SELECT 
+        s.song_id,
+        s.title AS Song_Title
+    FROM 
+        Favorite_Song fs
+    JOIN 
+        Songs s ON fs.song_id = s.song_id
+    WHERE 
+        fs.user_id = @user_id;
 END;
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+--ADD PLAY LIST TO FSVORITE:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CREATE PROCEDURE ToggleFavoritePlaylist
+    @user_id_added INT,
+    @user_id_owner INT,
+    @playlist_name VARCHAR(50)
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Favorite_Play_list WHERE user_id_owner = @user_id_owner AND user_id = @user_id_added AND [name] = @playlist_name)
+    BEGIN
+        DELETE FROM Favorite_Play_list 
+        WHERE user_id_owner = @user_id_owner AND user_id = @user_id_added AND [name] = @playlist_name;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO Favorite_Play_list (user_id_owner, user_id, [name])
+        VALUES (@user_id_owner, @user_id_added, @playlist_name);
+    END
+END;
+--DISPLAY  PLAY LIST  FAVORITE:
+CREATE PROCEDURE GetFavoritePlaylistsByUserID
+    @UserID INT
+AS
+BEGIN
+    SELECT
+        u.username AS OwnerUsername,  
+        fp.[name] AS PlaylistName
+    FROM
+        Favorite_Play_list fp
+    JOIN
+        Users u ON fp.user_id_owner = u.user_id
+    WHERE
+        fp.user_id = @UserID;
+END;
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
---SEARCH ALBUM AND SONG:
+--SEARCH ALBUM AND SONG:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 CREATE PROCEDURE SearchMusicAndAlbum
     @name NVARCHAR(100) = NULL,
     @artist_name NVARCHAR(100) = NULL,
@@ -292,26 +321,9 @@ BEGIN
     -- Execute the dynamic SQL
     EXEC sp_executesql @sql;
 END;
---EXECUTE:
-
---EXEC SearchMusic @name = 'Imagine';
-
---EXEC SearchMusic @artist_name = 'John Doe';
-
-
---EXEC SearchMusic @genre = 'Rock';
-
-
---EXEC SearchMusic @country = 'USA';
-
-
---EXEC SearchMusic @age_category = 'PG';
-
-
---EXEC SearchMusic @name = 'Imagine', @artist_name = 'John Doe', @genre = 'Rock', @country = 'USA', @age_category = 'PG';
-
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -------------------------------------------------------------------------------------------------------------------------------------------
---DISPLAY LYRICS
+--DISPLAY SONG DETAILS:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 CREATE PROCEDURE GetSongDetails
     @song_id INT
 AS
@@ -330,4 +342,72 @@ BEGIN
     JOIN Artists ar ON s.artist_id_added = ar.artist_id
     WHERE s.song_id = @song_id;
 END;
-------------------------------------------------------------------------------------------------
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--------------------------------------------------------------------------------------------------------------------------------------------
+--DISPLAY SONG Lyrics :!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CREATE PROCEDURE GetSongLyrics 
+    @song_id INT
+AS
+BEGIN
+    SELECT
+        s.lyrics AS Lyrics  
+    FROM Songs s
+    WHERE s.song_id = @song_id;
+END;
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--------------------------------------------------------------------------------------------------------------------------------------------
+--ADD FUND TO WALLET:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CREATE PROCEDURE AddFundsToWallet
+    @UserID INT,
+    @Amount DECIMAL(10, 2)
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Digital_wallet WHERE user_id = @UserID)
+    BEGIN
+        UPDATE Digital_wallet
+        SET amount = amount + @Amount
+        WHERE user_id = @UserID;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO Digital_wallet (user_id, amount)
+        VALUES (@UserID, @Amount);
+    END
+END;
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+---------------------------------------------------------------------------------------------------------------------------------------------
+--UPDATE WALLET:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CREATE PROCEDURE UpdateWalletBalance
+    @UserID INT,
+    @Amount DECIMAL(10, 2)
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Digital_wallet WHERE user_id = @UserID)
+    BEGIN
+        DECLARE @CurrentBalance DECIMAL(10, 2);
+        SELECT @CurrentBalance = amount FROM Digital_wallet WHERE user_id = @UserID;
+        IF @Amount < 0 AND @CurrentBalance + @Amount < 0
+        BEGIN
+            RAISERROR('Insufficient funds in the digital wallet.', 16, 1);
+        END
+        ELSE
+        BEGIN
+            UPDATE Digital_wallet
+            SET amount = amount + @Amount
+            WHERE user_id = @UserID;
+        END
+    END
+    ELSE
+    BEGIN
+        IF @Amount >= 0
+        BEGIN
+            INSERT INTO Digital_wallet (user_id, amount)
+            VALUES (@UserID, @Amount);
+        END
+        ELSE
+        BEGIN
+            RAISERROR('User does not have a digital wallet to deduct funds from.', 16, 1);
+        END
+    END
+END;
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

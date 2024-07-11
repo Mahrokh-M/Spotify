@@ -104,13 +104,13 @@ CREATE TABLE Tickets (
 	FOREIGN KEY (artist_id,date_concert) REFERENCES Concerts(artist_id,[date])
 );
 ----------------------------------------------------
----------------------------------------------------
 CREATE TABLE Favorite_Play_list(
     user_id INT,
+	user_id_owner INT,
     [name] VARCHAR(50) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES Permium(user_id),
-    FOREIGN KEY (user_id, [name]) REFERENCES Play_list(user_id, [name]),
-    PRIMARY KEY (user_id, [name])
+    FOREIGN KEY (user_id_owner, [name]) REFERENCES Play_list(user_id, [name]),
+    PRIMARY KEY (user_id_owner,user_id, [name])
 );
 ---------------------------------------------------
 CREATE TABLE Comment_Play_list(
