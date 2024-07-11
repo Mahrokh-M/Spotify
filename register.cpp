@@ -236,35 +236,32 @@ void Register::on_Back_clicked()
 
 void Register::on_Verify_clicked()
 {
-        QString username = ui->username_3->text();
-        QString email = ui->Email_3->text();
+    QString username = ui->username_3->text();
+    QString email = ui->Email_3->text();
 
-        // Open the database connection
-        if (initializeDatabase(db)) {
-            QSqlQuery query(db);
-            query.prepare("{CALL CheckUserByEmailAndUsername(?, ?)}");
-            query.addBindValue(username);
-            query.addBindValue(email);
+    // Open the database connection
+    QSqlQuery query(db);
+    query.prepare("{CALL CheckUserByEmailAndUsername(?, ?)}");
+    query.addBindValue(username);
+    query.addBindValue(email);
 
-            if (query.exec()) {
-                if (query.next()) {
-                    QString result = query.value(0).toString();
-                    if (result == "Valid") {
-                        ui->stackedWidget->setCurrentIndex(3); // Move to the next page for verification
-                    } else {
-                        QMessageBox::warning(this, "Verification Failed", "Invalid username or email.");
-                    }
-                } else {
-                    QMessageBox::warning(this, "Error", "Query did not return any result.");
-                }
+    if (query.exec()) {
+        if (query.next()) {
+            QString result = query.value(0).toString();
+            if (result == "Valid") {
+                ui->stackedWidget->setCurrentIndex(3); // Move to the next page for verification
             } else {
-                qDebug() << "Query execution error:" << query.lastError().text();
-                QMessageBox::critical(this, "Database Error", "Failed to execute query.");
+                QMessageBox::warning(this, "Verification Failed", "Invalid username or email.");
             }
         } else {
-            QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database.");
+            QMessageBox::warning(this, "Error", "Query did not return any result.");
         }
+    } else {
+        qDebug() << "Query execution error:" << query.lastError().text();
+        QMessageBox::critical(this, "Database Error", "Failed to execute query.");
     }
+}
+
 
 
 
@@ -290,49 +287,46 @@ void Register::on_Submit_clicked()
                 );
     ui->password_3->setEchoMode(QLineEdit::Password);
     if (ui->username_3->text().isEmpty() || ui->password_3->text().isEmpty()) {
-            QMessageBox::warning(this, "Error", "Please fill in both username and password fields.");
-            return; // Stop further execution
-        }
+        QMessageBox::warning(this, "Error", "Please fill in both username and password fields.");
+        return; // Stop further execution
+    }
     else if(ui->password_3->text()==ui->username_4->text()){
         QString password =ui->password_3->text();
         QString username =ui->username_3->text();
-        if (initializeDatabase(db)) {
-            QSqlQuery query(db);
-            query.prepare("{CALL UpdatePassword(?, ?)}");
-            query.addBindValue(username);
-            query.addBindValue(password);
+        QSqlQuery query(db);
+        query.prepare("{CALL UpdatePassword(?, ?)}");
+        query.addBindValue(username);
+        query.addBindValue(password);
 
-            if (query.exec()) {
-                        if (query.next()) {
-                            int affectedRows = query.value("AffectedRows").toInt();
-                            if (affectedRows > 0) {
-                                QString message = "Password updated successfully for user: " + username;
-                                QMessageBox::information(this, "Success", message);
-                                // Handle success scenario, e.g., show message to user
-                                ui->stackedWidget->setCurrentIndex(0);
-                            } else {
-                                qDebug() << "No rows updated. User:" << username << "not found or password not changed.";
-                                // Handle case where no rows were updated
-                            }
-                        } else {
-                            qDebug() << "Query did not return any result.";
-                        }
-                    } else {
-                        qDebug() << "Query execution error:" << query.lastError().text();
-                        // Handle error scenario, e.g., show error message
-                    }
+        if (query.exec()) {
+            if (query.next()) {
+                int affectedRows = query.value("AffectedRows").toInt();
+                if (affectedRows > 0) {
+                    QString message = "Password updated successfully for user: " + username;
+                    QMessageBox::information(this, "Success", message);
+                    // Handle success scenario, e.g., show message to user
+                    ui->stackedWidget->setCurrentIndex(0);
                 } else {
-                    qDebug() << "Database Connection Error: Failed to connect to the database.";
-                    // Handle error connecting to the database
+                    qDebug() << "No rows updated. User:" << username << "not found or password not changed.";
+                    // Handle case where no rows were updated
                 }
+            } else {
+                qDebug() << "Query did not return any result.";
             }
+        } else {
+            qDebug() << "Query execution error:" << query.lastError().text();
+            // Handle error scenario, e.g., show error message
+        }
+    }
     else{
-        QMessageBox::critical(this, "Error", "Passwords do not match. Please enter them again.");
-        ui->password_3->clear();
-        ui->username_4->clear();
+    QMessageBox::critical(this, "Error", "Passwords do not match. Please enter them again.");
+    ui->password_3->clear();
+    ui->username_4->clear();
 
     }
 }
+
+
 
 void Register::on_sign_button_3_clicked() {
     QString email = ui->email->text();
@@ -355,28 +349,28 @@ void Register::on_sign_button_3_clicked() {
     }
 
 
-        QSqlQuery query(db);
-        query.prepare("{CALL InsertUser(?, ?, ?, ?, ?)}");
-        query.addBindValue(username);
-        query.addBindValue(password);
-        query.addBindValue(birthDate.toString(Qt::ISODate)); // Ensure to pass as string
-        query.addBindValue(country);
-        query.addBindValue(email);
+    QSqlQuery query(db);
+    query.prepare("{CALL InsertUser(?, ?, ?, ?, ?)}");
+    query.addBindValue(username);
+    query.addBindValue(password);
+    query.addBindValue(birthDate.toString(Qt::ISODate)); // Ensure to pass as string
+    query.addBindValue(country);
+    query.addBindValue(email);
 
-        if (query.exec()) {
-            ui->message_succ->show();
-            ui->sign_button_3->hide();
-            ui->wrong_email->hide();
-            ui->wrong_pass->hide();
+    if (query.exec()) {
+        ui->message_succ->show();
+        ui->sign_button_3->hide();
+        ui->wrong_email->hide();
+        ui->wrong_pass->hide();
 
-            // Start the timer with a 3-second timeout (3000 milliseconds)
-            QTimer *timer = new QTimer(this);
-            connect(timer, &QTimer::timeout, this, &Register::onTimeout);
-            timer->start(3000);
-        } else {
-            qDebug() << "Stored procedure execution error:" << query.lastError().text();
-            QMessageBox::critical(this, "Database Error", "Failed to register user");
-        }
+        // Start the timer with a 3-second timeout (3000 milliseconds)
+        QTimer *timer = new QTimer(this);
+        connect(timer, &QTimer::timeout, this, &Register::onTimeout);
+        timer->start(3000);
+    } else {
+        qDebug() << "Stored procedure execution error:" << query.lastError().text();
+        QMessageBox::critical(this, "Database Error", "Failed to register user");
+    }
 }
 
 void Register::onTimeout()
@@ -404,35 +398,29 @@ void Register::on_sign_button_clicked()
     query.addBindValue(username);
     query.addBindValue(password);
 
-            // Execute the query
-            if (query.exec()) {
-                // Check the result
-                if (query.next()) {
-                    QString userType = query.value(0).toString();
-                    int userId = query.value(1).toInt();
-                    if (userType == "Regular User") {
-                        emit loginPSuccessful(userId,userType);  // Signal for regular user
-                    } else if (userType == "Premium User") {
-                        emit loginPSuccessful(userId,userType); // Signal for premium user
-                    }
-                } else {
-                    qDebug() << "No rows returned.";
-                    // Handle case where no rows were returned (user does not exist)
-                    QMessageBox::critical(this, "Login Error", "Invalid username or password.");
-                }
-            } else {
-                qDebug() << "Stored procedure execution error:" << query.lastError().text();
-                QMessageBox::critical(this, "Database Error", "Failed to execute stored procedure.");
+    // Execute the query
+    if (query.exec()) {
+        // Check the result
+        if (query.next()) {
+            QString userType = query.value(0).toString();
+            int userId = query.value(1).toInt();
+            if (userType == "Regular User") {
+                emit loginPSuccessful(userId,userType);  // Signal for regular user
+            } else if (userType == "Premium User") {
+                emit loginPSuccessful(userId,userType); // Signal for premium user
             }
         } else {
             qDebug() << "No rows returned.";
             // Handle case where no rows were returned (user does not exist)
             QMessageBox::critical(this, "Login Error", "Invalid username or password.");
         }
-    } else {
-        qDebug() << "Stored procedure execution error:" << query.lastError().text();
-        QMessageBox::critical(this, "Database Error", "Failed to execute stored procedure.");
     }
+    else {
+        qDebug() << "No rows returned.";
+        // Handle case where no rows were returned (user does not exist)
+        QMessageBox::critical(this, "Login Error", "Invalid username or password.");
+    }
+
 }
 
 
