@@ -31,7 +31,7 @@ private:
 
 private slots:
     void showRegister();
-    void showPremium();
+    void showPremium(const int &, const QString &);
     void showComment(const QString &);
     void goBacktoHome();
     void showPlaylist(const QString &);

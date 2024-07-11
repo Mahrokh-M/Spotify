@@ -12,6 +12,9 @@
 #include<QVector>
 #include<QFormLayout>
 #include<QGroupBox>
+#include<QMessageBox>
+#include <QSqlError>
+#include<QSqlQuery>
 namespace Ui {
 class Premium;
 }
@@ -28,6 +31,7 @@ private:
     Ui::Premium *ui;
     QString m_imagePath;
     int songCount;
+    QSqlDatabase db;
     QVector<QLineEdit*> titleEdits;
     QVector<QLineEdit*> albumEdits;
     QVector<QLineEdit*> genreEdits;
@@ -73,6 +77,10 @@ private:
     QList<QVariantMap> searchMusicAndAlbum(const QString &name, const QString &artistName, const QString &genre, const QString &country, const QString &ageCategory);
     void displaySearchResults(const QList<QVariantMap> &results);
     void clearScrollAreaSearch();
+    int getCurrentUserId();
+    bool initializeDatabase(QSqlDatabase &db);
+    void followUser(int userId, const QString &userName);
+
 
 signals:
     void open_comment(const QString);

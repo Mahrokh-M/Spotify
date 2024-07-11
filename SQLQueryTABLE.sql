@@ -1111,3 +1111,48 @@
 --        GL.Likes_Count DESC, NEWID(); -- Order by likes count of genre and then randomize
 --END;
 
+    SELECT TOP 10
+        --S.song_id,
+        S.title AS song_title,
+        U.username AS artist_name,
+        S.genre,
+        S.release_date
+    FROM 
+        Songs S
+    INNER JOIN 
+        artist_has_song ASHS ON ASHS.song_id = S.song_id
+    INNER JOIN 
+        Artists A ON ASHS.artist_id = A.artist_id
+    INNER JOIN 
+        GenreLikes GL ON S.song_id = GL.song_id
+	INNER JOIN 
+        Users U ON A.artist_id = U.user_id
+    WHERE 
+        S.song_id IN (SELECT song_id FROM Like_song WHERE user_id = @user_id) -- Exclude songs liked by the user
+    ORDER BY 
+        GL.Likes_Count DESC, NEWID(); -- Order by likes count of genre and then randomize
+END;
+---------------------------------------
+--CREATE PROCEDURE CheckUserType
+--    @username VARCHAR(50),
+--    @password VARCHAR(50)
+--AS
+--BEGIN
+--    SET NOCOUNT ON;
+--    DECLARE @user_id INT;
+--    SELECT @user_id = user_id
+--    FROM Users
+--    WHERE username = @username AND [password] = @password;
+--    IF @user_id IS NOT NULL
+--    BEGIN
+--        SELECT
+--            CASE
+--                WHEN EXISTS (SELECT 1 FROM Premium WHERE user_id = @user_id) THEN 'Premium User'
+--                ELSE 'Regular User'
+--            END AS User_Type;
+--    END
+--    ELSE
+--    BEGIN
+--        PRINT
+--    END
+--END;
