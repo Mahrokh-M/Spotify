@@ -94,6 +94,7 @@ private slots:
     void on_UploadPhoto_clicked();
     void on_submit_song_clicked();
     void on_OK_clicked();
+
     void on_Search_pushButton_clicked();
 public slots:
     void setUserID(const int &userId,const QString &userType);
