@@ -577,3 +577,58 @@ void Premium::sendFriendshipRequest(const QString &userName)
 {
     // Logic to send friendship request to userName
 }
+
+void Premium::on_UploadPhoto_clicked()
+{
+    // Example: Ask user to choose a file
+    QString imagePath = QFileDialog::getOpenFileName(this, tr("Choose Image"), "", tr("Images (*.png *.jpg *.jpeg)"));
+
+    if (imagePath.isEmpty()) {
+        // User canceled the selection
+        return;
+    }
+
+    // Load the selected image
+    QPixmap image(imagePath);
+
+    // Display the image on QLabel named Song_photo
+    ui->Song_photo->setPixmap(image.scaled(ui->Song_photo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+    // Store imagePath in a member variable to use it later
+    m_imagePath = imagePath;
+}
+
+void Premium::on_submit_song_clicked()
+{
+    if (m_imagePath.isEmpty()) {
+        // No image selected, handle the case as needed
+        qDebug() << "Error: No image selected";
+        return;
+    }
+
+    // Load the selected image again (in case it's not already loaded)
+    QPixmap image(m_imagePath);
+
+    // Example: Save the image to project directory
+    QString projectPath = QCoreApplication::applicationDirPath(); // Get current application directory
+    QString newFilePath = QDir::cleanPath(projectPath + "/" + QFileInfo(m_imagePath).fileName());
+
+    if (image.save(newFilePath)) {
+        // Image saved successfully
+        qDebug() << "Image saved to project directory:" << newFilePath;
+    } else {
+        // Failed to save image
+        qDebug() << "Error: Failed to save image to project directory";
+        return; // Optionally handle the error and return
+    }
+
+    // Further processing after saving the image, such as submitting the song
+    // Example: SubmitSongFunction();
+
+    // Clear the stored imagePath after processing
+    m_imagePath.clear();
+
+    // Optionally clear the Song_photo label after submission
+    ui->Song_photo->clear();
+}
+
