@@ -1,4 +1,5 @@
 #include "register.h"
+#include "mainwindow.h"
 #include "ui_register.h"
 #include <QPropertyAnimation>
 Register::Register(QWidget *parent)
@@ -263,14 +264,8 @@ void Register::on_Verify_clicked()
 }
 
 
-
-
 void Register::on_Submit_clicked()
 {
-
-    //save new password
-    //trigger
-
     ui->Submit->setStyleSheet(
                 "QPushButton {"
                 "    font: 15pt 'Segoe UI Historic';"
@@ -285,44 +280,53 @@ void Register::on_Submit_clicked()
                 "    background-color: rgb(36, 179, 79);"
                 "}"
                 );
+
     ui->password_3->setEchoMode(QLineEdit::Password);
+
     if (ui->username_3->text().isEmpty() || ui->password_3->text().isEmpty()) {
         QMessageBox::warning(this, "Error", "Please fill in both username and password fields.");
         return; // Stop further execution
     }
-    else if(ui->password_3->text()==ui->username_4->text()){
-        QString password =ui->password_3->text();
-        QString username =ui->username_3->text();
-        QSqlQuery query(db);
-        query.prepare("{CALL UpdatePassword(?, ?)}");
-        query.addBindValue(username);
-        query.addBindValue(password);
 
-        if (query.exec()) {
-            if (query.next()) {
-                int affectedRows = query.value("AffectedRows").toInt();
-                if (affectedRows > 0) {
-                    QString message = "Password updated successfully for user: " + username;
-                    QMessageBox::information(this, "Success", message);
-                    // Handle success scenario, e.g., show message to user
-                    ui->stackedWidget->setCurrentIndex(0);
-                } else {
-                    qDebug() << "No rows updated. User:" << username << "not found or password not changed.";
-                    // Handle case where no rows were updated
-                }
+    QString password = ui->password_3->text();
+    QString confirmPassword = ui->username_4->text();
+
+    if (password.length() < 8) {
+        QMessageBox::warning(this, "Error", "Password must be at least 8 characters long.");
+        return; // Stop further execution
+    }
+
+    if (password != confirmPassword) {
+        QMessageBox::critical(this, "Error", "Passwords do not match. Please enter them again.");
+        ui->password_3->clear();
+        ui->username_4->clear();
+        return; // Stop further execution
+    }
+
+    QString username = ui->username_3->text();
+    QSqlQuery query(db);
+    query.prepare("{CALL UpdatePassword(?, ?)}");
+    query.addBindValue(username);
+    query.addBindValue(password);
+
+    if (query.exec()) {
+        if (query.next()) {
+            int affectedRows = query.value("AffectedRows").toInt();
+            if (affectedRows > 0) {
+                QString message = "Password updated successfully for user: " + username;
+                QMessageBox::information(this, "Success", message);
+                // Handle success scenario, e.g., show message to user
+                ui->stackedWidget->setCurrentIndex(0);
             } else {
-                qDebug() << "Query did not return any result.";
+                qDebug() << "No rows updated. User:" << username << "not found or password not changed.";
+                // Handle case where no rows were updated
             }
         } else {
-            qDebug() << "Query execution error:" << query.lastError().text();
-            // Handle error scenario, e.g., show error message
+            qDebug() << "Query did not return any result.";
         }
-    }
-    else{
-    QMessageBox::critical(this, "Error", "Passwords do not match. Please enter them again.");
-    ui->password_3->clear();
-    ui->username_4->clear();
-
+    } else {
+        qDebug() << "Query execution error:" << query.lastError().text();
+        // Handle error scenario, e.g., show error message
     }
 }
 
@@ -405,7 +409,8 @@ void Register::on_sign_button_clicked()
     if (query.exec()) {
         // Check the result
         if (query.next()) {
-            int userId = query.value("User_Id").toInt();
+            ID = query.value("User_Id").toInt();
+            qDebug()<<ID;
             QString userType = query.value("User_Type").toString();
 
             if (userType == "Invalid User") {
@@ -413,9 +418,9 @@ void Register::on_sign_button_clicked()
                 QMessageBox::critical(this, "Login Error", "Invalid username or password.");
             } else {
                 if (userType == "Regular User") {
-                    emit loginPSuccessful(userId, userType);  // Signal for regular user
+                    emit loginPSuccessful(userType);  // Signal for regular user
                 } else if (userType == "Premium User") {
-                    emit loginPSuccessful(userId, userType); // Signal for premium user
+                    emit loginPSuccessful(userType); // Signal for premium user
                 }
             }
         } else {

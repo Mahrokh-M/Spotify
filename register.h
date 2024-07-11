@@ -45,7 +45,7 @@ private slots:
     void on_sign_button_clicked();
 signals:
 
-    void loginPSuccessful(const int &, const QString &);
+    void loginPSuccessful(const QString &);
 
 
 private:

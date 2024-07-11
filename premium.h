@@ -97,7 +97,7 @@ private slots:
 
     void on_Search_pushButton_clicked();
 public slots:
-    void setUserID(const int &userId,const QString &userType);
+    void setUserID(const QString &userType);
 };
 
 #endif // PREMIUM_H

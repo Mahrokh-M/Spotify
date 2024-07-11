@@ -14,37 +14,14 @@ Premium::Premium(QWidget *parent) :
     ui->setupUi(this);
     ui->tabWidget->setCurrentIndex(0);
 
-    //    // Initialize media player
-    //    player = new QMediaPlayer(this);
-
-    // Initialize scroll area and content widget
     scrollArea = ui->scrollArea;
     contentWidget = new QWidget(this);
     gridLayout = new QGridLayout(contentWidget);
 
     contentWidget->setLayout(gridLayout);
     scrollArea->setWidget(contentWidget);
-    // scrollArea->setWidgetResizable(true);
 
-    // Set layout of HomePage to include the scroll area
-
-
-    fillSongs();
-
-    // Add more songs as needed
-    fill_favorites();
-    fill_playlists();
-    fill_friends();
-    fill_follow();
-    fillAllUsers();
-    fill_concerts();
-    fill_wallet();
-    fillFriendshipRequests();
-    fill_my_belongings();
-
-    // Define the stylesheet
     setstyle();
-
 
 }
 
@@ -67,19 +44,29 @@ void Premium::setstyle(){
 }
 
 
-void Premium::setUserID(const int &userId,const QString &userType){
-    ID=userId;
+void Premium::setUserID(const QString &userType){
     Type=userType;
-//    //  if is premium
+    //  if is premium
 //    if(userType=="Premium User"){
 //    ui->tabWidget->removeTab(7);
 //    ui->tabWidget->removeTab(7);}
 //    // if is simple user
 //    if(userType=="Regular User"){
-//        while (ui->tabWidget->count() > 1) {
-//            ui->tabWidget->removeTab(1);
+//        while (ui->tabWidget->count() > 2) {
+//            ui->tabWidget->removeTab(2);
 //        }
 //    }
+
+    fillSongs();
+    fill_favorites();
+    fill_playlists();
+    fill_friends();
+    fill_follow();
+    fillAllUsers();
+    fill_concerts();
+    fill_wallet();
+    fillFriendshipRequests();
+    fill_my_belongings();
 }
 
 bool Premium::initializeDatabase(QSqlDatabase &db) {
@@ -281,7 +268,6 @@ void Premium::fill_favorites()
 
     ui->scrollArea_3->setWidget(contentWidget_2);
 }
-
 
 void Premium::fill_playlists()
 {

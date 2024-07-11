@@ -47,8 +47,8 @@ void MainWindow::showRegister(){
     ui->stackedWidget->setCurrentWidget(registerPage);
 }
 
-void MainWindow::showPremium(const int &userId,const QString &userType){
-    premium->setUserID(userId,userType);
+void MainWindow::showPremium(const QString &userType){
+    premium->setUserID(userType);
     ui->stackedWidget->setCurrentWidget(premium);
 }
 void MainWindow::showComment(const QString &songID){
