@@ -1,4 +1,7 @@
 #include "premium.h"
+#include "qsqlerror.h"
+#include "qsqlquery.h"
+#include "qurlquery.h"
 #include "ui_premium.h"
 
 
@@ -25,12 +28,7 @@ Premium::Premium(QWidget *parent) :
     // Set layout of HomePage to include the scroll area
 
 
-    // Example songs
-    for (int i = 0; i < 100; ++i) {
-        addSongItem("1", "Song 1", ":/new/prefix1/spotify logo.png");
-        addSongItem("2", "Song 2", ":/new/prefix1/spotify logo.png");
-        addSongItem("3", "Song 3", ":/new/prefix1/spotify logo.png");
-    }
+    fillSongs();
 
     // Add more songs as needed
     fill_favorites();
@@ -71,8 +69,8 @@ void Premium::setstyle(){
     // Apply the stylesheet to all child widgets of this widget
     this->setStyleSheet(styleSheet);
 }
-
-void Premium::addSongItem(const QString &songID,const QString &songName, const QString &imagePath)
+//**
+void Premium::addSongItem(const QString &songID, const QString &songName, const QString &imagePath)
 {
     int row = songCount / 8;
     int col = songCount % 8;
@@ -84,11 +82,10 @@ void Premium::addSongItem(const QString &songID,const QString &songName, const Q
     gridLayout->addWidget(imageLabel, row * 2, col);
 
     // Create button for song name
-    QPushButton *songButton = new QPushButton(songName, this);
+    QPushButton *songButton = new QPushButton(songName, this);  // Use songName as the text of the button
     songButton->setProperty("ID", songID);
-    songButton->setProperty("name", songName);
     songButton->setProperty("pic_path", imagePath);
-    connect(songButton, &QPushButton::clicked, this, &::Premium::addComment_like);
+    connect(songButton, &QPushButton::clicked, this, &Premium::addComment_like);
     gridLayout->addWidget(songButton, row * 2 + 1, col);
 
     songCount++;
@@ -101,6 +98,18 @@ void Premium::addComment_like()
     {
         QString songID = button->property("ID").toString();
         emit open_comment(songID); // Emit signal with songID
+    }
+}
+//**
+void Premium::fillSongs()
+{
+    QSqlQuery query("SELECT song_id, address_of_picture, title FROM Songs");
+    while (query.next()) {
+        QString songID = query.value(0).toString();
+        QString picturePath = query.value(1).toString();
+        QString songName = query.value(2).toString();
+        QString imagePath = picturePath.isEmpty() ? ":/new/prefix1/spotify logo.png" : picturePath;
+        addSongItem(songID, songName, imagePath);  // Pass songID, songName, and imagePath
     }
 }
 
@@ -859,4 +868,93 @@ void Premium::on_SubmitSongs_clicked()
 
     // Optionally clear the dynamically created widgets after submission
     clearScrollArea();
+}
+
+void Premium::displaySearchResults(const QList<QVariantMap> &results) {
+    int songCount = 0;
+    for (const QVariantMap &result : results) {
+        QString type = result["Type"].toString();
+        QString title = result["Title"].toString();
+        QString address_of_picture = result["address_of_picture"].toString();
+        QString labelText = QString("%1: %2").arg(type == "Song" ? "Song" : "Album").arg(title);
+
+        int row = songCount / 8;
+        int col = songCount % 8;
+
+        // Create label for song/album image
+        QLabel *imageLabel = new QLabel(this);
+        QPixmap pixmap;
+        if (!address_of_picture.isEmpty() && pixmap.load(address_of_picture)) {
+            imageLabel->setPixmap(pixmap.scaled(100, 100, Qt::KeepAspectRatio));
+        } else {
+            imageLabel->setPixmap(QPixmap(":/new/prefix1/spotify logo.png").scaled(100, 100, Qt::KeepAspectRatio));
+        }
+        gridLayout->addWidget(imageLabel, row * 2, col);
+
+        // Create button for song/album name
+        QPushButton *button = new QPushButton(labelText, this);
+        button->setProperty("ID", result["ID"]);
+        button->setProperty("Type", type);
+        connect(button, &QPushButton::clicked, this, &Premium::addComment_like);
+        gridLayout->addWidget(button, row * 2 + 1, col);
+
+        songCount++;
+    }
+}
+
+QList<QVariantMap> Premium::searchMusicAndAlbum(const QString &name, const QString &artistName, const QString &genre, const QString &country, const QString &ageCategory) {
+    QSqlQuery query;
+    query.prepare("EXEC SearchMusicAndAlbum :name, :artist_name, :genre, :country, :age_category");
+    query.bindValue(":name", name);
+    query.bindValue(":artist_name", artistName);
+    query.bindValue(":genre", genre);
+    query.bindValue(":country", country);
+    query.bindValue(":age_category", ageCategory);
+    query.exec();
+
+    QList<QVariantMap> results;
+    while (query.next()) {
+        QVariantMap result;
+        result["Type"] = query.value("Type");
+        result["ID"] = query.value("ID");
+        result["Title"] = query.value("Title");
+        result["address_of_picture"] = query.value("address_of_picture");
+        results.append(result);
+    }
+
+    if (query.lastError().isValid()) {
+        qDebug() << "SQL Error: " << query.lastError().text();
+    }
+
+    return results;
+}
+
+void Premium::on_Search_pushButton_clicked()
+{
+    QString name, artistName, genre, country, ageCategory;
+
+    // Check which radio button is selected
+    if (ui->SearchNameMusic->isChecked()) {
+        name = ui->SearchLineEdit->text();
+    } else if (ui->SearchNameArtist->isChecked()) {
+        artistName = ui->SearchLineEdit->text();
+    } else if (ui->SearchGenre->isChecked()) {
+        genre = ui->SearchLineEdit->text();
+    } else if (ui->SearchCountry->isChecked()) {
+        country = ui->SearchLineEdit->text();
+    } else if (ui->SearchAgeCategory->isChecked()) {
+        ageCategory = ui->SearchLineEdit->text();
+    }
+
+    QList<QVariantMap> results = searchMusicAndAlbum(name, artistName, genre, country, ageCategory);
+
+    clearScrollAreaSearch();
+    displaySearchResults(results);
+}
+void Premium::clearScrollAreaSearch() {
+    QLayoutItem *item;
+    while ((item = gridLayout->takeAt(0)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
 }

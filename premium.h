@@ -38,9 +38,10 @@ private:
     QGridLayout *gridLayout;
     QWidget *contentWidget;
     QScrollArea *scrollArea;
-    void addSongItem(const QString &songID,const QString &songName, const QString &imagePath);
+    void addSongItem(const QString &songID, const QString &songName, const QString &imagePath);
     void fill_favorites();
     void fill_playlists();
+    void fillSongs();
     void fill_friends();
     void myPlaylist();
     void friendPlaylist();
@@ -69,7 +70,9 @@ private:
     void onDeleteButtonClicked(const QString& type, const QString& itemName);
     void onNameButtonClicked(const QString& type, const QString& itemName);
     void fillScrollArea(QScrollArea* scrollArea, const QString& type);
-
+    QList<QVariantMap> searchMusicAndAlbum(const QString &name, const QString &artistName, const QString &genre, const QString &country, const QString &ageCategory);
+    void displaySearchResults(const QList<QVariantMap> &results);
+    void clearScrollAreaSearch();
 
 signals:
     void open_comment(const QString);
@@ -84,6 +87,7 @@ private slots:
     void on_UploadPhoto_clicked();
     void on_submit_song_clicked();
     void on_OK_clicked();
+    void on_Search_pushButton_clicked();
 };
 
 #endif // PREMIUM_H
