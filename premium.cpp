@@ -95,11 +95,6 @@ bool Premium::initializeDatabase(QSqlDatabase &db) {
     return true;
 }
 
-int Premium::getCurrentUserId(){
-    //return the persons ID
-    return ID;
-}
-
 void Premium::addSongItem(const QString &songID,const QString &songName, const QString &imagePath)
 
 {
@@ -423,7 +418,7 @@ void Premium::onStartChatClicked()
 }
 
 void Premium::fill_follow() {
-    int user_id = getCurrentUserId(); // Replace with your logic to get current user's ID
+    int user_id = ID; // Replace with your logic to get current user's ID
 
     // Display followers
     QSqlQuery followersQuery(db);
@@ -676,7 +671,7 @@ void Premium::fillFriendshipRequests()
 
 void Premium::fillAllUsers() {
     // Replace this with your logic to get the current user's ID
-    int currentUserId = getCurrentUserId();
+    int currentUserId = ID;
 
     // Create a content widget and a vertical layout for it
     QWidget *contentWidget = new QWidget(this);
@@ -739,7 +734,7 @@ void Premium::sendFriendshipRequest(const QString &userName) {
 
 void Premium::followUser(int userId, const QString &userName) {
     // Your logic to follow the user
-    int currentUserId = getCurrentUserId(); // Replace this with your logic to get the current user's ID
+    int currentUserId = ID; // Replace this with your logic to get the current user's ID
 
     QSqlQuery query(db);
     query.prepare("EXEC AddFollower @UserId1 = :userId1, @UserId2 = :userId2");

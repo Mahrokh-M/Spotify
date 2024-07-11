@@ -11,6 +11,7 @@
 #include"chatbox.h"
 QT_BEGIN_NAMESPACE
 extern QSqlDatabase db;
+extern int ID;
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
