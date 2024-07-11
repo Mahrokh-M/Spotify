@@ -84,6 +84,7 @@ private slots:
     void on_UploadPhoto_clicked();
     void on_submit_song_clicked();
     void on_OK_clicked();
+
 };
 
 #endif // PREMIUM_H
