@@ -1212,8 +1212,27 @@ BEGIN
     INNER JOIN Play_list pl ON ps.user_id = pl.user_id AND ps.[name] = pl.[name]
     WHERE pl.[name] = @playlist_name;
 END;
+----------------------------------------------
 GO
+CREATE PROCEDURE GetFriendPlaylists
+    @user_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    CREATE TABLE #FriendUserIds (
+        user_id INT
+    );
+    INSERT INTO #FriendUserIds (user_id)
+    SELECT user_id2
+    FROM Friend
+    WHERE user_id1 = @user_id AND accept = 1;
 
+    SELECT pl.[name] AS Playlist_Name
+    FROM Play_list pl
+    INNER JOIN #FriendUserIds f ON pl.user_id = f.user_id;
+    DROP TABLE #FriendUserIds;
+END;
+GO
 ----------------------------------------------------------------------Mahrokh---------------------------------------------------------------------
 CREATE PROCEDURE GetFavoriteSongsAndAlbums
     @user_id INT
