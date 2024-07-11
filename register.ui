@@ -333,7 +333,7 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
        <string>Email</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="username_5">
+     <widget class="QLineEdit" name="country">
       <property name="geometry">
        <rect>
         <x>640</x>

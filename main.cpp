@@ -2,7 +2,7 @@
 #include "register.h"
 #include <QtSql>
 #include <QApplication>
-
+#include<QSqlQuery>
 int main(int argc, char *argv[])
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QODBC");

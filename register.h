@@ -8,6 +8,10 @@
 #include <QRegularExpression>
 #include <QCoreApplication>
 #include<QDebug>
+#include<QMessageBox>
+#include <QSqlError>
+#include <QPropertyAnimation>
+#include<QSqlQuery>
 QT_BEGIN_NAMESPACE
 namespace Ui { class Register; }
 QT_END_NAMESPACE
@@ -46,6 +50,7 @@ signals:
 private:
     Ui::Register *ui;
         QTimer *timer;  // Declare the QTimer pointer
+        bool initializeDatabase(QSqlDatabase &db);
 };
 #endif // REGISTER_H
 bool isValidEmail(const QString &email);
