@@ -1,12 +1,16 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+QSqlDatabase db;
+int ID;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+     db = QSqlDatabase::addDatabase("QODBC");
+        db.setDatabaseName("DRIVER={ODBC Driver 17 for SQL Server};SERVER=LOCALHOST\\SQLEXPRESS;DATABASE=Spotify;Trusted_Connection=Yes;");
+        if (db.open()) {
+            qDebug() << "Database connected!";}
     // Initialize your pages
     registerPage = new Register();
     premium = new Premium();
@@ -43,7 +47,7 @@ void MainWindow::showRegister(){
 }
 
 void MainWindow::showPremium(const int &userId,const QString &userType){
-    //registerPage
+    premium->setUserID(userId,userType);
     ui->stackedWidget->setCurrentWidget(premium);
 }
 void MainWindow::showComment(const QString &songID){

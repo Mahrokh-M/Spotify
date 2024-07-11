@@ -1,4 +1,5 @@
 #include "premium.h"
+#include "mainwindow.h"
 #include "qsqlerror.h"
 #include "qsqlquery.h"
 #include "qurlquery.h"
@@ -40,18 +41,10 @@ Premium::Premium(QWidget *parent) :
     fill_wallet();
     fillFriendshipRequests();
     fill_my_belongings();
-    //if is premium
-    //        ui->tabWidget->removeTab(7);
-    //         ui->tabWidget->removeTab(7);
-    //if is simple user
-    //    while (ui->tabWidget->count() > 1) {
-    //        ui->tabWidget->removeTab(1);
-    //    }
+
     // Define the stylesheet
     setstyle();
-    if (!initializeDatabase(db)) {
-       QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database");
-    }
+
 
 }
 
@@ -74,8 +67,19 @@ void Premium::setstyle(){
 }
 
 
-void Premium::setUserID(){
-    //
+void Premium::setUserID(const int &userId,const QString &userType){
+    ID=userId;
+    Type=userType;
+//    //  if is premium
+//    if(userType=="Premium User"){
+//    ui->tabWidget->removeTab(7);
+//    ui->tabWidget->removeTab(7);}
+//    // if is simple user
+//    if(userType=="Regular User"){
+//        while (ui->tabWidget->count() > 1) {
+//            ui->tabWidget->removeTab(1);
+//        }
+//    }
 }
 
 bool Premium::initializeDatabase(QSqlDatabase &db) {
@@ -89,10 +93,6 @@ bool Premium::initializeDatabase(QSqlDatabase &db) {
 
     qDebug() << "Database connected!";
     return true;
-}
-
-int Premium::getCurrentUserId(){
-    //return the persons ID
 }
 
 void Premium::addSongItem(const QString &songID,const QString &songName, const QString &imagePath)
@@ -418,7 +418,7 @@ void Premium::onStartChatClicked()
 }
 
 void Premium::fill_follow() {
-    int user_id = getCurrentUserId(); // Replace with your logic to get current user's ID
+    int user_id = ID; // Replace with your logic to get current user's ID
 
     // Display followers
     QSqlQuery followersQuery(db);
@@ -671,7 +671,7 @@ void Premium::fillFriendshipRequests()
 
 void Premium::fillAllUsers() {
     // Replace this with your logic to get the current user's ID
-    int currentUserId = getCurrentUserId();
+    int currentUserId = ID;
 
     // Create a content widget and a vertical layout for it
     QWidget *contentWidget = new QWidget(this);
@@ -734,7 +734,7 @@ void Premium::sendFriendshipRequest(const QString &userName) {
 
 void Premium::followUser(int userId, const QString &userName) {
     // Your logic to follow the user
-    int currentUserId = getCurrentUserId(); // Replace this with your logic to get the current user's ID
+    int currentUserId = ID; // Replace this with your logic to get the current user's ID
 
     QSqlQuery query(db);
     query.prepare("EXEC AddFollower @UserId1 = :userId1, @UserId2 = :userId2");
@@ -1039,6 +1039,7 @@ void Premium::on_Search_pushButton_clicked()
     clearScrollAreaSearch();
     displaySearchResults(results);
 }
+
 void Premium::clearScrollAreaSearch() {
     QLayoutItem *item;
     while ((item = gridLayout->takeAt(0)) != nullptr) {
