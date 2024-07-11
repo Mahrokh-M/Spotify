@@ -86,6 +86,7 @@
 --    artist_id INT ,
 --    [location] VARCHAR(100),
 --    [date] DATETIME ,
+--    cancel BIT  DEFAULT 0, --laghv nist
 --	address_of_picture VARCHAR(100),
 --    FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
 --	PRIMARY KEY (artist_id,[date])
@@ -415,48 +416,49 @@
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -------------------------------------------------------------------------------------------------------------------
 ----SHOW ALL TICKET THAT BUY(0):!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
---CREATE FUNCTION SHOWALLTICKET0 (@user_id INT)
---RETURNS TABLE
---AS
---RETURN
---(
---    SELECT 
---        t.ticket_id,
---        a.bio AS Artist_information,
---        c.[date] AS concert_date,
---        c.location,
---        t.price
---    FROM 
---        Tickets t
---    JOIN 
---        Concerts c ON t.artist_id = c.artist_id AND t.date_concert = c.[date]
---    JOIN 
---        Artists a ON t.artist_id = a.artist_id
---    WHERE 
---        t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 0
---);
+DROP FUNCTION SHOWALLTICKET1;
+CREATE FUNCTION SHOWALLTICKET0 (@user_id INT)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT 
+        t.ticket_id,
+        a.bio AS Artist_information,
+        c.[date] AS concert_date,
+        c.location,
+        t.price
+    FROM 
+        Tickets t
+    JOIN 
+        Concerts c ON t.artist_id = c.artist_id AND t.date_concert = c.[date]
+    JOIN 
+        Artists a ON t.artist_id = a.artist_id
+    WHERE 
+        t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 0 AND t.date_concert>GETDATE() 
+);
 
 ----SHOW ALL TICKET THAT BUY(1):
---CREATE FUNCTION SHOWALLTICKET1 (@user_id INT)
---RETURNS TABLE
---AS
---RETURN
---(
---    SELECT 
---        t.ticket_id,
---        a.bio AS Artist_information,
---        c.[date] AS concert_date,
---        c.location,
---        t.price
---    FROM 
---        Tickets t
---    JOIN 
---        Concerts c ON t.artist_id = c.artist_id AND t.date_concert = c.[date]
---    JOIN 
---        Artists a ON t.artist_id = a.artist_id
---    WHERE 
---        t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 1
---);
+CREATE FUNCTION SHOWALLTICKET1 (@user_id INT)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT 
+        t.ticket_id,
+        a.bio AS Artist_information,
+        c.[date] AS concert_date,
+        c.location,
+        t.price
+    FROM 
+        Tickets t
+    JOIN 
+        Concerts c ON t.artist_id = c.artist_id AND t.date_concert = c.[date]
+    JOIN 
+        Artists a ON t.artist_id = a.artist_id
+    WHERE 
+        t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 1 AND t.date_concert<=GETDATE() 
+);
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 ----ADD SONG TO FSVORITE:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -675,339 +677,772 @@
 --    END
 --END;
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--ADD ARTIST:
+CREATE PROCEDURE AddArtist
+    @user_id INT,
+	@bio VARCHAR(100)
+AS
+BEGIN
+    -- Check if the user exists
+    IF EXISTS (SELECT 1 FROM Users WHERE user_id = @user_id)
+    BEGIN
+        -- Insert into Artists table with username as bio
+        INSERT INTO Artists (artist_id, bio)
+        VALUES (@user_id,@bio)
+    END
+    ELSE
+    BEGIN
+        RAISERROR('User does not exist.', 16, 1);
+    END
+END;
+GO
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--CHECK USER IS ARTIST OR NOT:
+CREATE PROCEDURE IsUserArtist
+    @user_id INT
+AS
+BEGIN
+    -- Declare a variable to store the result
+    DECLARE @is_artist BIT = 0;
+
+    -- Check if the user is a premium user with a valid subscription and is in the Artists table
+    IF EXISTS (
+        SELECT 1
+        FROM Premium p
+        JOIN Artists a ON p.user_id = a.artist_id
+        WHERE p.user_id = @user_id
+          AND p.End_time > GETDATE()
+    )
+    BEGIN
+        SET @is_artist = 1;
+    END
+
+    -- Return the result
+    SELECT @is_artist AS IsArtist;
+END;
+GO
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--______________________________________________________________________________________________________
+--ADD SONG :
+CREATE PROCEDURE AddSong
+    @artist_id INT,
+    @title VARCHAR(100),
+    @album_id INT = NULL, -- Optional: If the song is part of an album
+    @genre VARCHAR(50),
+    @lyrics VARCHAR(MAX),
+    @Age_category CHAR(2),
+    @country VARCHAR(50),
+	@address_of_picture VARCHAR(100),
+	@can_be_added BIT 
+AS
+BEGIN
+    -- Insert the song into the Songs table with the current date
+    INSERT INTO Songs (artist_id_added, title, album_id, genre, release_date, lyrics, Age_category, country, address_of_picture, can_be_added)
+    VALUES (@artist_id, @title, @album_id, @genre, GETDATE(), @lyrics, @Age_category, @country, @address_of_picture, @can_be_added);
+END;
+GO
+--ADD SONG WITH OTHE ARTIST :
+CREATE TYPE ArtistIdTableType AS TABLE 
+(
+    artist_id INT
+);
+CREATE PROCEDURE AddSongWithAllArtist
+    @artist_id INT,
+    @title VARCHAR(100),
+    @album_id INT = NULL, -- Optional: If the song is part of an album
+    @genre VARCHAR(50),
+    @lyrics VARCHAR(MAX),
+    @Age_category CHAR(2),
+    @country VARCHAR(50),
+    @address_of_picture VARCHAR(100),
+    @can_be_added BIT,
+    @other_artists ArtistIdTableType READONLY -- Table-valued parameter for other artists
+AS
+BEGIN
+    DECLARE @song_id INT;
+
+    BEGIN TRANSACTION;
+
+    -- Insert the song into the Songs table with the current date
+    INSERT INTO Songs (artist_id_added, title, album_id, genre, release_date, lyrics, Age_category, country, address_of_picture, can_be_added)
+    VALUES (@artist_id, @title, @album_id, @genre, GETDATE(), @lyrics, @Age_category, @country, @address_of_picture, @can_be_added);
+
+    -- Get the generated song ID
+    SET @song_id = SCOPE_IDENTITY();
+
+    -- Insert the main artist into artist_has_song
+    INSERT INTO artist_has_song (song_id, artist_id)
+    VALUES (@song_id, @artist_id);
+
+    -- Insert other artists into artist_has_song
+    INSERT INTO artist_has_song (song_id, artist_id)
+    SELECT @song_id, artist_id FROM @other_artists;
+
+    COMMIT TRANSACTION;
+END;
+GO
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--________________________________________________________________________________________________________________________________
+--ADD ALBUM WHIT ALL ARTIST:
+CREATE TYPE ArtistIdTableType AS TABLE 
+(
+    artist_id INT
+);
+CREATE PROCEDURE AddAlbumAndArtists
+    @artist_name VARCHAR(50),
+    @album_title VARCHAR(100),
+    @genre VARCHAR(50),
+    @release_date DATE,
+    @age_category CHAR(2),
+    @country VARCHAR(50),
+    @address_of_picture VARCHAR(100),
+    @collaborator_artists ArtistIdTableType READONLY
+AS
+BEGIN
+    DECLARE @artist_id INT;
+    DECLARE @album_id INT;
+
+    INSERT INTO Albums (title, artist_id_added, genre, release_date, Age_category, country, address_of_picture)
+    VALUES (@album_title, @artist_id, @genre,  GETDATE(), @age_category, @country, @address_of_picture);
+
+    SELECT @album_id = SCOPE_IDENTITY();
+
+    INSERT INTO artist_has_album (album_id, artist_id)
+    VALUES (@album_id, @artist_id);
+
+    INSERT INTO artist_has_album (album_id, artist_id)
+    SELECT @album_id, artist_id
+    FROM @collaborator_artists;
+END;
+GO
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--_____________________________________________________________________________________________________________________________________
+--DELETE song:
+CREATE PROCEDURE RemoveSong
+    @MusicID INT
+AS
+BEGIN
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        IF NOT EXISTS (SELECT 1 FROM Songs WHERE song_id = @MusicID)
+        BEGIN
+            ROLLBACK TRANSACTION;
+            THROW 50001, 'Song record not found', 1;
+            RETURN;
+        END
+        DELETE FROM Songs WHERE song_id = @MusicID;
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        DECLARE @ErrorMessage NVARCHAR(4000), @ErrorSeverity INT, @ErrorState INT;
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(), 
+            @ErrorSeverity = ERROR_SEVERITY(), 
+            @ErrorState = ERROR_STATE();
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH
+END;
+GO
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--______________________________________________________________________________________________________________________
+--DELETE ALBUM:
+CREATE PROCEDURE RemoveAlbum
+    @AlbumID INT
+AS
+BEGIN
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        IF NOT EXISTS (SELECT 1 FROM Albums WHERE album_id = @AlbumID)
+        BEGIN
+            THROW 50001, 'Album record not found', 1;
+        END
+        DELETE FROM Albums WHERE album_id = @AlbumID;
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+        DECLARE @ErrorState INT = ERROR_STATE();
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH
+END;
+--____________________________________________________________________________________________________________________
+--ADD CONCERT FOR A ARTIST:
+CREATE PROCEDURE AddNewConcert
+    @ArtistID INT,
+    @ConcertDate DATETIME,
+    @ConcertLocation NVARCHAR(100)
+AS
+BEGIN
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        -- Check if the artist exists
+        IF NOT EXISTS (SELECT 1 FROM Artists WHERE artist_id = @ArtistID)
+        BEGIN
+            THROW 50002, 'Artist ID is invalid.', 1;
+        END
+
+        -- Check if the artist already has a concert scheduled on this date
+        IF EXISTS (
+            SELECT 1
+            FROM Concert_Artists ca
+            INNER JOIN Concerts c ON ca.concert_id = c.concert_id
+            WHERE ca.artist_id = @ArtistID AND c.date = @ConcertDate
+        )
+        BEGIN
+            THROW 50003, 'Artist already has a concert scheduled on this date.', 1;
+        END
+        -- Insert the concert into Concerts table
+        INSERT INTO Concerts (artist_id, location, date, address_of_picture)
+        VALUES (@ArtistID, @ConcertLocation, @ConcertDate, NULL);
+
+        -- Commit transaction
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        -- Rollback transaction in case of error
+        ROLLBACK TRANSACTION;
+
+        -- Throw the caught exception
+        THROW;
+    END CATCH
+END;
+GO
+--__________________________________________________________________________________________________________________
+--CANCEL CONCER AND RETURN MONEY:
+CREATE PROCEDURE CancelConcert 
+    @artist_id INT,
+    @date_concert DATETIME
+AS
+BEGIN
+    -- Start a transaction
+    BEGIN TRANSACTION;
+
+    BEGIN TRY
+        -- Update the concert to indicate it is cancelled
+        UPDATE Concerts
+        SET cancel = 1
+        WHERE artist_id = @artist_id AND [date] = @date_concert;
+
+        -- Refund ticket amounts to digital wallets for sold tickets
+        UPDATE dw
+        SET dw.amount = dw.amount + t.price
+        FROM Digital_wallet dw
+        JOIN Tickets t ON dw.user_id = t.user_id
+        WHERE t.artist_id = @artist_id AND t.date_concert = @date_concert AND t.is_sold = 1;
+
+        -- Invalidate sold tickets
+        UPDATE Tickets
+        SET Expiration = 0
+        WHERE artist_id = @artist_id AND date_concert = @date_concert AND is_sold = 1;
+
+        -- Delete unsold tickets
+        DELETE FROM Tickets
+        WHERE artist_id = @artist_id AND date_concert = @date_concert AND is_sold = 0;
+
+        -- Commit the transaction
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        -- Rollback the transaction in case of error
+        ROLLBACK TRANSACTION;
+        -- Raise the error
+        THROW;
+    END CATCH
+END;
+GO
 -------------------------------------------------------------------------------------------ZAHRA--------------------------------------------------------------------------------------
---CREATE PROCEDURE InsertUser
---    @username NVARCHAR(50),
---    @password NVARCHAR(50),
---    @birth_date DATE,
---    @location NVARCHAR(100),
---    @Email NVARCHAR(100)
---AS
---BEGIN
---    INSERT INTO Users (username, [password], email, birth_date, [location])
---    VALUES (@username, @password, @Email, @birth_date, @location);
---END;
+CREATE PROCEDURE InsertUser
+    @username NVARCHAR(50),
+    @password NVARCHAR(50),
+    @birth_date DATE,
+    @location NVARCHAR(100),
+    @Email NVARCHAR(100)
+AS
+BEGIN
+    INSERT INTO Users (username, [password], email, birth_date, [location])
+    VALUES (@username, @password, @Email, @birth_date, @location);
+END;
+GO
+---------------------------------------------------
+CREATE PROCEDURE InsertPremium
+    @user_id INT, 
+    @end_time DATETIME,
+    @start_time DATETIME
+AS 
+BEGIN 
+    INSERT INTO Premium (user_id, Start_time, End_time)
+    VALUES (@user_id, @start_time, @end_time); 
 
------------------------------------------------------
---CREATE PROCEDURE InsertPremium
---    @user_id INT, 
---    @end_time DATETIME,
---    @start_time DATETIME
---AS 
---BEGIN 
---    INSERT INTO Premium (user_id, Start_time, End_time)
---    VALUES (@user_id, @start_time, @end_time); 
-
---    PRINT 'Premium subscription added successfully.'; 
---END;
-
----------------------------------------------------------
---CREATE PROCEDURE CreatePlaylist
---    @user_id INT,
---    @playlist_name NVARCHAR(50),
---    @is_public BIT
---AS
---BEGIN
---    -- Check if the user has a valid subscription
---    IF EXISTS (
---        SELECT 1
---        FROM Premium
---        WHERE user_id = @user_id AND End_time > GETDATE()
---    )
---    BEGIN
---        -- Check if the playlist name is already used by the user
---        IF NOT EXISTS (
---            SELECT 1
---            FROM Play_list
---            WHERE user_id = @user_id
---              AND [name] = @playlist_name
---        )
---        BEGIN
---            -- Insert the playlist into Play_list table
---            INSERT INTO Play_list (user_id, [name], ispublic)
---            VALUES (@user_id, @playlist_name, @is_public);
---            PRINT 'Playlist created successfully.';
---        END
---        ELSE
---        BEGIN
---            PRINT 'Playlist with this name already exists.';
---        END;
---    END
---    ELSE
---    BEGIN
---        PRINT 'User does not have a valid subscription. Playlist creation is not allowed.';
---    END;
---END;
-------------------------------------------------
---CREATE PROCEDURE AddSongToPlaylist
---    @user_id INT,
---    @playlist_name NVARCHAR(50),
---    @song_id INT
---AS
---BEGIN
---    -- Check if the playlist exists for the user
---    IF EXISTS (
---        SELECT 1
---        FROM Play_list
---        WHERE user_id = @user_id AND [name] = @playlist_name
---    )
---    BEGIN
---        -- Check if the song already exists in the playlist
---        IF NOT EXISTS (
---            SELECT 1
---            FROM Playlist_has_song
---            WHERE user_id = @user_id AND [name] = @playlist_name AND song_id = @song_id
---        )
---        BEGIN
---            -- Insert the song into the playlist
---            INSERT INTO Playlist_has_song (user_id, [name], song_id)
---            VALUES (@user_id, @playlist_name, @song_id);
---            PRINT 'Song added to playlist successfully.';
---        END
---        ELSE
---        BEGIN
---            PRINT 'This song is already in the playlist.';
---        END
---    END
---    ELSE
---    BEGIN
---        PRINT 'The specified playlist does not exist for the user.';
---    END
---END;
-
-----------------------
---CREATE PROCEDURE ViewPlaylistSongsWithArtists
---    @playlist_name NVARCHAR(50),
---    @user_id INT
---AS
---BEGIN
---    SELECT 
---        PHS.[name] AS playlist_name,
---        S.song_id,
---        S.title AS song_title,
---        STRING_AGG(U.username, ', ') AS artist_names,
---        S.genre,
---        S.release_date
---    FROM 
---        Playlist_has_song PHS
---    INNER JOIN 
---        Songs S ON PHS.song_id = S.song_id
---    INNER JOIN 
---        artist_has_song AHS ON S.song_id = AHS.song_id
---    INNER JOIN 
---        Artists A ON AHS.artist_id = A.artist_id
---    INNER JOIN 
---        Users U ON A.artist_id = U.user_id -- Assuming artist_id corresponds to user_id in Users
---    WHERE 
---        PHS.[name] = @playlist_name
---    GROUP BY 
---        PHS.[name], S.song_id, S.title, S.genre, S.release_date
---    ORDER BY 
---        S.song_id;
---END;
+    PRINT 'Premium subscription added successfully.'; 
+END;
+GO
 -------------------------------------------------------
---CREATE PROCEDURE AddCommentToPlaylist
---    @user_id INT,
---    @playlist_name NVARCHAR(50),
---    @text VARCHAR(100)
---AS
---BEGIN
---    IF EXISTS (
---        SELECT 1
---        FROM Premium 
---        WHERE user_id = @user_id AND End_time > GETDATE()
---    )
---    BEGIN
---        INSERT INTO Comment_Play_list (user_id, [name], [text])
---        VALUES (@user_id, @playlist_name, @text);
---        PRINT 'Comment added successfully to playlist.';
---    END
---    ELSE
---    BEGIN
---        PRINT 'User does not have a valid subscription. Commenting is not allowed.';
---    END
---END
--------------------------------------------------------------------
---CREATE PROCEDURE AddCommentToSong
---    @user_id INT,
---    @song_id INT,
---    @text VARCHAR(100)
---AS
---BEGIN
---    IF EXISTS (
---        SELECT 1
---        FROM Premium
---        WHERE user_id = @user_id AND End_time > GETDATE()
---    )
---    BEGIN
---        INSERT INTO Comment_song (song_id, [text], user_id)
---        VALUES (@song_id, @text, @user_id);
-        
---        PRINT 'Comment added successfully to song.';
---    END
---    ELSE
---    BEGIN
---        PRINT 'User does not have a valid subscription. Commenting is not allowed.';
---    END
---END
-------------------------------------------------------------------
---CREATE PROCEDURE AddCommentToAlbum
---    @user_id INT,
---    @album_id INT,
---    @text VARCHAR(100)
---AS
---BEGIN
---    IF EXISTS (
---        SELECT 1
---        FROM Premium
---        WHERE user_id = @user_id AND End_time > GETDATE()
---    )
---    BEGIN
---        INSERT INTO Comment_Album (user_id, album_id, [text])
---        VALUES (@user_id, @album_id, @text);
-        
---        PRINT 'Comment added successfully to album.';
---    END
---    ELSE
---    BEGIN
-
---        PRINT 'User does not have a valid subscription. Commenting is not allowed.';
---    END
---END
--------------------------------------------------------------------
---CREATE PROCEDURE LikeSong
---    @user_id INT,
---    @song_id INT
---AS
---BEGIN
---    IF EXISTS (
---        SELECT 1
---        FROM Premium
---        WHERE user_id = @user_id AND End_time > GETDATE()
---    )
---    BEGIN
---        IF NOT EXISTS (
---            SELECT 1     -- Using SELECT 1 in SQL is a shorthand way to check the existence of a record or condition without selecting any specific columns. It's efficient because it avoids selecting unnecessary data and simply returns a constant value (1) to indicate if the condition exists or not.
---            FROM Like_song
---            WHERE user_id = @user_id AND song_id = @song_id
---        )
---        BEGIN
---            INSERT INTO Like_song (user_id, song_id)
---            VALUES (@user_id, @song_id);
-            
---            PRINT 'Song liked successfully.';
---        END
---        ELSE
---        BEGIN
---            PRINT 'You have already liked this song.';
---        END
---    END
---    ELSE
---    BEGIN
---        PRINT 'User does not have a valid subscription. Liking is not allowed.';
---    END
---END
+CREATE PROCEDURE CreatePlaylist
+    @user_id INT,
+    @playlist_name NVARCHAR(50),
+    @is_public BIT
+AS
+BEGIN
+    -- Check if the user has a valid subscription
+    IF EXISTS (
+        SELECT 1
+        FROM Premium
+        WHERE user_id = @user_id AND End_time > GETDATE()
+    )
+    BEGIN
+        -- Check if the playlist name is already used by the user
+        IF NOT EXISTS (
+            SELECT 1
+            FROM Play_list
+            WHERE user_id = @user_id
+              AND [name] = @playlist_name
+        )
+        BEGIN
+            -- Insert the playlist into Play_list table
+            INSERT INTO Play_list (user_id, [name], ispublic)
+            VALUES (@user_id, @playlist_name, @is_public);
+            PRINT 'Playlist created successfully.';
+        END
+        ELSE
+        BEGIN
+            PRINT 'Playlist with this name already exists.';
+        END;
+    END
+    ELSE
+    BEGIN
+        PRINT 'User does not have a valid subscription. Playlist creation is not allowed.';
+    END;
+END;
+GO
+----------------------------------------------
+CREATE PROCEDURE AddSongToPlaylist
+    @user_id INT,
+    @playlist_name NVARCHAR(50),
+    @song_id INT
+AS
+BEGIN
+    -- Check if the playlist exists for the user
+    IF EXISTS (
+        SELECT 1
+        FROM Play_list
+        WHERE user_id = @user_id AND [name] = @playlist_name
+    )
+    BEGIN
+        -- Check if the song already exists in the playlist
+        IF NOT EXISTS (
+            SELECT 1
+            FROM Playlist_has_song
+            WHERE user_id = @user_id AND [name] = @playlist_name AND song_id = @song_id
+        )
+        BEGIN
+            -- Insert the song into the playlist
+            INSERT INTO Playlist_has_song (user_id, [name], song_id)
+            VALUES (@user_id, @playlist_name, @song_id);
+            PRINT 'Song added to playlist successfully.';
+        END
+        ELSE
+        BEGIN
+            PRINT 'This song is already in the playlist.';
+        END
+    END
+    ELSE
+    BEGIN
+        PRINT 'The specified playlist does not exist for the user.';
+    END
+END;
+GO
+--------------------
+CREATE PROCEDURE ViewPlaylistSongsWithArtists
+    @playlist_name NVARCHAR(50),
+    @user_id INT
+AS
+BEGIN
+    SELECT 
+        PHS.[name] AS playlist_name,
+        S.song_id,
+        S.title AS song_title,
+        STRING_AGG(U.username, ', ') AS artist_names,
+        S.genre,
+        S.release_date
+    FROM 
+        Playlist_has_song PHS
+    INNER JOIN 
+        Songs S ON PHS.song_id = S.song_id
+    INNER JOIN 
+        artist_has_song AHS ON S.song_id = AHS.song_id
+    INNER JOIN 
+        Artists A ON AHS.artist_id = A.artist_id
+    INNER JOIN 
+        Users U ON A.artist_id = U.user_id -- Assuming artist_id corresponds to user_id in Users
+    WHERE 
+        PHS.[name] = @playlist_name
+    GROUP BY 
+        PHS.[name], S.song_id, S.title, S.genre, S.release_date
+    ORDER BY 
+        S.song_id;
+END;
+GO
+-----------------------------------------------------
+CREATE PROCEDURE AddCommentToPlaylist
+    @user_id INT,
+    @playlist_name NVARCHAR(50),
+    @text VARCHAR(100)
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Premium 
+        WHERE user_id = @user_id AND End_time > GETDATE()
+    )
+    BEGIN
+        INSERT INTO Comment_Play_list (user_id, [name], [text])
+        VALUES (@user_id, @playlist_name, @text);
+        PRINT 'Comment added successfully to playlist.';
+    END
+    ELSE
+    BEGIN
+        PRINT 'User does not have a valid subscription. Commenting is not allowed.';
+    END
+END;
+GO
 -----------------------------------------------------------------
---CREATE PROCEDURE LikeAlbum
---    @user_id INT,
---    @album_id INT
---AS
---BEGIN
---    IF EXISTS (
---        SELECT 1
---        FROM Premium
---        WHERE user_id = @user_id AND End_time > GETDATE()
---    )
---    BEGIN
---        IF NOT EXISTS (
---            SELECT 1
---            FROM Like_album
---            WHERE user_id = @user_id AND album_id = @album_id
---        )
---        BEGIN
---            INSERT INTO Like_album (user_id, album_id)
---            VALUES (@user_id, @album_id);
+CREATE PROCEDURE AddCommentToSong
+    @user_id INT,
+    @song_id INT,
+    @text VARCHAR(100)
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Premium
+        WHERE user_id = @user_id AND End_time > GETDATE()
+    )
+    BEGIN
+        INSERT INTO Comment_song (song_id, [text], user_id)
+        VALUES (@song_id, @text, @user_id);
+        
+        PRINT 'Comment added successfully to song.';
+    END
+    ELSE
+    BEGIN
+        PRINT 'User does not have a valid subscription. Commenting is not allowed.';
+    END
+END;
+GO
+----------------------------------------------------------------
+CREATE PROCEDURE AddCommentToAlbum
+    @user_id INT,
+    @album_id INT,
+    @text VARCHAR(100)
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Premium
+        WHERE user_id = @user_id AND End_time > GETDATE()
+    )
+    BEGIN
+        INSERT INTO Comment_Album (user_id, album_id, [text])
+        VALUES (@user_id, @album_id, @text);
+        
+        PRINT 'Comment added successfully to album.';
+    END
+    ELSE
+    BEGIN
+
+        PRINT 'User does not have a valid subscription. Commenting is not allowed.';
+    END
+END;
+GO
+-----------------------------------------------------------------
+CREATE PROCEDURE LikeSong
+    @user_id INT,
+    @song_id INT
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Premium
+        WHERE user_id = @user_id AND End_time > GETDATE()
+    )
+    BEGIN
+        IF NOT EXISTS (
+            SELECT 1     -- Using SELECT 1 in SQL is a shorthand way to check the existence of a record or condition without selecting any specific columns. It's efficient because it avoids selecting unnecessary data and simply returns a constant value (1) to indicate if the condition exists or not.
+            FROM Like_song
+            WHERE user_id = @user_id AND song_id = @song_id
+        )
+        BEGIN
+            INSERT INTO Like_song (user_id, song_id)
+            VALUES (@user_id, @song_id);
             
---            PRINT 'Album liked successfully.';
---        END
---        ELSE
---        BEGIN
---            PRINT 'You have already liked this album.';
---        END
---    END
---    ELSE
---    BEGIN
---        PRINT 'User does not have a valid subscription. Liking is not allowed.';
---    END
---END
----------------------------------------------------------
---CREATE PROCEDURE LikePlaylist
---    @user_id INT,
---    @playlist_name NVARCHAR(50)
---AS
---BEGIN
---    IF EXISTS (
---        SELECT 1
---        FROM Premium
---        WHERE user_id = @user_id AND End_time > GETDATE()
---    )
---    BEGIN
---        IF NOT EXISTS (
---            SELECT 1
---            FROM Like_Play_list
---            WHERE user_id = @user_id AND [name] = @playlist_name
---        )
---        BEGIN
---            INSERT INTO Like_Play_list(user_id, [name])
---            VALUES (@user_id, @playlist_name);
+            PRINT 'Song liked successfully.';
+        END
+        ELSE
+        BEGIN
+            PRINT 'You have already liked this song.';
+        END
+    END
+    ELSE
+    BEGIN
+        PRINT 'User does not have a valid subscription. Liking is not allowed.';
+    END
+END;
+GO
+---------------------------------------------------------------
+CREATE PROCEDURE LikeAlbum
+    @user_id INT,
+    @album_id INT
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Premium
+        WHERE user_id = @user_id AND End_time > GETDATE()
+    )
+    BEGIN
+        IF NOT EXISTS (
+            SELECT 1
+            FROM Like_album
+            WHERE user_id = @user_id AND album_id = @album_id
+        )
+        BEGIN
+            INSERT INTO Like_album (user_id, album_id)
+            VALUES (@user_id, @album_id);
             
---            PRINT 'Playlist liked successfully.';
---        END
---        ELSE
---        BEGIN
---            PRINT 'You have already liked this playlist.';
---        END
---    END
---    ELSE
---    BEGIN
---        PRINT 'User does not have a valid subscription. Liking is not allowed.';
---    END
---END
-------------------------------------------------------------
---CREATE PROCEDURE InsertUserArtistLikes
---AS
---BEGIN
---    INSERT INTO User_Artist_Likes (user_id, artist_id, song_id, Likes_Count)
---    SELECT 
---        ls.user_id,
---        ar.artist_id,
---        ls.song_id,
---        COUNT(ls.song_id) OVER (PARTITION BY ls.user_id, ar.artist_id) AS Likes_Count
---    FROM 
---        Like_song ls
---    JOIN 
---        Songs s ON ls.song_id = s.song_id
---    JOIN 
---        artist_has_song ahs ON s.song_id = ahs.song_id
---    JOIN 
---        Artists ar ON ahs.artist_id = ar.artist_id;
---END;
+            PRINT 'Album liked successfully.';
+        END
+        ELSE
+        BEGIN
+            PRINT 'You have already liked this album.';
+        END
+    END
+    ELSE
+    BEGIN
+        PRINT 'User does not have a valid subscription. Liking is not allowed.';
+    END
+END;
+GO
+-------------------------------------------------------
+CREATE PROCEDURE LikePlaylist
+    @user_id INT,
+    @playlist_name NVARCHAR(50)
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM Premium
+        WHERE user_id = @user_id AND End_time > GETDATE()
+    )
+    BEGIN
+        IF NOT EXISTS (
+            SELECT 1
+            FROM Like_Play_list
+            WHERE user_id = @user_id AND [name] = @playlist_name
+        )
+        BEGIN
+            INSERT INTO Like_Play_list(user_id, [name])
+            VALUES (@user_id, @playlist_name);
+            
+            PRINT 'Playlist liked successfully.';
+        END
+        ELSE
+        BEGIN
+            PRINT 'You have already liked this playlist.';
+        END
+    END
+    ELSE
+    BEGIN
+        PRINT 'User does not have a valid subscription. Liking is not allowed.';
+    END
+END;
+GO
+----------------------------------------------------------
+CREATE PROCEDURE InsertUserArtistLikes
+AS
+BEGIN
+    INSERT INTO User_Artist_Likes (user_id, artist_id, song_id, Likes_Count)
+    SELECT 
+        ls.user_id,
+        ar.artist_id,
+        ls.song_id,
+        COUNT(ls.song_id) OVER (PARTITION BY ls.user_id, ar.artist_id) AS Likes_Count
+    FROM 
+        Like_song ls
+    JOIN 
+        Songs s ON ls.song_id = s.song_id
+    JOIN 
+        artist_has_song ahs ON s.song_id = ahs.song_id
+    JOIN 
+        Artists ar ON ahs.artist_id = ar.artist_id;
+END;
+GO
+CREATE PROCEDURE InsertUserGenreLikes
+AS
+BEGIN
+    INSERT INTO User_Genre_Likes (user_id, song_id, Likes_Count)
+    SELECT 
+        ls.user_id,
+        ls.song_id,
+        COUNT(ls.song_id) OVER (PARTITION BY ls.user_id, s.genre) AS Likes_Count
+    FROM 
+        Like_song ls
+    JOIN 
+        Songs s ON ls.song_id = s.song_id;
+END;
+GO
 
---CREATE PROCEDURE InsertUserGenreLikes
---AS
---BEGIN
---    INSERT INTO User_Genre_Likes (user_id, song_id, Likes_Count)
---    SELECT 
---        ls.user_id,
---        ls.song_id,
---        COUNT(ls.song_id) OVER (PARTITION BY ls.user_id, s.genre) AS Likes_Count
---    FROM 
---        Like_song ls
---    JOIN 
---        Songs s ON ls.song_id = s.song_id;
---END;
 
+--EXEC GetUserInterests @user_id = 1;
+-------------------------------------------------------
+CREATE PROCEDURE GetRecommendedAlb
+(
+    @user_id INT
+)
+AS
+BEGIN
+    SELECT TOP 10
+        A.album_id,
+        A.title AS album_title,
+        U.username AS artist_name,
+        A.genre,
+        A.release_date
+    FROM 
+        Albums A
+    INNER JOIN 
+        artist_has_album AHA ON A.album_id = AHA.album_id
+	INNER JOIN	 User_Artist_Likes UAL ON  UAL.user_id = @user_id
+    INNER JOIN 
+        Artists AR ON AHA.artist_id = AR.artist_id
+    INNER JOIN 
+        Users U ON AR.artist_id = U.user_id
+    WHERE 
+        A.album_id  IN (SELECT album_id FROM Like_album WHERE user_id = @user_id)
+    ORDER BY 
+        NEWID(); -- Random order for diversity in recommendations
+END;
+GO
+------------------------------------------------------------------------
+CREATE PROCEDURE GetRecommendedSongsByArtistLike
+(
+    @user_id INT
+)
+AS
+BEGIN
+    SELECT TOP 10
+        --S.song_id,
+        S.title AS song_title,
+        U.username AS artist_name,
+        S.genre,
+        S.release_date
+    FROM
+        Songs S
+    INNER JOIN
+        artist_has_song ASHS ON ASHS.song_id = S.song_id
+    INNER JOIN
+        Artists A ON ASHS.artist_id = A.artist_id
+    INNER JOIN
+        User_Artist_Likes UAL ON A.artist_id = UAL.artist_id
+	INNER JOIN 
+        Users U ON A.artist_id = U.user_id
+    WHERE
+        UAL.user_id = @user_id
+    AND
+        S.song_id IN (SELECT song_id FROM Like_song WHERE user_id = @user_id)
+    ORDER BY
+        UAL.Likes_Count DESC, NEWID();
+END;
+GO
+CREATE PROCEDURE GetRecommendedSongsByGenreLike
+(
+    @user_id INT
+)
+AS
+BEGIN
+    WITH GenreLikes AS (
+        SELECT 
+            UGL.user_id,
+            S.song_id,
+            S.title AS song_title,
+            S.genre,
+            UGL.Likes_Count
+        FROM 
+            User_Genre_Likes UGL
+        INNER JOIN 
+            Songs S ON UGL.song_id = S.song_id
+        WHERE 
+            UGL.user_id = @user_id
+    )
+    
+    SELECT TOP 10
+        --S.song_id,
+        S.title AS song_title,
+        U.username AS artist_name,
+        S.genre,
+        S.release_date
+    FROM 
+        Songs S
+    INNER JOIN 
+        artist_has_song ASHS ON ASHS.song_id = S.song_id
+    INNER JOIN 
+        Artists A ON ASHS.artist_id = A.artist_id
+    INNER JOIN 
+        GenreLikes GL ON S.song_id = GL.song_id
+	INNER JOIN 
+        Users U ON A.artist_id = U.user_id
+    WHERE 
+        S.song_id IN (SELECT song_id FROM Like_song WHERE user_id = @user_id) -- Exclude songs liked by the user
+    ORDER BY 
+        GL.Likes_Count DESC, NEWID(); -- Order by likes count of genre and then randomize
+END;
 
+    SELECT TOP 10
+        S.song_id,
+        S.title AS song_title,
+        U.username AS artist_name,
+        S.genre,
+        S.release_date
+    FROM 
+        Songs S
+    INNER JOIN 
+        artist_has_song ASHS ON ASHS.song_id = S.song_id
+    INNER JOIN 
+        Artists A ON ASHS.artist_id = A.artist_id
+    INNER JOIN 
+        GenreLikes GL ON S.song_id = GL.song_id
+	INNER JOIN 
+        Users U ON A.artist_id = U.user_id
+    WHERE 
+        S.song_id IN (SELECT song_id FROM Like_song WHERE user_id = @user_id) -- Exclude songs liked by the user
+    ORDER BY 
+        GL.Likes_Count DESC, NEWID();-- Order by likes count of genre and then randomize
+END;
+GO
+-------------------------------------
+CREATE PROCEDURE CheckUserType
+    @username VARCHAR(50),
+    @password VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @user_id INT;
+    SELECT @user_id = user_id
+    FROM Users
+    WHERE username = @username AND [password] = @password;
+    IF @user_id IS NOT NULL
+    BEGIN
+        SELECT
+            CASE
+                WHEN EXISTS (SELECT 1 FROM Premium WHERE user_id = @user_id) THEN 'Premium User'
+                ELSE 'Regular User'
+            END AS User_Type;
+    END
+END;
+GO
 
 ----EXEC GetUserInterests @user_id = 1;
 ---------------------------------------------------------
