@@ -10,6 +10,7 @@
 #include"playlist_songs.h"
 #include"chatbox.h"
 QT_BEGIN_NAMESPACE
+extern QSqlDatabase db;
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 

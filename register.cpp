@@ -7,9 +7,6 @@ Register::Register(QWidget *parent)
 {
 
     ui->setupUi(this);
-    if (!initializeDatabase(db)) {
-        QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database");
-    }
     ui->sign_button->setStyleSheet(
                 "QPushButton {"
                 "    font: 15pt 'Segoe UI Historic';"
@@ -270,18 +267,6 @@ void Register::on_Submit_clicked()
 
 }
 
-bool Register::initializeDatabase(QSqlDatabase &db) {
-    db = QSqlDatabase::addDatabase("QODBC");
-    db.setDatabaseName("DRIVER={ODBC Driver 17 for SQL Server};SERVER=LOCALHOST\\SQLEXPRESS;DATABASE=Spotify;Trusted_Connection=Yes;");
-
-    if (!db.open()) {
-        qDebug() << "Database connection error:" << db.lastError().text();
-        return false;
-    }
-
-    qDebug() << "Database connected!";
-    return true;
-}
 
 void Register::on_sign_button_3_clicked() {
     QString email = ui->email->text();
@@ -304,7 +289,6 @@ void Register::on_sign_button_3_clicked() {
     }
 
 
-    if (initializeDatabase(db)) {
         QSqlQuery query(db);
         query.prepare("{CALL InsertUser(?, ?, ?, ?, ?)}");
         query.addBindValue(username);
@@ -327,9 +311,6 @@ void Register::on_sign_button_3_clicked() {
             qDebug() << "Stored procedure execution error:" << query.lastError().text();
             QMessageBox::critical(this, "Database Error", "Failed to register user");
         }
-    } else {
-        QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database");
-    }
 }
 
 void Register::onTimeout()

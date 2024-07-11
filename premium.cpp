@@ -1,4 +1,5 @@
 #include "premium.h"
+#include "mainwindow.h"
 #include "qsqlerror.h"
 #include "qsqlquery.h"
 #include "qurlquery.h"
@@ -43,9 +44,7 @@ Premium::Premium(QWidget *parent) :
 
     // Define the stylesheet
     setstyle();
-    if (!initializeDatabase(db)) {
-        QMessageBox::critical(this, "Database Connection Error", "Failed to connect to the database");
-    }
+
 
 }
 
@@ -1045,6 +1044,7 @@ void Premium::on_Search_pushButton_clicked()
     clearScrollAreaSearch();
     displaySearchResults(results);
 }
+
 void Premium::clearScrollAreaSearch() {
     QLayoutItem *item;
     while ((item = gridLayout->takeAt(0)) != nullptr) {

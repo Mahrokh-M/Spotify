@@ -31,7 +31,6 @@ private:
     Ui::Premium *ui;
     QString m_imagePath;
     int songCount;
-    QSqlDatabase db;
     int ID;
     QString Type;
     QVector<QLineEdit*> titleEdits;
