@@ -1801,7 +1801,7 @@ BEGIN
     END;
     UPDATE Friend
     SET accept = 1 
-    WHERE user_id1 =@target_user_id  AND user_id2 = @requester_user_id;
+    WHERE (user_id1 =@target_user_id  AND user_id2 = @requester_user_id) OR (user_id1 =@requester_user_id AND user_id2 = @target_user_id  );
 END;
 GO
 
