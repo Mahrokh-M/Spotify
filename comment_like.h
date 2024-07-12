@@ -39,6 +39,10 @@ private slots:
 
     void on_Add_comment_clicked();
 
+    void on_Like_button_clicked();
+
+    void on_add_favorite_clicked();
+
 signals:
     void goBack();
      void open_comment(const QString);

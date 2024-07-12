@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QInputDialog>
+#include "newplaylistdialog.h"
 int ID_Song;
 Comment_Like::Comment_Like(QWidget *parent) :
     QWidget(parent),
@@ -138,13 +139,13 @@ void Comment_Like::setCommentDetails(const QString &songID)
     //    // Set the content widget as the scroll area's widget
     //    ui->Comment_section->setWidget(contentWidget);
 }
-
+//**************************************************************
 void Comment_Like::on_Back_clicked()
 {
     clearScrollArea(ui->Comment_section);
     emit goBack();
 }
-
+//**************************************************************
 void Comment_Like::on_add_playlist_clicked()
 {
     // Show the question label and the playlists scroll area
@@ -154,18 +155,26 @@ void Comment_Like::on_add_playlist_clicked()
     // Fill the playlists scroll area with playlist buttons
     fillPlaylists();
 }
-
+//*************************************************************
 void Comment_Like::fillPlaylists()
 {
+    QSqlQuery query(db);
+    query.prepare("EXEC GetUserPlaylists @user_id = :user_id");
+    query.bindValue(":user_id", ID);
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Database Error", query.lastError().text());
+        return;
+    }
+
     QWidget *contentWidget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(contentWidget);
 
-    // Example playlists
-    QStringList playlists = {"Playlist 1", "Playlist 2", "Playlist 3"};
-
-    for (const QString &playlistName : playlists)
-    {
+    while (query.next()) {
+        QString playlistName = query.value("name").toString();
         QPushButton *playlistButton = new QPushButton(playlistName, contentWidget);
+        playlistButton->setProperty("playlistName", playlistName);
+        playlistButton->setProperty("songId", ID_Song);
         connect(playlistButton, &QPushButton::clicked, this, &Comment_Like::on_playlistButtonClicked);
         layout->addWidget(playlistButton);
     }
@@ -180,34 +189,74 @@ void Comment_Like::fillPlaylists()
 
 void Comment_Like::on_playlistButtonClicked()
 {
-    QPushButton *clickedButton = qobject_cast<QPushButton*>(sender());
-    if (clickedButton)
-    {
-        QString playlistName = clickedButton->text();
-        // Logic to add the current song to the selected playlist
-        // Example:
-        qDebug() << "Adding song to " << playlistName;
-    }
-    ui->question_label->hide();
-    ui->playlists_scrollBar->hide();
-}
+    QPushButton *button = qobject_cast<QPushButton *>(sender());
+    if (!button)
+        return;
 
+    QString playlistName = button->property("playlistName").toString();
+    int songId = button->property("songId").toInt();
+
+    QSqlDatabase db = QSqlDatabase::database();
+    if (!db.isOpen()) {
+        QMessageBox::critical(this, "Database Error", "Database is not open.");
+        return;
+    }
+
+    QSqlQuery query(db);
+    query.prepare("EXEC AddSongToPlaylist @user_id = :user_id, @playlist_name = :playlist_name, @song_id = :song_id");
+    query.bindValue(":user_id", ID);
+    query.bindValue(":playlist_name", playlistName);
+    query.bindValue(":song_id", songId);
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Database Error", query.lastError().text());
+        return;
+    }
+
+    QString resultMessage;
+    if (query.next()) {
+        resultMessage = query.value(0).toString();
+    }
+
+    QMessageBox::information(this, "Add Song to Playlist", resultMessage);
+}
 void Comment_Like::on_addNewPlaylist_clicked()
 {
-    bool ok;
-    QString newPlaylistName = QInputDialog::getText(this, tr("New Playlist"),tr("Playlist name:"), QLineEdit::Normal,"", &ok);
-    if (ok && !newPlaylistName.isEmpty())
+    NewPlaylistDialog dialog(this);
+    if (dialog.exec() == QDialog::Accepted)
     {
-        // Logic to create a new playlist
-        // Example:
-        qDebug() << "Creating new playlist: " << newPlaylistName;
+        QString newPlaylistName = dialog.playlistName();
+        bool isPublic = dialog.isPublic();
+        QString imagePath = dialog.imagePath();
 
-        // You can also update the playlists_scrollBar to show the new playlist
-        fillPlaylists();
-        ui->question_label->hide();
-        ui->playlists_scrollBar->hide();
+        if (!newPlaylistName.isEmpty())
+        {
+            QSqlQuery query(db);
+            query.prepare("EXEC CreatePlaylist @user_id = :user_id, @playlist_name = :playlist_name, @is_public = :is_public, @address_of_picture = :address_of_picture");
+            query.bindValue(":user_id", ID);
+            query.bindValue(":playlist_name", newPlaylistName);
+            query.bindValue(":is_public", isPublic);
+            query.bindValue(":address_of_picture", imagePath);
+
+            if (!query.exec()) {
+                QMessageBox::critical(this, "Database Error", query.lastError().text());
+                return;
+            }
+
+            QString resultMessage;
+            if (query.next()) {
+                resultMessage = query.value(0).toString();
+            }
+
+            QMessageBox::information(this, "Create Playlist", resultMessage);
+
+            fillPlaylists();
+            ui->question_label->hide();
+            ui->playlists_scrollBar->show();
+        }
     }
 }
+
 
 void Comment_Like::setstyle(){
     QString styleSheet = R"(
@@ -335,3 +384,32 @@ void Comment_Like::clearScrollArea(QScrollArea *scrollArea) {
 
 
 }
+
+
+void Comment_Like::on_Like_button_clicked()
+{
+
+}
+
+
+void Comment_Like::on_add_favorite_clicked()
+{
+    QSqlQuery query(db);
+    query.prepare("EXEC ToggleFavoriteSong @user_id = :user_id, @song_id = :song_id");
+    query.bindValue(":user_id", ID);
+    query.bindValue(":song_id", ID_Song);
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Database Error", query.lastError().text());
+        return;
+    }
+
+    QString resultMessage;
+    if (query.next()) {
+        resultMessage = query.value(0).toString();
+    }
+
+    QMessageBox::information(this, "Add to Favorites", resultMessage);
+}
+
+

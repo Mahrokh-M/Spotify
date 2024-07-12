@@ -199,13 +199,15 @@ CREATE TABLE Tickets (
 --	PRIMARY KEY(user_id,song_id)
 --);
 ---------------------------------------------------------
+--DROP TABLE Comment_song
 --CREATE TABLE Comment_song(
 --    song_id INT,
---	[text] VARCHAR(100),
+--	[text] VARCHAR(MAX),
 --	user_id INT,
+--	[date] DATETIME,
 --    FOREIGN KEY (user_id) REFERENCES Premium(user_id),
 --	FOREIGN KEY (song_id) REFERENCES Songs(song_id)ON DELETE CASCADE,
---	PRIMARY KEY(user_id,song_id)
+--	PRIMARY KEY(user_id,song_id,[date])
 --);
 ---------------------------------------------------------
 --CREATE TABLE Like_song(
@@ -667,6 +669,21 @@ exec GetSongDetails @song_id=5;
 ----    END
 ----END;
 ------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CREATE PROCEDURE GetUserPlaylists
+    @user_id INT
+AS
+BEGIN
+    SELECT 
+        user_id,
+        [name],
+        ispublic,
+        address_of_picture
+    FROM 
+        Play_list
+    WHERE 
+        user_id = @user_id;
+END;
+GO
 -------------------------------------------------------------------------------------------------------------------------------------------------
 ------UPDATE WALLET:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ----CREATE PROCEDURE UpdateWalletBalance
@@ -1007,11 +1024,13 @@ BEGIN
     PRINT 'Premium subscription added successfully.'; 
 END;
 GO
-------------------***********------------------------
+-------------------------------------------------------
+DROP PROCEDURE CreatePlaylist
 CREATE PROCEDURE CreatePlaylist
     @user_id INT,
     @playlist_name NVARCHAR(50),
-    @is_public BIT
+    @is_public BIT,
+	@address_of_picture VARCHAR(100)
 AS
 BEGIN
     -- Check if the user has a valid subscription
@@ -1030,8 +1049,8 @@ BEGIN
         )
         BEGIN
             -- Insert the playlist into Play_list table
-            INSERT INTO Play_list (user_id, [name], ispublic)
-            VALUES (@user_id, @playlist_name, @is_public);
+            INSERT INTO Play_list (user_id, [name], ispublic,address_of_picture)
+            VALUES (@user_id, @playlist_name, @is_public,@address_of_picture);
             PRINT 'Playlist created successfully.';
         END
         ELSE
@@ -1987,10 +2006,10 @@ GO
 --       (2, '2023-02-15 08:30:00', '2023-12-31 23:59:59'),
 --       (3, '2023-03-20 12:00:00', '2023-12-31 23:59:59');
 
---INSERT INTO Play_list (user_id, [name], ispublic, address_of_picture)
---VALUES (1, 'My Playlist', 1, '/images/my_playlist.jpg'),
---       (1, 'Favorites', 1, '/images/favorites.jpg'),
---       (2, 'Road Trip Mix', 0, '/images/road_trip.jpg');
+INSERT INTO Play_list (user_id, [name], ispublic, address_of_picture)
+VALUES (1, 'My Playlis', 1, '/images/my_playlist.jpg'),
+       (1, 'Favorite', 1, '/images/favorites.jpg'),
+       (2, 'Road Trip Mi', 0, '/images/road_trip.jpg');
 
 --INSERT INTO Digital_wallet (user_id, amount)
 --VALUES (1, 100.00),
@@ -2127,3 +2146,23 @@ INSERT INTO Tickets (user_id, artist_id, price, Expiration, is_sold, date_concer
 
 
 
+
+
+
+
+
+--__________________________________________________________________check___________________________________________________________--
+SELECT*
+FROM Comment_song;
+exec GetCommentsForSong @song_id=48;
+exec GetCommentsForSong @song_id=6;
+exec AddCommentToSong @user_id= 2, @song_id = 6,@text='kjhkjhgju';
+EXEC AddSongToPlaylist @user_id =1, @playlist_name = 'Favorite', @song_id = 5;
+SELECT*
+exec ViewPlaylistSongsWithArtists @playlist_name='Favorite',@user_id=1;
+SELECT*
+FROM Playlist_has_song;
+SELECT*
+FROM Play_list
+SELECT*
+FROM Favorite_Song
