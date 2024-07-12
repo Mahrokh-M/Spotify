@@ -5,7 +5,6 @@
 #include "qurlquery.h"
 #include "ui_premium.h"
 
-
 Premium::Premium(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Premium),
@@ -45,17 +44,21 @@ void Premium::setstyle(){
 
 
 void Premium::setUserID(const QString &userType){
-    Type=userType;
-    //  if is premium
-//    if(userType=="Premium User"){
-//    ui->tabWidget->removeTab(7);
-//    ui->tabWidget->removeTab(7);}
-//    // if is simple user
-//    if(userType=="Regular User"){
-//        while (ui->tabWidget->count() > 2) {
-//            ui->tabWidget->removeTab(2);
-//        }
-//    }
+   // Type=userType;
+    //// if is premium
+  //  if(userType=="Premium User"){
+  // ui->tabWidget->removeTab(7);
+  //  ui->tabWidget->removeTab(7);}
+
+    //if(userType=="Artist"){
+   //ui->tabWidget->removeTab(7);
+   // ui->tabWidget->removeTab(7);}
+    // // if is simple user
+   //if(userType=="Regular User"){
+    //  while (ui->tabWidget->count() > 2) {
+        //  ui->tabWidget->removeTab(2);
+     //  }
+ //  }
 
     fillSongs();
     fill_favorites();
@@ -607,15 +610,13 @@ void Premium::fill_friends() {
     ui->friends_scrollArea->setWidget(contentWidget);
 }
 
-
-
 void Premium::onStartChatClicked()
 {
     QPushButton *button = qobject_cast<QPushButton*>(sender());
     if (button)
     {
-        QString friendID = button->property("ID").toString();
-        emit startChat(friendID); // Emit signal with friendID
+        QString friendName = button->property("FriendName").toString();
+                emit startChat(friendName);
     }
 }
 
@@ -779,56 +780,98 @@ double Premium::getUserBalance()
 
 void Premium::fill_wallet()
 {
-    // Example tickets
-    QList<QPair<QString, double>> validTickets = {
-        {"Concert 1", 100.0},
-        {"Concert 3", 50.0},
-        {"Concert 5", 150.0}
-    };
+    int userId=ID;
+    // Clear existing tickets from the UI
+    clearTickets(ui->valid_tickets_scrollArea);
+    clearTickets(ui->expired_tickets_scrollArea);
+    ui->balance->clear();
 
-    QList<QPair<QString, double>> expiredTickets = {
-        {"Concert 2", 100.0},
-        {"Concert 4", 50.0}
-    };
+    // Fetch valid tickets using GetValidTickets procedure
+    QSqlQuery validQuery(db);
+    validQuery.prepare("EXEC GetValidTickets @user_id = :user_id");
+    validQuery.bindValue(":user_id", userId);
 
-    double totalBalance = calculateTotalBalance(validTickets);
-    updateBalanceLabel(totalBalance);
+    QList<QPair<QString, double>> validTickets;
+    double totalBalance = 0.0;
+
+    if (!validQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve valid tickets: " + validQuery.lastError().text());
+        return;
+    }
+
+    while (validQuery.next()) {
+        QString ticketId = validQuery.value(0).toString();
+        double price = validQuery.value(4).toDouble();
+        validTickets.append(qMakePair(ticketId, price));
+    }
+
+    // Fetch expired tickets using GetExpiredTickets procedure
+    QSqlQuery expiredQuery(db);
+    expiredQuery.prepare("EXEC GetExpiredTickets @user_id = :user_id");
+    expiredQuery.bindValue(":user_id", userId);
+
+    QList<QPair<QString, double>> expiredTickets;
+
+    if (!expiredQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve expired tickets: " + expiredQuery.lastError().text());
+        return;
+    }
+
+    while (expiredQuery.next()) {
+        QString ticketId = expiredQuery.value(0).toString();
+        double price = expiredQuery.value(4).toDouble();
+        expiredTickets.append(qMakePair(ticketId, price));
+    }
+
+    // Update the balance label
+   updateBalanceLabel();
+
+    // Populate the tickets in the UI
     populateTickets(validTickets, ui->valid_tickets_scrollArea, true); // horizontal layout
     populateTickets(expiredTickets, ui->expired_tickets_scrollArea, true); // horizontal layout
 }
 
-double Premium::calculateTotalBalance(const QList<QPair<QString, double>>& validTickets)
+void Premium::clearTickets(QScrollArea* scrollArea)
 {
-    double balance = 0.0;
-    for (const auto& ticket : validTickets)
-    {
-        balance += ticket.second;
+    QWidget* widget = scrollArea->widget();
+    if (widget) {
+        delete widget;
     }
-    return balance;
+    scrollArea->setWidget(nullptr);
+}
+void Premium::updateBalanceLabel() {
+    int userId = ID; // Assuming ID is the current user's ID
+
+    QSqlQuery query;
+    query.prepare("SELECT amount FROM Digital_wallet WHERE user_id = :userID");
+    query.bindValue(":userID", userId);
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve wallet balance: " + query.lastError().text());
+        return;
+    }
+
+    if (query.next()) {
+        double balance = query.value("amount").toDouble();
+        ui->balance->setText(QString::number(balance, 'f', 2)); // Assuming ui->balance is the QLabel for the wallet balance
+    } else {
+        QMessageBox::warning(this, "No Balance", "No wallet balance found for this user.");
+    }
 }
 
-void Premium::updateBalanceLabel(double balance)
-{
-    ui->balance->setText(QString("Balance: $%1").arg(balance));
-}
 
 void Premium::populateTickets(const QList<QPair<QString, double>>& tickets, QScrollArea* scrollArea, bool horizontal)
 {
-    QWidget *contentWidget = new QWidget(this);
-    QHBoxLayout *layout = new QHBoxLayout(contentWidget);
+    QWidget* contentWidget = new QWidget();
+    QBoxLayout* layout = horizontal ? static_cast<QBoxLayout*>(new QHBoxLayout()) : static_cast<QBoxLayout*>(new QVBoxLayout());
+    contentWidget->setLayout(layout);
 
-    for (const auto& ticket : tickets)
-    {
-        QString concertName = ticket.first;
-        double ticketPrice = ticket.second;
-
-        QLabel *ticketLabel = new QLabel(QString("%1 - $%2").arg(concertName).arg(ticketPrice), this);
+    for (const QPair<QString, double>& ticket : tickets) {
+        QLabel* ticketLabel = new QLabel(ticket.first + " - $" + QString::number(ticket.second));
         layout->addWidget(ticketLabel);
     }
 
-    contentWidget->setLayout(layout);
     scrollArea->setWidget(contentWidget);
-    scrollArea->setWidgetResizable(true);
 }
 
 void Premium::fillFriendshipRequests() {
@@ -837,7 +880,7 @@ void Premium::fillFriendshipRequests() {
 
     // Prepare and execute the SQL query
     QSqlQuery query;
-    QString queryString = "EXEC GetFriendRequest @target_user_id = :user_id";
+    QString queryString = "EXEC GetFriendSRequest @target_user_id = :user_id";
     query.prepare(queryString);
     query.bindValue(":user_id", ID);  // Assuming currentUserID is defined somewhere
 
@@ -935,12 +978,23 @@ void Premium::fillAllUsers() {
     // Set the content widget for the scroll area
     ui->allUsers_scrollBar->setWidget(contentWidget);
 }
-
+//---------------------------------------------------------------
 void Premium::sendFriendshipRequest(const QString &userName) {
-    // Your logic to send a friendship request to the user
-    QMessageBox::information(this, "Friendship Request", "Friendship request sent to " + userName);
-}
+    // Database connection and query execution
+    QSqlQuery query;
+    query.prepare("EXEC SendFriendRequest1 @user_id1 = :user_id1, @friend_username = :friend_username");
+    query.bindValue(":user_id1", ID);  // Assuming currentUserID is defined elsewhere
+    query.bindValue(":friend_username", userName);
 
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to send friendship request: " + query.lastError().text());
+        return;
+    }
+
+    QMessageBox::information(this, "Friendship Request", "Friendship request sent to " + userName);
+    fillFriendshipRequests();
+}
+//------------------------------------------------------
 void Premium::followUser(int userId, const QString &userName) {
     // Your logic to follow the user
     int currentUserId = ID; // Replace this with your logic to get the current user's ID
@@ -986,8 +1040,23 @@ void Premium::acceptFriendshipRequest(const QString &userName)
 
 void Premium::declineFriendshipRequest(const QString &userName)
 {
-    // Logic to decline friendship request for userName
+    QSqlQuery query;
+    query.prepare("EXEC DeclineFriendRequest @current_user_id = :user_id, @requester_username = :friend_username");
+    query.bindValue(":user_id", ID);
+    query.bindValue(":friend_username", userName);
+
+
+    if (!query.exec()) {
+
+        QMessageBox::critical(this, "Error", "Failed to decline friendship request: " + query.lastError().text());
+        return;
+    }
+
+    QMessageBox::information(this, "Friendship Request", "Friend request from " + userName + " declined successfully.");
+
+    fillFriendshipRequests();
 }
+
 
 void Premium::on_UploadPhoto_clicked()
 {
@@ -1330,4 +1399,75 @@ void Premium::clearScrollAreaSearch() {
         }
     }
 }
+
+
+void Premium::on_charge_clicked()
+{
+    int userId = ID; // Assuming ID is the current user's ID
+    double amount = ui->charge_amount->text().toDouble();
+
+    if (amount <= 0) {
+        QMessageBox::warning(this, "Invalid Amount", "Please enter a valid amount to charge.");
+        return;
+    }
+
+    QSqlQuery query;
+    query.prepare("EXEC UpdateWalletBalance @UserID = :userID, @Amount = :amount");
+    query.bindValue(":userID", userId);
+    query.bindValue(":amount", amount); // Charge is a positive transaction
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to update wallet balance: " + query.lastError().text());
+        return;
+    }
+
+    QMessageBox::information(this, "Success", "Charge successful.");
+    updateBalanceLabel();
+}
+
+void Premium::on_withdraw_clicked()
+{
+    int userId = ID; // Assuming ID is the current user's ID
+    double amount = ui->withdraw_amount->text().toDouble();
+
+    if (amount <= 0) {
+        QMessageBox::warning(this, "Invalid Amount", "Please enter a valid amount to withdraw.");
+        return;
+    }
+
+    QSqlQuery balanceQuery;
+    balanceQuery.prepare("SELECT amount FROM Digital_wallet WHERE user_id = :userID");
+    balanceQuery.bindValue(":userID", userId);
+
+    if (!balanceQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve wallet balance: " + balanceQuery.lastError().text());
+        return;
+    }
+
+    if (balanceQuery.next()) {
+        double currentBalance = balanceQuery.value("amount").toDouble();
+        if (amount > currentBalance) {
+            QMessageBox::warning(this, "Insufficient Funds", "You do not have enough funds to complete this withdrawal.");
+            return;
+        }
+    } else {
+        QMessageBox::warning(this, "No Balance", "No wallet balance found for this user.");
+        return;
+    }
+
+    QSqlQuery query;
+    query.prepare("EXEC UpdateWalletBalance @UserID = :userID, @Amount = :amount");
+    query.bindValue(":userID", userId);
+    query.bindValue(":amount", -amount); // Withdraw is a negative transaction
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to update wallet balance: " + query.lastError().text());
+        return;
+    }
+
+    QMessageBox::information(this, "Success", "Withdrawal successful.");
+    updateBalanceLabel();
+}
+
+
 

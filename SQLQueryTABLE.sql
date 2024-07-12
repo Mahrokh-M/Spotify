@@ -264,6 +264,16 @@ CREATE TABLE Comment_song(
 --	FOREIGN KEY (song_id) REFERENCES Songs(song_id),
 --	PRIMARY KEY(user_id,song_id)
 --);
+-------------------------------------------------------------------------
+CREATE TABLE Chat (
+    chat_id INT PRIMARY KEY IDENTITY(1,1),
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    message_content VARCHAR(MAX) NOT NULL,
+    sent_at DATETIME NOT NULL DEFAULT GETDATE(),
+    FOREIGN KEY (sender_id) REFERENCES Users(user_id),
+    FOREIGN KEY (receiver_id) REFERENCES Users(user_id)
+);
 --------------------------------------------------------------ASAL-----------------------------------------------------------------------
 ----ADD Fllowers:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --CREATE PROCEDURE AddFollower
@@ -364,7 +374,7 @@ CREATE TABLE Comment_song(
 --FROM Concerts
 --WHERE [date] > GETDATE();
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-----SHOW ALL Available Tickets:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--SHOW ALL Available Tickets:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --CREATE PROCEDURE GetAvailableTickets
 --    @artist_id INT,
 --    @date_concert DATETIME
@@ -1437,26 +1447,37 @@ END;
 END;
 GO
 -------------------------------------
-CREATE PROCEDURE CheckUserType
+CREATE PROCEDURE CheckSSS
     @username VARCHAR(50),
     @password VARCHAR(50)
 AS
 BEGIN
     SET NOCOUNT ON;
     DECLARE @user_id INT;
+    DECLARE @is_artist VARCHAR(20);
+
     SELECT @user_id = user_id
     FROM Users
     WHERE username = @username AND [password] = @password;
+
     IF @user_id IS NOT NULL
     BEGIN
-        SELECT
+        SELECT @user_id AS User_Id,
             CASE
-                WHEN EXISTS (SELECT 1 FROM Premium WHERE user_id = @user_id) THEN 'Premium User'
+                WHEN EXISTS (SELECT 1 FROM Premium WHERE user_id = @user_id AND GETDATE() < End_time) THEN 'Premium User'
                 ELSE 'Regular User'
-            END AS User_Type;
+            END AS User_Type,
+            CASE
+                WHEN EXISTS (SELECT 1 FROM Artists WHERE artist_id = @user_id) THEN 'Artist'
+                ELSE 'Not an Artist'
+            END AS Artist_Status;
+    END
+    ELSE
+    BEGIN
+        SELECT NULL AS User_Id, 'Invalid User' AS User_Type, 'N/A' AS Artist_Status;
     END
 END;
-GO
+
 
 ----EXEC GetUserInterests @user_id = 1;
 ---------------------------------------------------------
@@ -1682,6 +1703,219 @@ BEGIN
     DROP TABLE #FriendUserIds;
 END;
 GO
+---------------------------------------------
+CREATE PROCEDURE SendMessageS
+    @SenderID INT,
+    @ReceiverUsername VARCHAR(50),
+    @MessageContent VARCHAR(MAX)
+AS
+BEGIN
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DECLARE @ReceiverID INT;
+
+        -- Check if SenderID exists in Users table
+        IF NOT EXISTS (SELECT 1 FROM Users WHERE user_id = @SenderID)
+        BEGIN
+            THROW 50000, 'Sender ID is invalid.', 1;
+        END;
+
+        -- Get ReceiverID from Users table based on ReceiverUsername
+        SELECT @ReceiverID = user_id
+        FROM Users
+        WHERE username = @ReceiverUsername;
+
+        -- Check if ReceiverID is found
+        IF @ReceiverID IS NULL
+        BEGIN
+            THROW 50001, 'Receiver Username is invalid.', 1;
+        END;
+
+        -- Check if the users are friends and the friendship request is accepted
+        IF NOT EXISTS (
+            SELECT 1
+            FROM Friend
+            WHERE (user_id1 = @SenderID AND user_id2 = @ReceiverID AND accept = 1)
+               OR (user_id1 = @ReceiverID AND user_id2 = @SenderID AND accept = 1)
+        )
+        BEGIN
+            THROW 50002, 'Users are not friends or friendship request is not accepted.', 1;
+        END;
+
+        -- Insert the message into the Chat table
+        INSERT INTO Chat (sender_id, receiver_id, message_content, sent_at)
+        VALUES (@SenderID, @ReceiverID, @MessageContent, GETDATE());
+
+        -- Commit transaction
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        -- Rollback transaction in case of error
+        ROLLBACK TRANSACTION;
+
+        -- Raise the error again to notify the caller
+        THROW;
+    END CATCH
+END;
+
+GO
+--********
+CREATE PROCEDURE GetChatsBetweenUser
+    @sender_id INT,
+    @receiver_username NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+	DECLARE @user_id2 INT;
+    SELECT @user_id2 = user_id
+    FROM Users
+    WHERE username = @receiver_username;
+	IF @user_id2 IS NULL
+    BEGIN
+        RAISERROR ('User with the specified username does not exist.', 16, 1);
+        RETURN;
+    END
+    SELECT  message_content, sent_at
+    FROM Chat
+    WHERE (sender_id = @sender_id AND receiver_id = @receiver_id)
+       OR (sender_id = @receiver_id AND receiver_id = @sender_id)
+    ORDER BY sent_at;
+END;
+GO
+--******************************************************
+CREATE PROCEDURE SendFriendRequest1
+    @user_id1 INT,
+    @friend_username NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Get user_id2 from the username
+    DECLARE @user_id2 INT;
+    SELECT @user_id2 = user_id
+    FROM Users
+    WHERE username = @friend_username;
+
+    -- Check if the user with given username exists
+    IF @user_id2 IS NULL
+    BEGIN
+        RAISERROR ('User with the specified username does not exist.', 16, 1);
+        RETURN;
+    END
+
+    -- Check if there is already a friend request or friendship exists
+    DECLARE @existing_accept INT;
+    SELECT @existing_accept = accept
+    FROM Friend
+    WHERE (user_id1 = @user_id1 AND user_id2 = @user_id2)
+       OR (user_id1 = @user_id2 AND user_id2 = @user_id1);
+
+    IF @existing_accept IS NOT NULL
+    BEGIN
+        IF @existing_accept = 1
+        BEGIN
+            -- Friendship already exists
+            RAISERROR ('These users are already friends.', 16, 1);
+            RETURN;
+        END
+        ELSE IF @existing_accept = 3
+        BEGIN
+            -- Friend request already sent, waiting for acceptance
+            RAISERROR ('Friend request already sent. Waiting for acceptance.', 16, 1);
+            RETURN;
+        END
+    END
+
+    -- Insert a new friend request
+    INSERT INTO Friend (user_id1, user_id2, accept)
+    VALUES (@user_id1, @user_id2, 3);  
+
+    PRINT 'Friend request sent successfully.';
+END;
+
+GO
+--**********************
+CREATE PROCEDURE GetFriendSRequest
+    @target_user_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        CASE 
+            WHEN F.user_id1 = @target_user_id THEN U2.username 
+            WHEN F.user_id2 = @target_user_id THEN U1.username 
+        END AS username
+    FROM 
+        Friend F
+    LEFT JOIN 
+        Users U1 ON F.user_id1 = U1.user_id
+    LEFT JOIN 
+        Users U2 ON F.user_id2 = U2.user_id
+    WHERE 
+        (F.user_id1 = @target_user_id OR F.user_id2 = @target_user_id) AND F.accept = 3;
+END;
+
+GO
+--------------------------------------------
+CREATE PROCEDURE AcceptFriendRequest
+    @target_user_id INT,
+    @requester_username VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @requester_user_id INT;
+    SELECT @requester_user_id = user_id
+    FROM Users
+    WHERE username = @requester_username;
+    IF @requester_user_id IS NULL
+    BEGIN
+        RAISERROR('Requester user not found.', 16, 1);
+        RETURN;
+    END;
+    UPDATE Friend
+    SET accept = 1 
+    WHERE (user_id1 =@target_user_id  AND user_id2 = @requester_user_id) OR (user_id1 =@requester_user_id AND user_id2 = @target_user_id  );
+END;
+GO
+
+CREATE PROCEDURE DeclineFriendRequest
+    @current_user_id INT,
+    @requester_username VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @requester_user_id INT;
+    SELECT @requester_user_id = user_id
+    FROM Users
+    WHERE username = @requester_username;
+    IF @requester_user_id IS NULL
+    BEGIN
+        RAISERROR('Requester user not found.', 16, 1);
+        RETURN;
+    END;
+    UPDATE Friend
+    SET accept = 0
+    WHERE user_id1 =  @current_user_id AND user_id2 = @requester_user_id;
+END;
+GO
+-------------------**************---------------------------
+CREATE PROCEDURE GetFriendsNames
+    @user_id INT
+AS
+BEGIN
+    SELECT u.username AS friend_name
+    FROM Users u
+    INNER JOIN (
+        SELECT user_id2 AS friend_id FROM Friend WHERE user_id1 = @user_id AND accept = 1
+        UNION ALL
+        SELECT user_id1 AS friend_id FROM Friend WHERE user_id2 = @user_id AND accept = 1
+    ) f ON u.user_id = f.friend_id;
+END;
+GO
 ----------------------------------------------------------------------Mahrokh---------------------------------------------------------------------
 CREATE PROCEDURE GetFavoriteSongsAndAlbums
     @user_id INT
@@ -1718,11 +1952,50 @@ END;
 GO
 
 
-
-
-
-
-
+--------------------------------------------------------
+-- Procedure to get all valid tickets
+CREATE PROCEDURE GetValidTickets
+    @user_id INT
+AS
+BEGIN
+    SELECT 
+        t.ticket_id,
+        a.bio AS Artist_information,
+        c.[date] AS concert_date,
+        c.location,
+        t.price
+    FROM 
+        Tickets t
+    JOIN 
+        Concerts c ON t.artist_id = c.artist_id AND t.date_concert = c.[date]
+    JOIN 
+        Artists a ON t.artist_id = a.artist_id
+    WHERE 
+        t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 0 AND t.date_concert > GETDATE();
+END;
+GO
+--------------------------------------------------------
+-- Procedure to get all expired tickets
+CREATE PROCEDURE GetExpiredTickets
+    @user_id INT
+AS
+BEGIN
+    SELECT 
+        t.ticket_id,
+        a.bio AS Artist_information,
+        c.[date] AS concert_date,
+        c.location,
+        t.price
+    FROM 
+        Tickets t
+    JOIN 
+        Concerts c ON t.artist_id = c.artist_id AND t.date_concert = c.[date]
+    JOIN 
+        Artists a ON t.artist_id = a.artist_id
+    WHERE 
+        t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 1 AND t.date_concert <= GETDATE();
+END;
+GO
 
 
 
@@ -1766,15 +2039,25 @@ GO
 --       (2, 'Song 2', 2, 'Rock', '2023-02-20', 'Lyrics for Song 2', 'PG', 'UK', '/images/song2.jpg', 1),
 --       (3, 'Song 3', 3, 'Electronic', '2023-03-10', 'Lyrics for Song 3', 'PG', 'Canada', '/images/song3.jpg', 1);
 
---INSERT INTO Concerts (artist_id, [location], [date], address_of_picture)
---VALUES (1, 'New York Concert Hall', '2023-04-01 19:00:00', '/images/concert1.jpg'),
---       (2, 'LA Stadium', '2023-05-15 20:00:00', '/images/concert2.jpg'),
---       (3, 'Chicago Arena', '2023-06-20 18:30:00', '/images/concert3.jpg');
 
---INSERT INTO Tickets (user_id, artist_id, price, Expiration, is_sold, date_concert)
---VALUES (1, 1, 50.00, 1, 0, '2023-04-01 19:00:00'),
---       (2, 2, 75.00, 1, 0, '2023-05-15 20:00:00'),
---       (3, 3, 60.00, 1, 0, '2023-06-20 18:30:00');
+
+---- Insert sample data into the Concerts table
+--INSERT INTO Concerts (artist_id, location, date, cancel, address_of_picture) VALUES
+--(1, 'Location 1', '2025-08-01 19:00:00', 0, 'address1.jpg'),
+--(2, 'Location 2', '2025-08-15 19:00:00', 0, 'address2.jpg'),
+--(3, 'Location 3', '2025-09-01 19:00:00', 0, 'address3.jpg'),
+--(1, 'Location 1', '2022-07-01 19:00:00', 0, 'address4.jpg'),
+--(2, 'Location 2', '2022-07-15 19:00:00', 0, 'address5.jpg');
+
+---- Inserting new rows into the Tickets table
+--INSERT INTO Tickets (user_id, artist_id, price, Expiration, is_sold, date_concert) VALUES
+--(1, 1, 100.00, 0, 1, '2025-08-01 19:00:00'),
+--(1, 2, 50.00, 0, 1, '2025-08-15 19:00:00'),
+--(1, 3, 150.00, 0, 1, '2025-09-01 19:00:00'),
+--(2, 1, 100.00, 1, 1, '2022-07-01 19:00:00'),
+--(2, 2, 50.00, 1, 1, '2022-07-15 19:00:00');
+
+
 
 --INSERT INTO Favorite_Play_list (user_id, user_id_owner, [name])
 --VALUES (1, 2, 'Favorites'),
