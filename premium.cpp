@@ -679,37 +679,63 @@ void Premium::fill_concerts()
     QWidget *contentWidget = new QWidget(this);
     QVBoxLayout *mainLayout = new QVBoxLayout(contentWidget);
 
-    // Example concerts
-    QStringList concertNames = {"Concert 1", "Concert 2", "Concert 3", "Concert 4", "Concert 5", "Concert 6", "Concert 7", "Concert 8", "Concert 9", "Concert 10"};
-    QString imagePath = ":/new/prefix1/spotify logo.png";
+    QSqlQuery concertQuery;
+    concertQuery.prepare("SELECT artist_id, location, [date], address_of_picture FROM Concerts WHERE [date] > GETDATE() AND cancel != 1");
 
-    for (int i = 0; i < concertNames.size(); i += 4)
-    {
-        QHBoxLayout *hLayout = new QHBoxLayout();
+    if (!concertQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve concerts: " + concertQuery.lastError().text());
+        return;
+    }
 
-        for (int j = 0; j < 4 && i + j < concertNames.size(); ++j)
-        {
-            addConcertItem(hLayout, concertNames[i + j], imagePath);
+    while (concertQuery.next()) {
+        int artistId = concertQuery.value("artist_id").toInt();
+        QString location = concertQuery.value("location").toString();
+        QDateTime date = concertQuery.value("date").toDateTime();
+        QString addressOfPicture = concertQuery.value("address_of_picture").toString();
+        QString concertName = QString("%1 - %2").arg(artistId).arg(location);
+
+        if (areTicketsAvailable(artistId, date)) {
+            addConcertItem(mainLayout, concertName, artistId, date, addressOfPicture);
         }
-
-        mainLayout->addLayout(hLayout);
     }
 
     ui->concerts_scrollBar->setWidget(contentWidget);
 }
 
-void Premium::addConcertItem(QHBoxLayout *layout, const QString &concertName, const QString &imagePath)
+bool Premium::areTicketsAvailable(int artistId, const QDateTime &date)
+{
+    QSqlQuery ticketQuery;
+    ticketQuery.prepare("EXEC GetAvailableTickets @artist_id = :artistId, @date_concert = :date");
+    ticketQuery.bindValue(":artistId", artistId);
+    ticketQuery.bindValue(":date", date);
+
+    if (!ticketQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to check ticket availability: " + ticketQuery.lastError().text());
+        return false;
+    }
+
+    return ticketQuery.next(); // Returns true if there is at least one available ticket
+}
+
+void Premium::addConcertItem(QVBoxLayout *layout, const QString &concertName, int artistId, const QDateTime &date, const QString &imagePath)
 {
     QWidget *concertWidget = new QWidget(this);
     QVBoxLayout *vLayout = new QVBoxLayout(concertWidget);
 
     QLabel *imageLabel = new QLabel(this);
-    QPixmap pixmap(imagePath);
+    QString resolvedImagePath = imagePath;
+
+    if (resolvedImagePath.isEmpty() || !QFile::exists(resolvedImagePath)) {
+        resolvedImagePath = ":/new/prefix1/spotify logo.png"; // Use default image if the specified one is empty or not found
+    }
+
+    QPixmap pixmap(resolvedImagePath);
     imageLabel->setPixmap(pixmap.scaled(100, 100, Qt::KeepAspectRatio));
     vLayout->addWidget(imageLabel);
 
     QPushButton *concertButton = new QPushButton(concertName, this);
-    concertButton->setProperty("name", concertName);
+    concertButton->setProperty("artistId", artistId);
+    concertButton->setProperty("date", date);
     connect(concertButton, &QPushButton::clicked, this, &Premium::toggleTicketOptions);
     vLayout->addWidget(concertButton);
 
@@ -718,12 +744,24 @@ void Premium::addConcertItem(QHBoxLayout *layout, const QString &concertName, co
     ticketWidget->setObjectName("ticketWidget");
     ticketWidget->setVisible(false);
 
-    QStringList ticketOptions = {"VIP - $200", "Standard - $100", "Economy - $50"};
-    for (const QString &ticketOption : ticketOptions)
-    {
+    QSqlQuery ticketQuery;
+    ticketQuery.prepare("EXEC GetAvailableTickets @artist_id = :artistId, @date_concert = :date");
+    ticketQuery.bindValue(":artistId", artistId);
+    ticketQuery.bindValue(":date", date);
+
+    if (!ticketQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve tickets: " + ticketQuery.lastError().text());
+        return;
+    }
+
+    while (ticketQuery.next()) {
+        int ticketId = ticketQuery.value("ticket_id").toInt();
+        double price = ticketQuery.value("price").toDouble();
+        QString ticketOption = QString("Ticket ID %1 - $%2").arg(ticketId).arg(price);
+
         QPushButton *ticketButton = new QPushButton(ticketOption, this);
-        ticketButton->setProperty("price", ticketOption.split('-').last().trimmed().mid(1).toDouble());
-        ticketButton->setProperty("concert", concertName);
+        ticketButton->setProperty("ticketId", ticketId);
+        ticketButton->setProperty("price", price);
         connect(ticketButton, &QPushButton::clicked, this, &Premium::buyTicket);
         ticketLayout->addWidget(ticketButton);
     }
@@ -756,27 +794,50 @@ void Premium::buyTicket()
     if (!button)
         return;
 
+    int ticketId = button->property("ticketId").toInt();
     double ticketPrice = button->property("price").toDouble();
-    QString concertName = button->property("concert").toString();
     double userBalance = getUserBalance();
 
-    if (userBalance >= ticketPrice)
-    {
-        // Proceed with ticket purchase
-        QMessageBox::information(this, "Purchase Successful", QString("You have successfully purchased a ticket for %1!").arg(concertName));
-    }
-    else
-    {
-        // Show error message
+    if (userBalance < ticketPrice) {
         QMessageBox::critical(this, "Insufficient Funds", "You do not have enough money to buy this ticket.");
+        return;
     }
+
+    QSqlQuery query;
+    query.prepare("EXEC BuyTicket @user_id = :userId, @ticket_id = :ticketId");
+    query.bindValue(":userId", ID); // Assuming ID is the current user's ID
+    query.bindValue(":ticketId", ticketId);
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to buy ticket: " + query.lastError().text());
+        return;
+    }
+
+    QMessageBox::information(this, "Purchase Successful", QString("You have successfully purchased a ticket!"));
+    updateBalanceLabel(); // Update the balance label after purchase
+    fill_wallet();
+    fill_concerts();
+
 }
 
 double Premium::getUserBalance()
 {
-    // Example function to return user balance, replace with actual logic
-    return 150.0; // User has $150
+    QSqlQuery balanceQuery;
+    balanceQuery.prepare("SELECT amount FROM Digital_wallet WHERE user_id = :userId");
+    balanceQuery.bindValue(":userId", ID); // Assuming ID is the current user's ID
+
+    if (!balanceQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve wallet balance: " + balanceQuery.lastError().text());
+        return 0.0;
+    }
+
+    if (balanceQuery.next()) {
+        return balanceQuery.value("amount").toDouble();
+    }
+
+    return 0.0; // If no balance is found, return 0.0
 }
+
 
 void Premium::fill_wallet()
 {
@@ -792,7 +853,6 @@ void Premium::fill_wallet()
     validQuery.bindValue(":user_id", userId);
 
     QList<QPair<QString, double>> validTickets;
-    double totalBalance = 0.0;
 
     if (!validQuery.exec()) {
         QMessageBox::critical(this, "Error", "Failed to retrieve valid tickets: " + validQuery.lastError().text());
@@ -839,6 +899,7 @@ void Premium::clearTickets(QScrollArea* scrollArea)
     }
     scrollArea->setWidget(nullptr);
 }
+
 void Premium::updateBalanceLabel() {
     int userId = ID; // Assuming ID is the current user's ID
 
@@ -858,7 +919,6 @@ void Premium::updateBalanceLabel() {
         QMessageBox::warning(this, "No Balance", "No wallet balance found for this user.");
     }
 }
-
 
 void Premium::populateTickets(const QList<QPair<QString, double>>& tickets, QScrollArea* scrollArea, bool horizontal)
 {
@@ -1056,7 +1116,6 @@ void Premium::declineFriendshipRequest(const QString &userName)
 
     fillFriendshipRequests();
 }
-
 
 void Premium::on_UploadPhoto_clicked()
 {
@@ -1400,7 +1459,6 @@ void Premium::clearScrollAreaSearch() {
     }
 }
 
-
 void Premium::on_charge_clicked()
 {
     int userId = ID; // Assuming ID is the current user's ID
@@ -1470,4 +1528,37 @@ void Premium::on_withdraw_clicked()
 }
 
 
+
+
+void Premium::on_premiumBuy_clicked()
+{
+    QString lineEditText = ui->cartNumber->text();
+    QString lineEditText1 = ui->SecondPass_card->text();
+    QString comboBoxText = ui->comboBox_month_card->currentText();
+    QString comboBoxText1 = ui->comboBox_2->currentText();
+    bool isRadioButton1Checked = ui->premium1month->isChecked();
+    bool isRadioButton2Checked = ui->premium3month->isChecked();
+    bool isRadioButton3Checked = ui->premium6month->isChecked();
+
+        if (!isRadioButton1Checked && !isRadioButton2Checked && !isRadioButton3Checked) {
+            QMessageBox::warning(this, "Selection Error", "Please select one of the options.");
+            return;
+        }
+        if (lineEditText.isEmpty() ||lineEditText1.isEmpty() || comboBoxText.isEmpty() || comboBoxText1.isEmpty()) {
+            QMessageBox::warning(this, "Input Error", "Please fill in all required fields.");
+            return;
+        }
+        //ADD Premum user
+        if (ui->Imartist->isChecked()) {
+                // Add Artist
+                QMessageBox::information(this, "Checkbox Checked", "The checkbox is checked.");
+            }
+
+
+
+
+
+        //////////////////////////////////////
+
+}
 

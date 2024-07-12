@@ -92,17 +92,17 @@
 --	PRIMARY KEY (artist_id,[date])
 --);
 ------------------------------------------------------
---CREATE TABLE Tickets (
---    ticket_id INT PRIMARY KEY IDENTITY,
---    user_id INT,
---	artist_id INT,
---	price DECIMAL(10, 2),
---    Expiration BIT DEFAULT 1,-- 1
---	is_sold BIT DEFAULT 0,-- 0 
---	date_concert DATETIME ,--**
---    FOREIGN KEY (user_id) REFERENCES Users(user_id),
---	FOREIGN KEY (artist_id,date_concert) REFERENCES Concerts(artist_id,[date])
---);
+CREATE TABLE Tickets (
+    ticket_id INT PRIMARY KEY IDENTITY,
+    user_id INT,
+	artist_id INT,
+	price DECIMAL(10, 2),
+    Expiration BIT DEFAULT 0,-- 1
+	is_sold BIT DEFAULT 0,-- 0 
+	date_concert DATETIME ,--**
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+	FOREIGN KEY (artist_id,date_concert) REFERENCES Concerts(artist_id,[date])
+);
 ------------------------------------------------------
 --CREATE TABLE Favorite_Play_list(
 --    user_id INT,
@@ -372,9 +372,9 @@ CREATE TABLE Chat (
 ----SHOW ALL  Available CONCERT:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --SELECT artist_id, location, [date]
 --FROM Concerts
---WHERE [date] > GETDATE();
+--WHERE [date] > GETDATE() and Concerts.cancel!=1;
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
---SHOW ALL Available Tickets:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+------SHOW ALL Available Tickets:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --CREATE PROCEDURE GetAvailableTickets
 --    @artist_id INT,
 --    @date_concert DATETIME
@@ -385,8 +385,10 @@ CREATE TABLE Chat (
 --    WHERE artist_id = @artist_id
 --      AND date_concert = @date_concert
 --      AND is_sold = 0
---      AND Expiration = 1;
+--      AND Expiration = 0;
 --END;
+--GO
+
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ----BUY TICKET AND UPDATE WALLET:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --CREATE PROCEDURE BuyTicket
@@ -403,7 +405,7 @@ CREATE TABLE Chat (
 --    FROM Tickets
 --    WHERE ticket_id = @ticket_id
 --      AND is_sold = 0
---      AND Expiration = 1;
+--      AND Expiration = 0;
   
 --    SELECT @balance = amount
 --    FROM Digital_wallet
@@ -425,6 +427,7 @@ CREATE TABLE Chat (
 
 --    COMMIT TRANSACTION;
 --END;
+--GO
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -------------------------------------------------------------------------------------------------------------------
 ----SHOW ALL TICKET THAT BUY(0):!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -602,37 +605,49 @@ CREATE TABLE Chat (
 ------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -----------------------------------------------------------------------------------------------------------------------------------------------
 --DISPLAY SONG DETAILS:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
---DROP PROCEDURE GetSongDetails;
---CREATE PROCEDURE GetSongDetails
---    @song_id INT
---AS
---BEGIN
---    -- Get the song details
---    SELECT
---        s.song_id AS ID,
---        s.title AS Title,
---        a.title AS AlbumTitle,
---        s.genre AS Genre,
---        s.country AS Country,
---        s.Age_category AS AgeCategory,
---        s.lyrics AS Lyrics,
---        s.address_of_picture AS PictureAddress  -- Add the picture address
---    FROM Songs s
---    JOIN Albums a ON s.album_id = a.album_id OR s.album_id IS NULL
---    WHERE s.song_id = @song_id;
+DROP PROCEDURE GetSongDetails;
+CREATE PROCEDURE GetSongDetails
+    @song_id INT
+AS
+BEGIN
+    -- Get the song details
+    SELECT
+        s.song_id AS ID,
+        s.title AS Title,
+        a.title AS AlbumTitle,
+        s.genre AS Genre,
+        s.country AS Country,
+        s.Age_category AS AgeCategory,
+        s.lyrics AS Lyrics,
+        s.address_of_picture AS PictureAddress  -- Add the picture address
+    FROM Songs s
+    JOIN Albums a ON s.album_id = a.album_id OR s.album_id IS NULL
+    WHERE s.song_id = @song_id;
 
---    -- Get all artists for the song
---    SELECT
---        u.username AS ArtistName
---    FROM artist_has_song ahs
---    JOIN Artists ar ON ahs.artist_id = ar.artist_id
---    JOIN Users u ON ar.artist_id = u.user_id
---    WHERE ahs.song_id = @song_id;
---END;
---GO
+    -- Get all artists for the song
+    SELECT
+        u.username AS ArtistName
+    FROM artist_has_song ahs
+    JOIN Artists ar ON ahs.artist_id = ar.artist_id
+    JOIN Users u ON ar.artist_id = u.user_id
+    WHERE ahs.song_id = @song_id;
+END;
+GO
 
 
 exec GetSongDetails @song_id=5;
+------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+------------------------------------------------------------------------------------------------------------------------------------------------
+------DISPLAY SONG Lyrics :!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+----CREATE PROCEDURE GetSongLyrics 
+----    @song_id INT
+----AS
+----BEGIN
+----    SELECT
+----        s.lyrics AS Lyrics  
+----    FROM Songs s
+----    WHERE s.song_id = @song_id;
+----END;
 ------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ------ADD FUND TO WALLET:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -706,49 +721,49 @@ GO
 ----END;
 ------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ----ADD ARTIST:
---CREATE PROCEDURE AddArtist
---    @user_id INT,
---	@bio VARCHAR(100)
---AS
---BEGIN
---    -- Check if the user exists
---    IF EXISTS (SELECT 1 FROM Users WHERE user_id = @user_id)
---    BEGIN
---        -- Insert into Artists table with username as bio
---        INSERT INTO Artists (artist_id, bio)
---        VALUES (@user_id,@bio)
---    END
---    ELSE
---    BEGIN
---        RAISERROR('User does not exist.', 16, 1);
---    END
---END;
+CREATE PROCEDURE AddArtist
+    @user_id INT,
+	@bio VARCHAR(100)
+AS
+BEGIN
+    -- Check if the user exists
+    IF EXISTS (SELECT 1 FROM Users WHERE user_id = @user_id)
+    BEGIN
+        -- Insert into Artists table with username as bio
+        INSERT INTO Artists (artist_id, bio)
+        VALUES (@user_id,@bio)
+    END
+    ELSE
+    BEGIN
+        RAISERROR('User does not exist.', 16, 1);
+    END
+END;
 GO
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --CHECK USER IS ARTIST OR NOT:
---CREATE PROCEDURE IsUserArtist
---    @user_id INT
---AS
---BEGIN
---    -- Declare a variable to store the result
---    DECLARE @is_artist BIT = 0;
+CREATE PROCEDURE IsUserArtist
+    @user_id INT
+AS
+BEGIN
+    -- Declare a variable to store the result
+    DECLARE @is_artist BIT = 0;
 
---    -- Check if the user is a premium user with a valid subscription and is in the Artists table
---    IF EXISTS (
---        SELECT 1
---        FROM Premium p
---        JOIN Artists a ON p.user_id = a.artist_id
---        WHERE p.user_id = @user_id
---          AND p.End_time > GETDATE()
---    )
---    BEGIN
---        SET @is_artist = 1;
---    END
+    -- Check if the user is a premium user with a valid subscription and is in the Artists table
+    IF EXISTS (
+        SELECT 1
+        FROM Premium p
+        JOIN Artists a ON p.user_id = a.artist_id
+        WHERE p.user_id = @user_id
+          AND p.End_time > GETDATE()
+    )
+    BEGIN
+        SET @is_artist = 1;
+    END
 
---    -- Return the result
---    SELECT @is_artist AS IsArtist;
---END;
---GO
+    -- Return the result
+    SELECT @is_artist AS IsArtist;
+END;
+GO
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --______________________________________________________________________________________________________
 --ADD SONG :
@@ -983,17 +998,6 @@ BEGIN
     END CATCH
 END;
 GO
---___________________________________________________________________________________________________________________________
-CREATE PROCEDURE GetCommentsForSong
-    @song_id INT
-AS
-BEGIN
-    SELECT [text], user_id, [date]
-    FROM Comment_song
-    WHERE song_id = @song_id
-    ORDER BY [date];
-END;
-GO
 -------------------------------------------------------------------------------------------ZAHRA--------------------------------------------------------------------------------------
 CREATE PROCEDURE InsertUser
     @username NVARCHAR(50),
@@ -1007,7 +1011,7 @@ BEGIN
     VALUES (@username, @password, @Email, @birth_date, @location);
 END;
 GO
----------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE InsertPremium
     @user_id INT, 
     @end_time DATETIME,
@@ -1060,7 +1064,7 @@ BEGIN
     END;
 END;
 GO
-----------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE AddSongToPlaylist
     @user_id INT,
     @playlist_name NVARCHAR(50),
@@ -1097,7 +1101,7 @@ BEGIN
     END
 END;
 GO
---------------------
+------------------***********------------------------
 CREATE PROCEDURE ViewPlaylistSongsWithArtists
     @playlist_name NVARCHAR(50),
     @user_id INT
@@ -1128,7 +1132,7 @@ BEGIN
         S.song_id;
 END;
 GO
------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE AddCommentToPlaylist
     @user_id INT,
     @playlist_name NVARCHAR(50),
@@ -1151,11 +1155,11 @@ BEGIN
     END
 END;
 GO
------------------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE AddCommentToSong
     @user_id INT,
     @song_id INT,
-    @text VARCHAR(MAX)
+    @text VARCHAR(100)
 AS
 BEGIN
     IF EXISTS (
@@ -1164,8 +1168,8 @@ BEGIN
         WHERE user_id = @user_id AND End_time > GETDATE()
     )
     BEGIN
-        INSERT INTO Comment_song (song_id, [text], user_id,[date])
-        VALUES (@song_id, @text, @user_id,GETDATE());
+        INSERT INTO Comment_song (song_id, [text], user_id)
+        VALUES (@song_id, @text, @user_id);
         
         PRINT 'Comment added successfully to song.';
     END
@@ -1175,7 +1179,7 @@ BEGIN
     END
 END;
 GO
-----------------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE AddCommentToAlbum
     @user_id INT,
     @album_id INT,
@@ -1200,7 +1204,7 @@ BEGIN
     END
 END;
 GO
------------------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE LikeSong
     @user_id INT,
     @song_id INT
@@ -1234,7 +1238,7 @@ BEGIN
     END
 END;
 GO
----------------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE LikeAlbum
     @user_id INT,
     @album_id INT
@@ -1268,7 +1272,7 @@ BEGIN
     END
 END;
 GO
--------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE LikePlaylist
     @user_id INT,
     @playlist_name NVARCHAR(50)
@@ -1302,7 +1306,7 @@ BEGIN
     END
 END;
 GO
-----------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE InsertUserArtistLikes
 AS
 BEGIN
@@ -1336,9 +1340,7 @@ BEGIN
         Songs s ON ls.song_id = s.song_id;
 END;
 GO
-
---EXEC GetUserInterests @user_id = 1;
--------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE GetRecommendedAlb
 (
     @user_id INT
@@ -1366,7 +1368,7 @@ BEGIN
         NEWID(); -- Random order for diversity in recommendations
 END;
 GO
-------------------------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE GetRecommendedSongsByArtistLike
 (
     @user_id INT
@@ -1397,6 +1399,7 @@ BEGIN
         UAL.Likes_Count DESC, NEWID();
 END;
 GO
+------------------***********------------------------
 CREATE PROCEDURE GetRecommendedSongsByGenreLike
 (
     @user_id INT
@@ -1462,7 +1465,7 @@ END;
         GL.Likes_Count DESC, NEWID();-- Order by likes count of genre and then randomize
 END;
 GO
--------------------------------------
+------------------***********------------------------**************************************************************************************
 CREATE PROCEDURE CheckSSS
     @username VARCHAR(50),
     @password VARCHAR(50)
@@ -1493,10 +1496,8 @@ BEGIN
         SELECT NULL AS User_Id, 'Invalid User' AS User_Type, 'N/A' AS Artist_Status;
     END
 END;
-
-
-----EXEC GetUserInterests @user_id = 1;
----------------------------------------------------------
+GO
+------------------***********------------------------
 --CREATE PROCEDURE GetRecommendedAlb
 --(
 --    @user_id INT
@@ -1598,66 +1599,40 @@ END;
 --        GL.Likes_Count DESC, NEWID(); -- Order by likes count of genre and then randomize
 --END;
 --GO
----------------------------------------
---CREATE PROCEDURE CheckS
---    @username VARCHAR(50),
---    @password VARCHAR(50)
---AS
---BEGIN
---    SET NOCOUNT ON;
---    DECLARE @user_id INT;
---    SELECT @user_id = user_id
---    FROM Users
---    WHERE username = @username AND [password] = @password;
-    
---    IF @user_id IS NOT NULL
---    BEGIN
---        SELECT @user_id AS User_Id,
---            CASE
---                WHEN EXISTS (SELECT 1 FROM Premium WHERE user_id = @user_id AND GETDATE() < End_time) THEN 'Premium User'
---                ELSE 'Regular User'
---            END AS User_Type;
---    END
---    ELSE
---    BEGIN
---        SELECT NULL AS User_Id, 'Invalid User' AS User_Type;
---    END
---END;
---GO 
 ----------------------------------------------
---CREATE PROCEDURE CheckUserByEmailAndUsername
---    @username VARCHAR(50),
---    @email VARCHAR(100)
---AS
---BEGIN
---    SET NOCOUNT ON;
+CREATE PROCEDURE CheckUserByEmailAndUsername
+    @username VARCHAR(50),
+    @email VARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
 
---    DECLARE @user_id INT;
---    SELECT @user_id = user_id
---    FROM Users
---    WHERE username = @username AND email = @email;
---    SELECT 
---        CASE
---            WHEN @user_id IS NOT NULL THEN 'Valid'
---            ELSE 'Invalid'
---        END AS Result;
---END;
---GO
+    DECLARE @user_id INT;
+    SELECT @user_id = user_id
+    FROM Users
+    WHERE username = @username AND email = @email;
+    SELECT 
+        CASE
+            WHEN @user_id IS NOT NULL THEN 'Valid'
+            ELSE 'Invalid'
+        END AS Result;
+END;
+GO
 ------------------------------------------------
---CREATE PROCEDURE UpdatePassword
---    @username VARCHAR(50),
---    @newPassword VARCHAR(50)
---AS
---BEGIN
---    SET NOCOUNT ON;
+CREATE PROCEDURE UpdatePassword
+    @username VARCHAR(50),
+    @newPassword VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
 
---    UPDATE Users
---    SET [password] = @newPassword
---    WHERE username = @username;
+    UPDATE Users
+    SET [password] = @newPassword
+    WHERE username = @username;
 
---    SELECT @@ROWCOUNT AS AffectedRows; -- Return the number of affected rows
---END;
---GO
+    SELECT @@ROWCOUNT AS AffectedRows; -- Return the number of affected rows
+END;
+GO
 --------------------------------------------------------
 CREATE PROCEDURE GetPlaylistsByUserId
     @user_id INT
@@ -1794,8 +1769,8 @@ BEGIN
     END
     SELECT  message_content, sent_at
     FROM Chat
-    WHERE (sender_id = @sender_id AND receiver_id = @receiver_id)
-       OR (sender_id = @receiver_id AND receiver_id = @sender_id)
+    WHERE (sender_id = @sender_id AND receiver_id = @user_id2)
+       OR (sender_id = @user_id2 AND receiver_id = @sender_id)
     ORDER BY sent_at;
 END;
 GO
@@ -1842,14 +1817,12 @@ BEGIN
             RETURN;
         END
     END
-
     -- Insert a new friend request
     INSERT INTO Friend (user_id1, user_id2, accept)
     VALUES (@user_id1, @user_id2, 3);  
 
     PRINT 'Friend request sent successfully.';
 END;
-
 GO
 --**********************
 CREATE PROCEDURE GetFriendSRequest
@@ -1872,10 +1845,9 @@ BEGIN
     WHERE 
         (F.user_id1 = @target_user_id OR F.user_id2 = @target_user_id) AND F.accept = 3;
 END;
-
 GO
 --------------------------------------------
-CREATE PROCEDURE AcceptFriendRequest
+CREATE PROCEDURE AcceptFriendRequests
     @target_user_id INT,
     @requester_username VARCHAR(50)
 AS
@@ -1895,8 +1867,8 @@ BEGIN
     SET accept = 1 
     WHERE (user_id1 =@target_user_id  AND user_id2 = @requester_user_id) OR (user_id1 =@requester_user_id AND user_id2 = @target_user_id  );
 END;
-GO
 
+GO
 CREATE PROCEDURE DeclineFriendRequest
     @current_user_id INT,
     @requester_username VARCHAR(50)
@@ -1918,6 +1890,8 @@ BEGIN
     WHERE user_id1 =  @current_user_id AND user_id2 = @requester_user_id;
 END;
 GO
+
+
 -------------------**************---------------------------
 CREATE PROCEDURE GetFriendsNames
     @user_id INT
@@ -1932,6 +1906,8 @@ BEGIN
     ) f ON u.user_id = f.friend_id;
 END;
 GO
+------------------------------------premum---------------------------------
+
 ----------------------------------------------------------------------Mahrokh---------------------------------------------------------------------
 CREATE PROCEDURE GetFavoriteSongsAndAlbums
     @user_id INT
@@ -2039,6 +2015,14 @@ VALUES (1, 'My Playlis', 1, '/images/my_playlist.jpg'),
 --VALUES (1, 100.00),
 --       (2, 50.00),
 --       (3, 75.00);
+UPDATE Digital_wallet
+SET amount = CASE 
+    WHEN user_id = 1 THEN 200.00
+    WHEN user_id = 2 THEN 150.00
+    WHEN user_id = 3 THEN 175.00
+END
+WHERE user_id IN (1, 2, 3);
+
 
 --INSERT INTO Artists (artist_id, bio)
 --VALUES (1, 'Bio for Artist 1'),
@@ -2066,12 +2050,32 @@ VALUES (1, 'My Playlis', 1, '/images/my_playlist.jpg'),
 --(2, 'Location 2', '2022-07-15 19:00:00', 0, 'address5.jpg');
 
 ---- Inserting new rows into the Tickets table
---INSERT INTO Tickets (user_id, artist_id, price, Expiration, is_sold, date_concert) VALUES
---(1, 1, 100.00, 0, 1, '2025-08-01 19:00:00'),
---(1, 2, 50.00, 0, 1, '2025-08-15 19:00:00'),
---(1, 3, 150.00, 0, 1, '2025-09-01 19:00:00'),
---(2, 1, 100.00, 1, 1, '2022-07-01 19:00:00'),
---(2, 2, 50.00, 1, 1, '2022-07-15 19:00:00');
+
+
+---- Insert into Concerts table
+--INSERT INTO Concerts (artist_id, location, [date], cancel, address_of_picture) VALUES
+--(1, 'Venue 2', '2025-08-15 19:00:00', 0, 'path/to/image2.png'),
+--(2, 'Venue 3', '2025-09-01 19:00:00', 0, 'path/to/image3.png'),
+--(3, 'Venue 1', '2025-09-10 19:00:00', 0, 'path/to/image1.png'),
+--(3, 'Venue 2', '2025-10-01 19:00:00', 0, 'path/to/image2.png'),
+--(1, 'Venue 3', '2025-10-15 19:00:00', 0, 'path/to/image3.png'),
+--(2, 'Venue 1', '2025-11-01 19:00:00', 0, 'path/to/image1.png'),
+--(3, 'Venue 2', '2025-11-15 19:00:00', 0, 'path/to/image2.png'),
+--(1, 'Venue 3', '2025-12-01 19:00:00', 0, 'path/to/image3.png');
+
+-- Insert into Tickets table
+-----drop table Tickets;
+INSERT INTO Tickets (user_id, artist_id, price, Expiration, is_sold, date_concert) VALUES
+(NULL, 1, 100.00, 0, 0, '2025-08-01 19:00:00'),
+(NULL, 2, 50.00, 0, 0, '2025-08-15 19:00:00'),
+(NULL, 3, 150.00, 0, 0, '2025-09-01 19:00:00'),
+(NULL, 1, 120.00, 0, 0, '2025-09-10 19:00:00'),
+(NULL, 2, 60.00, 0, 0, '2025-10-01 19:00:00'),
+(NULL, 3, 170.00, 0, 0, '2025-10-15 19:00:00'),
+(NULL, 1, 130.00, 0, 0, '2025-11-01 19:00:00'),
+(NULL, 2, 70.00, 0, 0, '2025-11-15 19:00:00'),
+(NULL, 3, 180.00, 0, 0, '2025-12-01 19:00:00');
+
 
 
 
