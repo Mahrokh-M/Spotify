@@ -1446,7 +1446,7 @@ END;
         GL.Likes_Count DESC, NEWID();-- Order by likes count of genre and then randomize
 END;
 GO
-------------------***********------------------------
+------------------***********------------------------**************************************************************************************
 CREATE PROCEDURE CheckSSS
     @username VARCHAR(50),
     @password VARCHAR(50)
