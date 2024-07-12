@@ -302,6 +302,16 @@ background-color: rgb(255, 255, 255);</string>
     <string>Lyrics</string>
    </property>
   </widget>
+  <widget class="QTextEdit" name="textEdit_Lyrics">
+   <property name="geometry">
+    <rect>
+     <x>93</x>
+     <y>20</y>
+     <width>371</width>
+     <height>271</height>
+    </rect>
+   </property>
+  </widget>
   <zorder>background</zorder>
   <zorder>Song_pic</zorder>
   <zorder>Song_name</zorder>
@@ -320,6 +330,7 @@ background-color: rgb(255, 255, 255);</string>
   <zorder>Song_genr</zorder>
   <zorder>Song_Country</zorder>
   <zorder>show_lyrics</zorder>
+  <zorder>textEdit_Lyrics</zorder>
  </widget>
  <resources/>
  <connections/>

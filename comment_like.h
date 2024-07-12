@@ -31,6 +31,8 @@ private slots:
     void on_add_playlist_clicked();
     void on_addNewPlaylist_clicked();
     void on_playlistButtonClicked();
+    void on_show_lyrics_clicked();
+
 signals:
     void goBack();
      void open_comment(const QString);

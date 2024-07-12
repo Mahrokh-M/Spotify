@@ -26,7 +26,7 @@
     <string notr="true">background-color: rgb(46, 47, 51);</string>
    </property>
    <property name="currentIndex">
-    <number>4</number>
+    <number>7</number>
    </property>
    <widget class="QWidget" name="songs_tab">
     <attribute name="title">
@@ -1063,7 +1063,7 @@ color: rgb(255, 255, 255);</string>
       <rect>
        <x>30</x>
        <y>390</y>
-       <width>91</width>
+       <width>151</width>
        <height>31</height>
       </rect>
      </property>
@@ -1079,7 +1079,7 @@ color: rgb(255, 255, 255);</string>
       <rect>
        <x>30</x>
        <y>560</y>
-       <width>111</width>
+       <width>161</width>
        <height>21</height>
       </rect>
      </property>
@@ -1122,7 +1122,7 @@ color: rgb(255, 255, 255);</string>
       <string>Withdraw</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="password_3">
+    <widget class="QLineEdit" name="charge_amount">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -1144,7 +1144,7 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       <string>Enter charge amount</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="password_4">
+    <widget class="QLineEdit" name="withdraw_amount">
      <property name="geometry">
       <rect>
        <x>470</x>
@@ -1484,7 +1484,7 @@ color: rgb(255, 255, 255);</string>
         <x>0</x>
         <y>0</y>
         <width>1251</width>
-        <height>591</height>
+        <height>576</height>
        </rect>
       </property>
       <attribute name="label">
