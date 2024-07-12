@@ -81,6 +81,10 @@ color: rgb(255, 255, 255);</string>
        <height>26</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">
+color: rgb(255, 255, 255);</string>
+     </property>
      <property name="text">
       <string>Name of the artist</string>
      </property>
@@ -93,6 +97,9 @@ color: rgb(255, 255, 255);</string>
        <width>141</width>
        <height>26</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
      </property>
      <property name="text">
       <string>Age category</string>
@@ -107,6 +114,9 @@ color: rgb(255, 255, 255);</string>
        <height>26</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
      <property name="text">
       <string>The name of the music</string>
      </property>
@@ -120,6 +130,9 @@ color: rgb(255, 255, 255);</string>
        <height>26</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
      <property name="text">
       <string>Country</string>
      </property>
@@ -132,6 +145,9 @@ color: rgb(255, 255, 255);</string>
        <width>101</width>
        <height>26</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(255, 255, 255);</string>
      </property>
      <property name="text">
       <string>Genre</string>

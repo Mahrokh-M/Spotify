@@ -379,7 +379,7 @@ void Premium::showPlaylist(){
     QPushButton *button = qobject_cast<QPushButton*>(sender());
     if (button)
     {
-        QString songID = button->property("ID").toString();
+        QString songID = button->property("name").toString();
         emit open_playlist(songID); // Emit signal with songID
     }
 }

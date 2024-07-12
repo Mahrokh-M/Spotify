@@ -16,6 +16,7 @@ class Comment_Like : public QWidget
 
 public:
     explicit Comment_Like(QWidget *parent = nullptr);
+    QMap<QString, QString>  getSongDetails(int songId);
     ~Comment_Like();
 
 private:

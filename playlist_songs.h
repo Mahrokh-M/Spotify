@@ -6,6 +6,7 @@
 #include <QScrollArea>
 #include <QPushButton>
 #include <QLabel>
+#include <QFile>
 namespace Ui {
 class playlist_songs;
 }
@@ -22,9 +23,12 @@ private slots:
     void on_Back_clicked();
     void setstyle();
 
+    void on_Like_button_clicked();
+
 private:
     Ui::playlist_songs *ui;
     void onSongButtonClicked();
+    void updateLikeButtonStyle(const QString &playlistName);
 public slots:
     void fillPlaylist(const QString &listID);
 signals:

@@ -82,6 +82,7 @@
 --	FOREIGN KEY (artist_id_added) REFERENCES Artists(artist_id)
 --);
 ------------------------------------------------------
+
 --CREATE TABLE Concerts (
 --    artist_id INT ,
 --    [location] VARCHAR(100),
@@ -91,7 +92,7 @@
 --    FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
 --	PRIMARY KEY (artist_id,[date])
 --);
-------------------------------------------------------
+--------------------------------------------------------
 --CREATE TABLE Tickets (
 --    ticket_id INT PRIMARY KEY IDENTITY,
 --    user_id INT,
@@ -534,59 +535,58 @@ RETURN
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ----SEARCH ALBUM AND SONG:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
---CREATE PROCEDURE SearchMusicAndAlbum
---    @name NVARCHAR(100) = NULL,
---    @artist_name NVARCHAR(100) = NULL,
---    @genre NVARCHAR(50) = NULL,
---    @country NVARCHAR(50) = NULL,
---    @age_category CHAR(2) = NULL
---AS
---BEGIN
---    DECLARE @sql NVARCHAR(MAX) = '';
+CREATE PROCEDURE SearchMusicAndAlbum
+    @name NVARCHAR(100) = NULL,
+    @artist_name NVARCHAR(100) = NULL,
+    @genre NVARCHAR(50) = NULL,
+    @country NVARCHAR(50) = NULL,
+    @age_category CHAR(2) = NULL
+AS
+BEGIN
+    DECLARE @sql NVARCHAR(MAX) = '';
     
---    -- Base SELECT statement for Songs
---    SET @sql = '
---        SELECT ''Song'' AS Type, s.song_id AS ID, s.title AS Title, a.title AS AlbumTitle, ar.bio AS ArtistBio, s.genre AS Genre, s.country AS Country, s.Age_category AS AgeCategory
---        FROM Songs s
---        JOIN Albums a ON s.album_id = a.album_id
---        JOIN Artists ar ON s.artist_id_added = ar.artist_id
---        WHERE 1=1';
+    -- Base SELECT statement for Songs
+    SET @sql = '
+        SELECT ''Song'' AS Type, s.song_id AS ID, s.title AS Title
+        FROM Songs s
+        JOIN Artists ar ON s.artist_id_added = ar.artist_id
+        WHERE 1=1';
     
---    -- Append conditions for Songs
---    IF @name IS NOT NULL
---        SET @sql = @sql + ' AND s.title LIKE ''%' + @name + '%''';
---    IF @artist_name IS NOT NULL
---        SET @sql = @sql + ' AND ar.bio LIKE ''%' + @artist_name + '%''';
---    IF @genre IS NOT NULL
---        SET @sql = @sql + ' AND s.genre LIKE ''%' + @genre + '%''';
---    IF @country IS NOT NULL
---        SET @sql = @sql + ' AND s.country LIKE ''%' + @country + '%''';
---    IF @age_category IS NOT NULL
---        SET @sql = @sql + ' AND s.Age_category = ''' + @age_category + '''';
+    -- Append conditions for Songs
+    IF @name IS NOT NULL
+        SET @sql = @sql + ' AND s.title LIKE ''%' + @name + '%''';
+    IF @artist_name IS NOT NULL
+        SET @sql = @sql + ' AND ar.bio LIKE ''%' + @artist_name + '%''';
+    IF @genre IS NOT NULL
+        SET @sql = @sql + ' AND s.genre LIKE ''%' + @genre + '%''';
+    IF @country IS NOT NULL
+        SET @sql = @sql + ' AND s.country LIKE ''%' + @country + '%''';
+    IF @age_category IS NOT NULL
+        SET @sql = @sql + ' AND s.Age_category = ''' + @age_category + '''';
     
---    -- Add UNION ALL for Albums
---    SET @sql = @sql + '
---        UNION ALL
---        SELECT ''Album'' AS Type, a.album_id AS ID, a.title AS Title, a.title AS AlbumTitle, ar.bio AS ArtistBio, a.genre AS Genre, a.country AS Country, a.Age_category AS AgeCategory
---        FROM Albums a
---        JOIN Artists ar ON a.artist_id_added = ar.artist_id
---        WHERE 1=1';
+    -- Add UNION ALL for Albums
+    SET @sql = @sql + '
+        UNION ALL
+        SELECT ''Album'' AS Type, a.album_id AS ID, a.title AS Title, a.title 
+        FROM Albums a
+        JOIN Artists ar ON a.artist_id_added = ar.artist_id
+        WHERE 1=1';
     
---    -- Append conditions for Albums
---    IF @name IS NOT NULL
---        SET @sql = @sql + ' AND a.title LIKE ''%' + @name + '%''';
---    IF @artist_name IS NOT NULL
---        SET @sql = @sql + ' AND ar.bio LIKE ''%' + @artist_name + '%''';
---    IF @genre IS NOT NULL
---        SET @sql = @sql + ' AND a.genre LIKE ''%' + @genre + '%''';
---    IF @country IS NOT NULL
---        SET @sql = @sql + ' AND a.country LIKE ''%' + @country + '%''';
---    IF @age_category IS NOT NULL
---        SET @sql = @sql + ' AND a.Age_category = ''' + @age_category + '''';
+    -- Append conditions for Albums
+    IF @name IS NOT NULL
+        SET @sql = @sql + ' AND a.title LIKE ''%' + @name + '%''';
+    IF @artist_name IS NOT NULL
+        SET @sql = @sql + ' AND ar.bio LIKE ''%' + @artist_name + '%''';
+    IF @genre IS NOT NULL
+        SET @sql = @sql + ' AND a.genre LIKE ''%' + @genre + '%''';
+    IF @country IS NOT NULL
+        SET @sql = @sql + ' AND a.country LIKE ''%' + @country + '%''';
+    IF @age_category IS NOT NULL
+        SET @sql = @sql + ' AND a.Age_category = ''' + @age_category + '''';
     
---    -- Execute the dynamic SQL
---    EXEC sp_executesql @sql;
---END;
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql;
+END;
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ----DISPLAY SONG DETAILS:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1227,40 +1227,7 @@ BEGIN
     END
 END;
 GO
--------------------------------------------------------
-CREATE PROCEDURE LikePlaylist
-    @user_id INT,
-    @playlist_name NVARCHAR(50)
-AS
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM Premium
-        WHERE user_id = @user_id AND End_time > GETDATE()
-    )
-    BEGIN
-        IF NOT EXISTS (
-            SELECT 1
-            FROM Like_Play_list
-            WHERE user_id = @user_id AND [name] = @playlist_name
-        )
-        BEGIN
-            INSERT INTO Like_Play_list(user_id, [name])
-            VALUES (@user_id, @playlist_name);
-            
-            PRINT 'Playlist liked successfully.';
-        END
-        ELSE
-        BEGIN
-            PRINT 'You have already liked this playlist.';
-        END
-    END
-    ELSE
-    BEGIN
-        PRINT 'User does not have a valid subscription. Liking is not allowed.';
-    END
-END;
-GO
+
 ----------------------------------------------------------
 CREATE PROCEDURE InsertUserArtistLikes
 AS
@@ -1619,21 +1586,6 @@ BEGIN
     WHERE user_id = @user_id;
 END;
 GO
---------------------------------------------
-CREATE PROCEDURE GetSongsInPlaylist
-    @user_id INT,
-    @playlist_name VARCHAR(50)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT s.title AS Song_Title
-    FROM Playlist_has_song ps
-    INNER JOIN Songs s ON ps.song_id = s.song_id
-    WHERE ps.user_id = @user_id
-    AND ps.[name] = @playlist_name;
-END;
-GO
 --------------------------------------
 CREATE PROCEDURE GetSongsByPlaylist
     @playlist_name VARCHAR(50)
@@ -1860,11 +1812,41 @@ BEGIN
         la.user_id = @user_id;
 END;
 GO
+-----------------------------------------------------------
 
+CREATE PROCEDURE GetSongsInPlaylist
+    @playlist_name VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
 
+    SELECT s.title AS Song_Title
+    FROM Playlist_has_song ps
+    INNER JOIN Songs s ON ps.song_id = s.song_id
+    WHERE ps.[name] = @playlist_name;
+END;
+GO
+--------------------------------------------------------
+CREATE PROCEDURE LikePlaylist
+    @user_id INT,
+    @playlist_name NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
 
+    IF NOT EXISTS (
+        SELECT 1
+        FROM Like_Play_list
+        WHERE user_id = @user_id AND [name] = @playlist_name
+    )
+    BEGIN
+        INSERT INTO Like_Play_list (user_id, [name])
+        VALUES (@user_id, @playlist_name);
 
+    END
 
+END;
+GO
 
 
 
@@ -1879,6 +1861,12 @@ GO
 --VALUES ('user1', 'password1', 'user1@example.com', '1990-01-01', 'New York'),
 --       ('user2', 'password2', 'user2@example.com', '1992-05-15', 'Los Angeles'),
 --       ('user3', 'password3', 'user3@example.com', '1985-08-20', 'Chicago');
+
+--INSERT INTO Users (username, [password], email, birth_date, [location])
+--VALUES ('user4', 'password4', 'user4@example.com', '1990-01-01', 'New York');
+
+--INSERT INTO Premium (user_id, Start_time, End_time)
+--VALUES (4, '2023-01-01 10:00:00', '2025-12-31 23:59:59');
 
 --INSERT INTO Premium (user_id, Start_time, End_time)
 --VALUES (1, '2023-01-01 10:00:00', '2023-12-31 23:59:59'),
