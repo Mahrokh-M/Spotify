@@ -1446,26 +1446,37 @@ END;
 END;
 GO
 -------------------------------------
-CREATE PROCEDURE CheckUserType
+CREATE PROCEDURE CheckSSS
     @username VARCHAR(50),
     @password VARCHAR(50)
 AS
 BEGIN
     SET NOCOUNT ON;
     DECLARE @user_id INT;
+    DECLARE @is_artist VARCHAR(20);
+
     SELECT @user_id = user_id
     FROM Users
     WHERE username = @username AND [password] = @password;
+
     IF @user_id IS NOT NULL
     BEGIN
-        SELECT
+        SELECT @user_id AS User_Id,
             CASE
-                WHEN EXISTS (SELECT 1 FROM Premium WHERE user_id = @user_id) THEN 'Premium User'
+                WHEN EXISTS (SELECT 1 FROM Premium WHERE user_id = @user_id AND GETDATE() < End_time) THEN 'Premium User'
                 ELSE 'Regular User'
-            END AS User_Type;
+            END AS User_Type,
+            CASE
+                WHEN EXISTS (SELECT 1 FROM Artists WHERE artist_id = @user_id) THEN 'Artist'
+                ELSE 'Not an Artist'
+            END AS Artist_Status;
+    END
+    ELSE
+    BEGIN
+        SELECT NULL AS User_Id, 'Invalid User' AS User_Type, 'N/A' AS Artist_Status;
     END
 END;
-GO
+
 
 ----EXEC GetUserInterests @user_id = 1;
 ---------------------------------------------------------

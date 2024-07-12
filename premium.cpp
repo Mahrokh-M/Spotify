@@ -44,17 +44,21 @@ void Premium::setstyle(){
 
 
 void Premium::setUserID(const QString &userType){
-    Type=userType;
-    //  if is premium
-//    if(userType=="Premium User"){
-//    ui->tabWidget->removeTab(7);
-//    ui->tabWidget->removeTab(7);}
-//    // if is simple user
-//    if(userType=="Regular User"){
-//        while (ui->tabWidget->count() > 2) {
-//            ui->tabWidget->removeTab(2);
-//        }
-//    }
+   // Type=userType;
+    //// if is premium
+  //  if(userType=="Premium User"){
+  // ui->tabWidget->removeTab(7);
+  //  ui->tabWidget->removeTab(7);}
+
+    //if(userType=="Artist"){
+   //ui->tabWidget->removeTab(7);
+   // ui->tabWidget->removeTab(7);}
+    // // if is simple user
+   //if(userType=="Regular User"){
+    //  while (ui->tabWidget->count() > 2) {
+        //  ui->tabWidget->removeTab(2);
+     //  }
+ //  }
 
     fillSongs();
     fill_favorites();
