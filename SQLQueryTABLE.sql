@@ -92,17 +92,17 @@
 --	PRIMARY KEY (artist_id,[date])
 --);
 ------------------------------------------------------
---CREATE TABLE Tickets (
---    ticket_id INT PRIMARY KEY IDENTITY,
---    user_id INT,
---	artist_id INT,
---	price DECIMAL(10, 2),
---    Expiration BIT DEFAULT 1,-- 1
---	is_sold BIT DEFAULT 0,-- 0 
---	date_concert DATETIME ,--**
---    FOREIGN KEY (user_id) REFERENCES Users(user_id),
---	FOREIGN KEY (artist_id,date_concert) REFERENCES Concerts(artist_id,[date])
---);
+CREATE TABLE Tickets (
+    ticket_id INT PRIMARY KEY IDENTITY,
+    user_id INT,
+	artist_id INT,
+	price DECIMAL(10, 2),
+    Expiration BIT DEFAULT 0,-- 1
+	is_sold BIT DEFAULT 0,-- 0 
+	date_concert DATETIME ,--**
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+	FOREIGN KEY (artist_id,date_concert) REFERENCES Concerts(artist_id,[date])
+);
 ------------------------------------------------------
 --CREATE TABLE Favorite_Play_list(
 --    user_id INT,
@@ -370,9 +370,9 @@ CREATE TABLE Chat (
 ----SHOW ALL  Available CONCERT:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --SELECT artist_id, location, [date]
 --FROM Concerts
---WHERE [date] > GETDATE();
+--WHERE [date] > GETDATE() and Concerts.cancel!=1;
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
---SHOW ALL Available Tickets:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+------SHOW ALL Available Tickets:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --CREATE PROCEDURE GetAvailableTickets
 --    @artist_id INT,
 --    @date_concert DATETIME
@@ -383,8 +383,10 @@ CREATE TABLE Chat (
 --    WHERE artist_id = @artist_id
 --      AND date_concert = @date_concert
 --      AND is_sold = 0
---      AND Expiration = 1;
+--      AND Expiration = 0;
 --END;
+--GO
+
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ----BUY TICKET AND UPDATE WALLET:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --CREATE PROCEDURE BuyTicket
@@ -423,6 +425,7 @@ CREATE TABLE Chat (
 
 --    COMMIT TRANSACTION;
 --END;
+--GO
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -------------------------------------------------------------------------------------------------------------------
 ----SHOW ALL TICKET THAT BUY(0):!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2038,12 +2041,32 @@ GO
 --(2, 'Location 2', '2022-07-15 19:00:00', 0, 'address5.jpg');
 
 ---- Inserting new rows into the Tickets table
---INSERT INTO Tickets (user_id, artist_id, price, Expiration, is_sold, date_concert) VALUES
---(1, 1, 100.00, 0, 1, '2025-08-01 19:00:00'),
---(1, 2, 50.00, 0, 1, '2025-08-15 19:00:00'),
---(1, 3, 150.00, 0, 1, '2025-09-01 19:00:00'),
---(2, 1, 100.00, 1, 1, '2022-07-01 19:00:00'),
---(2, 2, 50.00, 1, 1, '2022-07-15 19:00:00');
+
+
+---- Insert into Concerts table
+--INSERT INTO Concerts (artist_id, location, [date], cancel, address_of_picture) VALUES
+--(1, 'Venue 2', '2025-08-15 19:00:00', 0, 'path/to/image2.png'),
+--(2, 'Venue 3', '2025-09-01 19:00:00', 0, 'path/to/image3.png'),
+--(3, 'Venue 1', '2025-09-10 19:00:00', 0, 'path/to/image1.png'),
+--(3, 'Venue 2', '2025-10-01 19:00:00', 0, 'path/to/image2.png'),
+--(1, 'Venue 3', '2025-10-15 19:00:00', 0, 'path/to/image3.png'),
+--(2, 'Venue 1', '2025-11-01 19:00:00', 0, 'path/to/image1.png'),
+--(3, 'Venue 2', '2025-11-15 19:00:00', 0, 'path/to/image2.png'),
+--(1, 'Venue 3', '2025-12-01 19:00:00', 0, 'path/to/image3.png');
+
+-- Insert into Tickets table
+-----drop table Tickets;
+INSERT INTO Tickets (user_id, artist_id, price, Expiration, is_sold, date_concert) VALUES
+(NULL, 1, 100.00, 0, 0, '2025-08-01 19:00:00'),
+(NULL, 2, 50.00, 0, 0, '2025-08-15 19:00:00'),
+(NULL, 3, 150.00, 0, 0, '2025-09-01 19:00:00'),
+(NULL, 1, 120.00, 0, 0, '2025-09-10 19:00:00'),
+(NULL, 2, 60.00, 0, 0, '2025-10-01 19:00:00'),
+(NULL, 3, 170.00, 0, 0, '2025-10-15 19:00:00'),
+(NULL, 1, 130.00, 0, 0, '2025-11-01 19:00:00'),
+(NULL, 2, 70.00, 0, 0, '2025-11-15 19:00:00'),
+(NULL, 3, 180.00, 0, 0, '2025-12-01 19:00:00');
+
 
 
 

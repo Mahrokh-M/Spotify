@@ -56,7 +56,7 @@ private:
     void onStartChatClicked();
     void fill_follow();
     void fill_concerts();
-    void addConcertItem(QHBoxLayout *layout, const QString &concertName, const QString &imagePath);
+    void addConcertItem(QVBoxLayout *layout, const QString &concertName, int artistId, const QDateTime &date, const QString &imagePath);
     void showTicketOptions();
     void buyTicket();
     double getUserBalance();
@@ -86,6 +86,7 @@ private:
     void clearScrollArea(QScrollArea *scrollArea);
     void clearTickets(QScrollArea* scrollArea);
     void updateBalanceLabel();
+    bool areTicketsAvailable(int artistId, const QDateTime &date);
 
 
 signals:
