@@ -1553,5 +1553,12 @@ void Premium::on_premiumBuy_clicked()
                 // Add Artist
                 QMessageBox::information(this, "Checkbox Checked", "The checkbox is checked.");
             }
+
+
+
+
+
+        //////////////////////////////////////
+
 }
 

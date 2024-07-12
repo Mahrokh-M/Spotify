@@ -1750,8 +1750,8 @@ BEGIN
     END
     SELECT  message_content, sent_at
     FROM Chat
-    WHERE (sender_id = @sender_id AND receiver_id = @receiver_id)
-       OR (sender_id = @receiver_id AND receiver_id = @sender_id)
+    WHERE (sender_id = @sender_id AND receiver_id = @user_id2)
+       OR (sender_id = @user_id2 AND receiver_id = @sender_id)
     ORDER BY sent_at;
 END;
 GO
@@ -1798,14 +1798,12 @@ BEGIN
             RETURN;
         END
     END
-
     -- Insert a new friend request
     INSERT INTO Friend (user_id1, user_id2, accept)
     VALUES (@user_id1, @user_id2, 3);  
 
     PRINT 'Friend request sent successfully.';
 END;
-
 GO
 --**********************
 CREATE PROCEDURE GetFriendSRequest
@@ -1828,10 +1826,9 @@ BEGIN
     WHERE 
         (F.user_id1 = @target_user_id OR F.user_id2 = @target_user_id) AND F.accept = 3;
 END;
-
 GO
 --------------------------------------------
-CREATE PROCEDURE AcceptFriendRequest
+CREATE PROCEDURE AcceptFriendRequests
     @target_user_id INT,
     @requester_username VARCHAR(50)
 AS
@@ -1851,8 +1848,8 @@ BEGIN
     SET accept = 1 
     WHERE (user_id1 =@target_user_id  AND user_id2 = @requester_user_id) OR (user_id1 =@requester_user_id AND user_id2 = @target_user_id  );
 END;
-GO
 
+GO
 CREATE PROCEDURE DeclineFriendRequest
     @current_user_id INT,
     @requester_username VARCHAR(50)
@@ -1874,6 +1871,8 @@ BEGIN
     WHERE user_id1 =  @current_user_id AND user_id2 = @requester_user_id;
 END;
 GO
+
+
 -------------------**************---------------------------
 CREATE PROCEDURE GetFriendsNames
     @user_id INT
