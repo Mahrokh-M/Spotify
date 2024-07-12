@@ -234,9 +234,7 @@ CREATE TABLE Tickets (
 --	PRIMARY KEY(user_id,album_id)
 
 --);
----------------------------------------------------------
-
----------------------------------------------------------
+-------------------------------------------------------------------------
 --CREATE TABLE Play_song(
 --   song_id INT ,
 --	user_id INT ,
@@ -913,6 +911,7 @@ BEGIN
     END CATCH
 END;
 --____________________________________________________________________________________________________________________
+DROP PROCEDURE AddNewConcert
 --ADD CONCERT FOR A ARTIST:
 CREATE PROCEDURE AddNewConcert
     @ArtistID INT,
@@ -932,9 +931,8 @@ BEGIN
         -- Check if the artist already has a concert scheduled on this date
         IF EXISTS (
             SELECT 1
-            FROM Concert_Artists ca
-            INNER JOIN Concerts c ON ca.concert_id = c.concert_id
-            WHERE ca.artist_id = @ArtistID AND c.date = @ConcertDate
+            FROM Concerts 
+            WHERE artist_id = @ArtistID AND [date] = @ConcertDate
         )
         BEGIN
             THROW 50003, 'Artist already has a concert scheduled on this date.', 1;
