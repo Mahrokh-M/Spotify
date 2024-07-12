@@ -134,7 +134,7 @@
 --CREATE TABLE Friend(
 --    user_id1 INT,
 --	user_id2 INT,
---	accept BIT DEFAULT 0,
+--	accept INT DEFAULT 0,
 --    FOREIGN KEY (user_id1) REFERENCES Premium(user_id),
 --	FOREIGN KEY (user_id2) REFERENCES Premium(user_id),
 --	PRIMARY KEY(user_id1,user_id2)
@@ -535,59 +535,58 @@ RETURN
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ----SEARCH ALBUM AND SONG:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
---CREATE PROCEDURE SearchMusicAndAlbum
---    @name NVARCHAR(100) = NULL,
---    @artist_name NVARCHAR(100) = NULL,
---    @genre NVARCHAR(50) = NULL,
---    @country NVARCHAR(50) = NULL,
---    @age_category CHAR(2) = NULL
---AS
---BEGIN
---    DECLARE @sql NVARCHAR(MAX) = '';
+CREATE PROCEDURE SearchMusicAndAlbum
+    @name NVARCHAR(100) = NULL,
+    @artist_name NVARCHAR(100) = NULL,
+    @genre NVARCHAR(50) = NULL,
+    @country NVARCHAR(50) = NULL,
+    @age_category CHAR(2) = NULL
+AS
+BEGIN
+    DECLARE @sql NVARCHAR(MAX) = '';
     
---    -- Base SELECT statement for Songs
---    SET @sql = '
---        SELECT ''Song'' AS Type, s.song_id AS ID, s.title AS Title, a.title AS AlbumTitle, ar.bio AS ArtistBio, s.genre AS Genre, s.country AS Country, s.Age_category AS AgeCategory
---        FROM Songs s
---        JOIN Albums a ON s.album_id = a.album_id
---        JOIN Artists ar ON s.artist_id_added = ar.artist_id
---        WHERE 1=1';
+    -- Base SELECT statement for Songs
+    SET @sql = '
+        SELECT ''Song'' AS Type, s.song_id AS ID, s.title AS Title
+        FROM Songs s
+        JOIN Artists ar ON s.artist_id_added = ar.artist_id
+        WHERE 1=1';
     
---    -- Append conditions for Songs
---    IF @name IS NOT NULL
---        SET @sql = @sql + ' AND s.title LIKE ''%' + @name + '%''';
---    IF @artist_name IS NOT NULL
---        SET @sql = @sql + ' AND ar.bio LIKE ''%' + @artist_name + '%''';
---    IF @genre IS NOT NULL
---        SET @sql = @sql + ' AND s.genre LIKE ''%' + @genre + '%''';
---    IF @country IS NOT NULL
---        SET @sql = @sql + ' AND s.country LIKE ''%' + @country + '%''';
---    IF @age_category IS NOT NULL
---        SET @sql = @sql + ' AND s.Age_category = ''' + @age_category + '''';
+    -- Append conditions for Songs
+    IF @name IS NOT NULL
+        SET @sql = @sql + ' AND s.title LIKE ''%' + @name + '%''';
+    IF @artist_name IS NOT NULL
+        SET @sql = @sql + ' AND ar.bio LIKE ''%' + @artist_name + '%''';
+    IF @genre IS NOT NULL
+        SET @sql = @sql + ' AND s.genre LIKE ''%' + @genre + '%''';
+    IF @country IS NOT NULL
+        SET @sql = @sql + ' AND s.country LIKE ''%' + @country + '%''';
+    IF @age_category IS NOT NULL
+        SET @sql = @sql + ' AND s.Age_category = ''' + @age_category + '''';
     
---    -- Add UNION ALL for Albums
---    SET @sql = @sql + '
---        UNION ALL
---        SELECT ''Album'' AS Type, a.album_id AS ID, a.title AS Title, a.title AS AlbumTitle, ar.bio AS ArtistBio, a.genre AS Genre, a.country AS Country, a.Age_category AS AgeCategory
---        FROM Albums a
---        JOIN Artists ar ON a.artist_id_added = ar.artist_id
---        WHERE 1=1';
+    -- Add UNION ALL for Albums
+    SET @sql = @sql + '
+        UNION ALL
+        SELECT ''Album'' AS Type, a.album_id AS ID, a.title AS Title, a.title 
+        FROM Albums a
+        JOIN Artists ar ON a.artist_id_added = ar.artist_id
+        WHERE 1=1';
     
---    -- Append conditions for Albums
---    IF @name IS NOT NULL
---        SET @sql = @sql + ' AND a.title LIKE ''%' + @name + '%''';
---    IF @artist_name IS NOT NULL
---        SET @sql = @sql + ' AND ar.bio LIKE ''%' + @artist_name + '%''';
---    IF @genre IS NOT NULL
---        SET @sql = @sql + ' AND a.genre LIKE ''%' + @genre + '%''';
---    IF @country IS NOT NULL
---        SET @sql = @sql + ' AND a.country LIKE ''%' + @country + '%''';
---    IF @age_category IS NOT NULL
---        SET @sql = @sql + ' AND a.Age_category = ''' + @age_category + '''';
+    -- Append conditions for Albums
+    IF @name IS NOT NULL
+        SET @sql = @sql + ' AND a.title LIKE ''%' + @name + '%''';
+    IF @artist_name IS NOT NULL
+        SET @sql = @sql + ' AND ar.bio LIKE ''%' + @artist_name + '%''';
+    IF @genre IS NOT NULL
+        SET @sql = @sql + ' AND a.genre LIKE ''%' + @genre + '%''';
+    IF @country IS NOT NULL
+        SET @sql = @sql + ' AND a.country LIKE ''%' + @country + '%''';
+    IF @age_category IS NOT NULL
+        SET @sql = @sql + ' AND a.Age_category = ''' + @age_category + '''';
     
---    -- Execute the dynamic SQL
---    EXEC sp_executesql @sql;
---END;
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql;
+END;
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ----DISPLAY SONG DETAILS:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1600,8 +1599,8 @@ BEGIN
     INNER JOIN Play_list pl ON ps.user_id = pl.user_id AND ps.[name] = pl.[name]
     WHERE pl.[name] = @playlist_name;
 END;
-----------------------------------------------
 GO
+-------------------------------------------------
 CREATE PROCEDURE GetFriendPlaylists
     @user_id INT
 AS
@@ -1619,6 +1618,164 @@ BEGIN
     FROM Play_list pl
     INNER JOIN #FriendUserIds f ON pl.user_id = f.user_id;
     DROP TABLE #FriendUserIds;
+END;
+GO
+---------------------------------------------
+CREATE PROCEDURE SendMessag
+    @SenderID INT,
+    @ReceiverID INT,
+    @MessageContent VARCHAR(MAX)
+AS
+BEGIN
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        -- Check if SenderID exists in Users table
+        IF NOT EXISTS (SELECT 1 FROM Users WHERE user_id = @SenderID)
+        BEGIN
+            THROW 50000, 'Sender ID is invalid.', 1;
+        END;
+
+        -- Check if ReceiverID exists in Users table
+        IF NOT EXISTS (SELECT 1 FROM Users WHERE user_id = @ReceiverID)
+        BEGIN
+            THROW 50001, 'Receiver ID is invalid.', 1;
+        END;
+
+        -- Check if the users are friends and the friendship request is accepted
+        IF NOT EXISTS (
+            SELECT 1
+            FROM Friend
+            WHERE (user_id1 = @SenderID AND user_id2 = @ReceiverID AND accept = 1)
+               OR (user_id1 = @ReceiverID AND user_id2 = @SenderID AND accept = 1)
+        )
+        BEGIN
+            THROW 50002, 'Users are not friends or friendship request is not accepted.', 1;
+        END;
+
+        -- Insert the message into the Chat table
+        INSERT INTO Chat (sender_id, receiver_id, message_content, sent_at)
+        VALUES (@SenderID, @ReceiverID, @MessageContent, GETDATE());
+
+        -- Commit transaction
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        -- Rollback transaction in case of error
+        ROLLBACK TRANSACTION;
+
+        -- Raise the error again to notify the caller
+        THROW;
+    END CATCH
+END;
+GO
+--********
+CREATE PROCEDURE GetChatsBetweenUsers
+    @sender_id INT,
+    @receiver_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT  message_content, sent_at
+    FROM Chat
+    WHERE (sender_id = @sender_id AND receiver_id = @receiver_id)
+       OR (sender_id = @receiver_id AND receiver_id = @sender_id)
+    ORDER BY sent_at;
+END;
+GO
+--******************************************************
+CREATE PROCEDURE SendFriendRequest
+    @user_id1 INT,
+    @user_id2 INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Check if there is already a friend request or friendship exists
+    DECLARE @existing_accept INT;
+    SELECT @existing_accept = accept
+    FROM Friend
+    WHERE (user_id1 = @user_id1 AND user_id2 = @user_id2)
+       OR (user_id1 = @user_id2 AND user_id2 = @user_id1);
+
+    IF @existing_accept IS NOT NULL
+    BEGIN
+        IF @existing_accept = 1
+        BEGIN
+            -- Friendship already exists
+            RAISERROR ('These users are already friends.', 16, 1);
+            RETURN;
+        END
+        ELSE IF @existing_accept = 3
+        BEGIN
+            -- Friend request already sent, waiting for acceptance
+            RAISERROR ('Friend request already sent. Waiting for acceptance.', 16, 1);
+            RETURN;
+        END
+    END
+
+    -- Insert a new friend request
+    INSERT INTO Friend (user_id1, user_id2, accept)
+    VALUES (@user_id1, @user_id2, 3);  
+
+    PRINT 'Friend request sent successfully.';
+END;
+GO
+CREATE PROCEDURE GetFriendRequest
+    @target_user_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT U.username
+    FROM Friend F
+    JOIN Users U ON  F.user_id2= U.user_id
+    WHERE F.user_id1 = @target_user_id AND F.accept = 3;
+END;
+GO
+--------------------------------------------
+CREATE PROCEDURE AcceptFriendRequest
+    @target_user_id INT,
+    @requester_username VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @requester_user_id INT;
+    SELECT @requester_user_id = user_id
+    FROM Users
+    WHERE username = @requester_username;
+    IF @requester_user_id IS NULL
+    BEGIN
+        RAISERROR('Requester user not found.', 16, 1);
+        RETURN;
+    END;
+    UPDATE Friend
+    SET accept = 1 
+    WHERE user_id1 =@target_user_id  AND user_id2 = @requester_user_id;
+END;
+GO
+
+CREATE PROCEDURE DeclineFriendRequest
+    @current_user_id INT,
+    @requester_username VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @requester_user_id INT;
+    SELECT @requester_user_id = user_id
+    FROM Users
+    WHERE username = @requester_username;
+    IF @requester_user_id IS NULL
+    BEGIN
+        RAISERROR('Requester user not found.', 16, 1);
+        RETURN;
+    END;
+    UPDATE Friend
+    SET accept = 0
+    WHERE user_id1 =  @current_user_id AND user_id2 = @requester_user_id;
 END;
 GO
 ----------------------------------------------------------------------Mahrokh---------------------------------------------------------------------
@@ -1818,3 +1975,4 @@ GO
 
 
 
+GO

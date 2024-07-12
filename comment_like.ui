@@ -22,6 +22,9 @@
      <height>231</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);</string>
+   </property>
    <property name="text">
     <string/>
    </property>
@@ -36,7 +39,8 @@
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">color: rgb(255, 255, 255);</string>
+    <string notr="true">color: rgb(0, 0, 0);
+background-color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
     <string/>
@@ -198,6 +202,106 @@
     </property>
    </widget>
   </widget>
+  <widget class="QLabel" name="Song_Artist">
+   <property name="geometry">
+    <rect>
+     <x>1060</x>
+     <y>30</y>
+     <width>251</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">
+color: rgb(0, 0, 0);
+background-color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="Song_AgeCategory">
+   <property name="geometry">
+    <rect>
+     <x>1060</x>
+     <y>80</y>
+     <width>121</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">
+background-color: rgb(255, 255, 255);
+color: rgb(0, 0, 0);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="Song_Album">
+   <property name="geometry">
+    <rect>
+     <x>1060</x>
+     <y>130</y>
+     <width>251</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(0, 0, 0);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="Song_genr">
+   <property name="geometry">
+    <rect>
+     <x>1060</x>
+     <y>180</y>
+     <width>251</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(0, 0, 0);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="Song_Country">
+   <property name="geometry">
+    <rect>
+     <x>1190</x>
+     <y>80</y>
+     <width>121</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(0, 0, 0);
+background-color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="show_lyrics">
+   <property name="geometry">
+    <rect>
+     <x>1120</x>
+     <y>240</y>
+     <width>131</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Lyrics</string>
+   </property>
+  </widget>
   <zorder>background</zorder>
   <zorder>Song_pic</zorder>
   <zorder>Song_name</zorder>
@@ -210,6 +314,12 @@
   <zorder>add_playlist</zorder>
   <zorder>question_label</zorder>
   <zorder>playlists_scrollBar</zorder>
+  <zorder>Song_Artist</zorder>
+  <zorder>Song_AgeCategory</zorder>
+  <zorder>Song_Album</zorder>
+  <zorder>Song_genr</zorder>
+  <zorder>Song_Country</zorder>
+  <zorder>show_lyrics</zorder>
  </widget>
  <resources/>
  <connections/>
