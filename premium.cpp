@@ -1548,15 +1548,44 @@ void Premium::on_premiumBuy_clicked()
             QMessageBox::warning(this, "Input Error", "Please fill in all required fields.");
             return;
         }
-        //ADD Premum user
+
+
+        QDateTime currentDateTime = QDateTime::currentDateTime();
+        QDateTime endTime;
+        if (isRadioButton1Checked) {
+                    endTime = currentDateTime.addMonths(1);
+                } else if (isRadioButton2Checked) {
+                    endTime = currentDateTime.addMonths(3);
+                } else if (isRadioButton3Checked) {
+                    endTime = currentDateTime.addMonths(6);
+                }
+        QSqlQuery query(db);
+        query.prepare("EXEC Insert_Premium @user_id=?, @start_time=?, @end_time=?");
+                query.addBindValue(ID); // Replace with actual user ID
+                query.addBindValue(currentDateTime); // Start time
+                query.addBindValue(endTime); // End time
+                if (!query.exec()) {
+                    qDebug() << "Error accepting friend request:" << query.lastError().text();
+                    return;
+                }
+               if (query.exec()) {
+                        QMessageBox::information(this, "Success", "Operation completed successfully.");}
+
         if (ui->Imartist->isChecked()) {
+                QSqlQuery query2(db);
                 // Add Artist
+                query2.prepare("EXEC AddArtist @user_id=?, @bio=?");
+                query2.addBindValue(ID); // Replace with actual user ID
+                query2.addBindValue("Bio Information");
+                if (!query2.exec()) {
+                    qDebug() << "Error accepting friend request:" << query2.lastError().text();
+                    return;
+                }
+                if (query2.exec()) {
+                        QMessageBox::information(this, "Success", "Operation completed successfully.");}
+
                 QMessageBox::information(this, "Checkbox Checked", "The checkbox is checked.");
             }
-
-
-
-
 
         //////////////////////////////////////
 
