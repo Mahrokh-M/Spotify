@@ -19,6 +19,7 @@
 #include <QFile>
 #include<QCalendarWidget>
 #include<QTimeEdit>
+#include<QTextEdit>
 
 namespace Ui {
 class Premium;
@@ -43,6 +44,7 @@ private:
     QVector<QLineEdit*> releaseDateEdits;
     QVector<QLineEdit*> ageCategoryEdits;
     QVector<QLineEdit*> countryEdits;
+    QVector<QTextEdit*> lyricsEdits;  // Add this line
     QPushButton *submitSongsButton;
     QGridLayout *gridLayout;
     QWidget *contentWidget;
@@ -91,6 +93,9 @@ private:
     void fill_playlists();
     void setupDateTimePicker();
     void setupDateTimePicker2();
+    void clearScrollArea2();
+    void setupDateTimePicker3();
+    void fillAlbums();
 
 
 signals:
@@ -114,6 +119,8 @@ private slots:
     void on_premiumBuy_clicked();
 
     void on_submit_song_2_clicked();
+
+    void on_UploadPhoto_2_clicked();
 
 public slots:
     void setUserID(const QString &userType);

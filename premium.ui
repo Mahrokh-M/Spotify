@@ -26,7 +26,7 @@
     <string notr="true">background-color: rgb(46, 47, 51);</string>
    </property>
    <property name="currentIndex">
-    <number>8</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="songs_tab">
     <attribute name="title">
@@ -35,10 +35,10 @@
     <widget class="QScrollArea" name="scrollArea">
      <property name="geometry">
       <rect>
-       <x>0</x>
-       <y>70</y>
-       <width>1521</width>
-       <height>681</height>
+       <x>20</x>
+       <y>120</y>
+       <width>1461</width>
+       <height>251</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -53,8 +53,8 @@ color: rgb(255, 255, 255);</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1519</width>
-        <height>679</height>
+        <width>1459</width>
+        <height>249</height>
        </rect>
       </property>
      </widget>
@@ -70,6 +70,9 @@ color: rgb(255, 255, 255);</string>
      </property>
      <property name="styleSheet">
       <string notr="true">color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="placeholderText">
+      <string>you can search a song here</string>
      </property>
     </widget>
     <widget class="QRadioButton" name="SearchNameArtist">
@@ -165,6 +168,33 @@ color: rgb(255, 255, 255);</string>
      <property name="text">
       <string/>
      </property>
+    </widget>
+    <widget class="QScrollArea" name="albumScroll">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>400</y>
+       <width>1461</width>
+       <height>251</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(46, 47, 51);
+color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents_20">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1459</width>
+        <height>249</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QWidget" name="premium_tab">
@@ -1181,7 +1211,7 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       </rect>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="add_single">
       <property name="geometry">
@@ -1422,8 +1452,8 @@ color: rgb(255, 255, 255);</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>100</width>
-        <height>30</height>
+        <width>1251</width>
+        <height>576</height>
        </rect>
       </property>
       <attribute name="label">
@@ -1432,9 +1462,9 @@ color: rgb(255, 255, 255);</string>
       <widget class="QLineEdit" name="num_songs">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>40</y>
-         <width>301</width>
+         <x>60</x>
+         <y>370</y>
+         <width>261</width>
          <height>61</height>
         </rect>
        </property>
@@ -1454,8 +1484,8 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       <widget class="QPushButton" name="OK">
        <property name="geometry">
         <rect>
-         <x>320</x>
-         <y>40</y>
+         <x>330</x>
+         <y>370</y>
          <width>91</width>
          <height>61</height>
         </rect>
@@ -1494,6 +1524,152 @@ color: rgb(255, 255, 255);</string>
          </rect>
         </property>
        </widget>
+      </widget>
+      <widget class="QLineEdit" name="ReleaseDate_3">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>160</y>
+         <width>401</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>Release Date</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="title_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>20</y>
+         <width>401</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>Title</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="AgeCategory_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>230</y>
+         <width>401</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>Age Category</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="Genre_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>90</y>
+         <width>401</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>Genre</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="Country_3">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>300</y>
+         <width>401</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>Country</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="UploadPhoto_2">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>460</y>
+         <width>161</width>
+         <height>91</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font: 15pt &quot;Segoe UI Historic&quot;;
+background-color: rgb(46, 189, 89);border-radius: 30px;
+color: rgb(255, 255, 255);</string>
+       </property>
+       <property name="text">
+        <string>Upload Photo</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="SelectTime_3">
+       <property name="geometry">
+        <rect>
+         <x>310</x>
+         <y>160</y>
+         <width>121</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font: 12pt &quot;Segoe UI Historic&quot;;
+background-color: rgb(46, 189, 89);border-radius: 30px;
+color: rgb(255, 255, 255);</string>
+       </property>
+       <property name="text">
+        <string>Select Time</string>
+       </property>
       </widget>
      </widget>
      <widget class="QWidget" name="add_concert">

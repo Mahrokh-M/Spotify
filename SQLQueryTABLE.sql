@@ -763,6 +763,7 @@ GO
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --______________________________________________________________________________________________________
 --ADD SONG :
+drop PROCEDURE AddSong
 CREATE PROCEDURE AddSong
     @artist_id INT,
     @title VARCHAR(100),
@@ -771,13 +772,14 @@ CREATE PROCEDURE AddSong
     @lyrics VARCHAR(MAX),
     @Age_category CHAR(2),
     @country VARCHAR(50),
-	@address_of_picture VARCHAR(100),
-	@can_be_added BIT 
+  @address_of_picture VARCHAR(100),
+  @can_be_added BIT ,
+  @release_date DATETIME
 AS
 BEGIN
     -- Insert the song into the Songs table with the current date
     INSERT INTO Songs (artist_id_added, title, album_id, genre, release_date, lyrics, Age_category, country, address_of_picture, can_be_added)
-    VALUES (@artist_id, @title, @album_id, @genre, GETDATE(), @lyrics, @Age_category, @country, @address_of_picture, @can_be_added);
+    VALUES (@artist_id, @title, @album_id, @genre,@release_date, @lyrics, @Age_category, @country, @address_of_picture, @can_be_added);
 END;
 GO
 --ADD SONG WITH OTHE ARTIST :
@@ -831,21 +833,15 @@ CREATE PROCEDURE AddAlbumAndArtists
     @artist_name VARCHAR(50),
     @album_title VARCHAR(100),
     @genre VARCHAR(50),
-    @release_date DATE,
     @age_category CHAR(2),
     @country VARCHAR(50),
     @address_of_picture VARCHAR(100),
-	@artist_id INT,
-    @collaborator_artists ArtistIdTableType READONLY
+  @artist_id INT,
+  @release_date DATETIME
 AS
 BEGIN
     INSERT INTO Albums (title, artist_id_added, genre, release_date, Age_category, country, address_of_picture)
-    VALUES (@album_title, @artist_id, @genre,  GETDATE(), @age_category, @country, @address_of_picture);
-
-    SELECT @album_id = SCOPE_IDENTITY();
-
-    INSERT INTO artist_has_album (album_id, artist_id)
-    VALUES (@album_id, @artist_id);
+    VALUES (@album_title, @artist_id, @genre,    @release_date, @age_category, @country, @address_of_picture);
 END;
 GO
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1020,7 +1016,7 @@ CREATE PROCEDURE CreatePlaylist
     @user_id INT,
     @playlist_name NVARCHAR(50),
     @is_public BIT,
-	@address_of_picture VARCHAR(100)
+  @address_of_picture VARCHAR(100)
 AS
 BEGIN
     -- Check if the user has a valid subscription
