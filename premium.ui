@@ -26,7 +26,7 @@
     <string notr="true">background-color: rgb(46, 47, 51);</string>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>8</number>
    </property>
    <widget class="QWidget" name="songs_tab">
     <attribute name="title">
@@ -1188,8 +1188,8 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>100</width>
-        <height>30</height>
+        <width>1251</width>
+        <height>576</height>
        </rect>
       </property>
       <attribute name="label">
@@ -1398,6 +1398,24 @@ color: rgb(255, 255, 255);</string>
         <string/>
        </property>
       </widget>
+      <widget class="QPushButton" name="SelectTime">
+       <property name="geometry">
+        <rect>
+         <x>930</x>
+         <y>290</y>
+         <width>121</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font: 12pt &quot;Segoe UI Historic&quot;;
+background-color: rgb(46, 189, 89);border-radius: 30px;
+color: rgb(255, 255, 255);</string>
+       </property>
+       <property name="text">
+        <string>Select Time</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="add_album">
       <property name="geometry">
@@ -1484,7 +1502,7 @@ color: rgb(255, 255, 255);</string>
         <x>0</x>
         <y>0</y>
         <width>1251</width>
-        <height>591</height>
+        <height>576</height>
        </rect>
       </property>
       <attribute name="label">
@@ -1580,9 +1598,9 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       <widget class="QLineEdit" name="ticket1">
        <property name="geometry">
         <rect>
-         <x>440</x>
+         <x>450</x>
          <y>240</y>
-         <width>401</width>
+         <width>221</width>
          <height>61</height>
         </rect>
        </property>
@@ -1602,9 +1620,9 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       <widget class="QLineEdit" name="ticket2">
        <property name="geometry">
         <rect>
-         <x>440</x>
+         <x>450</x>
          <y>310</y>
-         <width>401</width>
+         <width>221</width>
          <height>61</height>
         </rect>
        </property>
@@ -1624,9 +1642,9 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       <widget class="QLineEdit" name="ticket3">
        <property name="geometry">
         <rect>
-         <x>440</x>
+         <x>450</x>
          <y>380</y>
-         <width>401</width>
+         <width>221</width>
          <height>61</height>
         </rect>
        </property>
@@ -1641,6 +1659,90 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
        </property>
        <property name="placeholderText">
         <string>ticket 3 price</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="SelectTime_2">
+       <property name="geometry">
+        <rect>
+         <x>850</x>
+         <y>100</y>
+         <width>121</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font: 12pt &quot;Segoe UI Historic&quot;;
+background-color: rgb(46, 189, 89);border-radius: 30px;
+color: rgb(255, 255, 255);</string>
+       </property>
+       <property name="text">
+        <string>Select Time</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="ticket1_quantity">
+       <property name="geometry">
+        <rect>
+         <x>680</x>
+         <y>240</y>
+         <width>151</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>quantity</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="ticket2_quantity">
+       <property name="geometry">
+        <rect>
+         <x>680</x>
+         <y>310</y>
+         <width>151</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>quantity</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="ticket3_quantity">
+       <property name="geometry">
+        <rect>
+         <x>680</x>
+         <y>380</y>
+         <width>151</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-radius: 30px;
+background-color: rgb(255, 255, 255);
+padding: 10px;
+font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>quantity</string>
        </property>
       </widget>
      </widget>

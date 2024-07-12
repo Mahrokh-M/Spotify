@@ -17,6 +17,8 @@
 #include <QSqlError>
 #include<QSqlQuery>
 #include <QFile>
+#include<QCalendarWidget>
+#include<QTimeEdit>
 
 namespace Ui {
 class Premium;
@@ -87,6 +89,8 @@ private:
     void clearTickets(QScrollArea* scrollArea);
     void updateBalanceLabel();
     bool areTicketsAvailable(int artistId, const QDateTime &date);
+    void setupDateTimePicker();
+    void setupDateTimePicker2();
 
 
 signals:
@@ -108,6 +112,8 @@ private slots:
     void on_withdraw_clicked();
 
     void on_premiumBuy_clicked();
+
+    void on_submit_song_2_clicked();
 
 public slots:
     void setUserID(const QString &userType);
