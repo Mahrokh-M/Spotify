@@ -249,6 +249,7 @@ void Comment_Like::on_addNewPlaylist_clicked()
             }
 
             QMessageBox::information(this, "Create Playlist", resultMessage);
+            emit newPlayList();
 
             fillPlaylists();
             ui->question_label->hide();

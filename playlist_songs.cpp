@@ -47,7 +47,8 @@ void playlist_songs::fillPlaylist(const QString &listID)
     // Process each song from the query result
     while (query.next()) {
         QString songTitle = query.value("Song_Title").toString();
-        QString picturePath = "";  // Replace with actual picture path logic if available
+        QString songID=query.value("ID").toString();
+        QString picturePath = query.value("addr").toString();  // Replace with actual picture path logic if available
         QString imagePath = (picturePath.isEmpty() || !QFile::exists(picturePath)) ? ":/new/prefix1/spotify logo.png" : picturePath;
 
         QHBoxLayout *hLayout = new QHBoxLayout();
@@ -59,7 +60,7 @@ void playlist_songs::fillPlaylist(const QString &listID)
 
         // Create button for song name
         QPushButton *songButton = new QPushButton(songTitle, contentWidget);
-        songButton->setProperty("ID", songTitle); // Use song title as ID for this example
+        songButton->setProperty("ID", songID); // Use song title as ID for this example
         songButton->setProperty("name", songTitle);
         songButton->setProperty("pic_path", imagePath);
         connect(songButton, &QPushButton::clicked, this, &playlist_songs::onSongButtonClicked);

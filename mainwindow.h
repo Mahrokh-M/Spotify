@@ -39,6 +39,7 @@ private slots:
     void showPlaylist(const QString &);
     void startChat(const QString &);
     void OpenAlbum(const QString &songID);
+    void Addnewplaylist();
 
 };
 

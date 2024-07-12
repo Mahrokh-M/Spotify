@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1552</width>
-    <height>801</height>
+    <height>733</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,14 +19,14 @@
      <x>0</x>
      <y>0</y>
      <width>1551</width>
-     <height>801</height>
+     <height>781</height>
     </rect>
    </property>
    <property name="styleSheet">
     <string notr="true">background-color: rgb(46, 47, 51);</string>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>3</number>
    </property>
    <widget class="QWidget" name="songs_tab">
     <attribute name="title">
@@ -1484,7 +1484,7 @@ color: rgb(255, 255, 255);</string>
         <x>0</x>
         <y>0</y>
         <width>1251</width>
-        <height>591</height>
+        <height>576</height>
        </rect>
       </property>
       <attribute name="label">

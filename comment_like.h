@@ -46,6 +46,7 @@ private slots:
 signals:
     void goBack();
      void open_comment(const QString);
+     void newPlayList();
 };
 
 #endif // COMMENT_LIKE_H

@@ -1590,4 +1590,7 @@ void Premium::on_premiumBuy_clicked()
         //////////////////////////////////////
 
 }
+void Premium::fillPlayListAfterNew(){
+    fill_playlists();
+}
 

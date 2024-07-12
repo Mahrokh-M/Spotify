@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(premium, &Premium::startChat, this, &MainWindow::startChat);
     connect(chatbox, &ChatBox::goBack, this, &MainWindow::goBacktoHome);
     connect(premium, &Premium::open_album, this, &MainWindow::OpenAlbum);
+    connect(comment_like, &Comment_Like::newPlayList,this,&::MainWindow::Addnewplaylist);
     // Initially show the register page
     ui->stackedWidget->setCurrentWidget(registerPage);
 }
@@ -72,4 +73,7 @@ void MainWindow::startChat(const QString &personname){
 void MainWindow::OpenAlbum(const QString &albumID){
     //fill songs in the album
     ui->stackedWidget->setCurrentWidget(playlist);
+}
+void MainWindow::Addnewplaylist(){
+    //premium->fill_playlists();
 }

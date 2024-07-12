@@ -47,7 +47,6 @@ private:
     QScrollArea *scrollArea;
     void addSongItem(const QString &songID, const QString &songName, const QString &imagePath);
     void fill_favorites();
-    void fill_playlists();
     void fillSongs();
     void fill_friends();
     void myPlaylist();
@@ -87,7 +86,7 @@ private:
     void clearTickets(QScrollArea* scrollArea);
     void updateBalanceLabel();
     bool areTicketsAvailable(int artistId, const QDateTime &date);
-
+    void fill_playlists();
 
 signals:
     void open_comment(const QString);
@@ -111,6 +110,8 @@ private slots:
 
 public slots:
     void setUserID(const QString &userType);
+    void fillPlayListAfterNew();
+
 
 };
 
