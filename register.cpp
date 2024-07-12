@@ -388,6 +388,7 @@ void Register::onTimeout()
     }
 }
 
+
 void Register::on_sign_button_clicked()
 {
     QString username = ui->username->text();
@@ -401,7 +402,7 @@ void Register::on_sign_button_clicked()
     QSqlQuery query(db);
 
     // Prepare the query to call stored procedure
-    query.prepare("{CALL CheckS(?, ?)}");
+    query.prepare("EXEC CheckSSS ?, ?");
     query.addBindValue(username);
     query.addBindValue(password);
 
@@ -410,17 +411,28 @@ void Register::on_sign_button_clicked()
         // Check the result
         if (query.next()) {
             ID = query.value("User_Id").toInt();
-            qDebug()<<ID;
+            qDebug() << "User ID:" << ID;
             QString userType = query.value("User_Type").toString();
+            QString artistStatus = query.value("Artist_Status").toString();
+            QString Type;
 
             if (userType == "Invalid User") {
                 qDebug() << "Invalid username or password.";
                 QMessageBox::critical(this, "Login Error", "Invalid username or password.");
             } else {
+                //QString loginMessage = QString("User Type: %1\nArtist Status: %2").arg(userType, artistStatus);
+                //QMessageBox::information(this, "Login Successful", loginMessage);
+
                 if (userType == "Regular User") {
-                    emit loginPSuccessful(userType);  // Signal for regular user
-                } else if (userType == "Premium User") {
-                    emit loginPSuccessful(userType); // Signal for premium user
+                    Type="Regular User";
+                    emit loginPSuccessful(Type);  // Signal for regular user
+                } else if (userType == "Premium User" && artistStatus=="Artist"){
+                    Type="Artist";
+                     emit loginPSuccessful(Type);
+                }
+                else if (userType == "Premium User" && artistStatus=="Not an Artist") {
+                    Type="Premium User";
+                    emit loginPSuccessful(Type); // Signal for premium user
                 }
             }
         } else {
@@ -432,8 +444,6 @@ void Register::on_sign_button_clicked()
         QMessageBox::critical(this, "Database Error", "Failed to execute query.");
     }
 }
-
-
 
 
 
