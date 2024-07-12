@@ -70,6 +70,8 @@ void Premium::setUserID(const QString &userType){
     fill_wallet();
     fillFriendshipRequests();
     fill_my_belongings();
+    setupDateTimePicker();
+    setupDateTimePicker2();
 }
 
 bool Premium::initializeDatabase(QSqlDatabase &db) {
@@ -122,7 +124,14 @@ void Premium::fillSongs()
         QString songID = query.value(0).toString();
         QString picturePath = query.value(1).toString();
         QString songName = query.value(2).toString();
-        QString imagePath = picturePath.isEmpty() ? ":/new/prefix1/spotify logo.png" : picturePath;
+        QString imagePath;
+
+        // Check if picturePath is empty or the file does not exist
+        if (picturePath.isEmpty() || !QFile::exists(picturePath)) {
+            imagePath = ":/new/prefix1/spotify logo.png"; // Use default image
+        } else {
+            imagePath = picturePath;
+        }
 
         // Create a frame with a green border
         QFrame *frame = new QFrame(contentWidget);
@@ -838,7 +847,6 @@ double Premium::getUserBalance()
     return 0.0; // If no balance is found, return 0.0
 }
 
-
 void Premium::fill_wallet()
 {
     int userId=ID;
@@ -1161,6 +1169,52 @@ void Premium::on_submit_song_clicked()
         return; // Optionally handle the error and return
     }
 
+    // Extract values from line edits
+    QString title = ui->title->text();
+    QString album = ui->Album->text();
+    QString genre = ui->Genre->text();
+    QString releaseDate = ui->ReleaseDate->text(); // Note: ReleaseDate might not be used in stored procedure
+    QString ageCategory = ui->AgeCategory->text();
+    QString country = ui->Country->text();
+    QString lyrics = ui->Lyrics->toPlainText(); // Assuming Lyrics is a QTextEdit
+    int artistId = ID; // Assuming you have a method to get the current artist ID
+
+    // Find album ID by album name
+    QVariant albumId = QVariant(QVariant::Int);
+    if (!album.isEmpty()) {
+        QSqlQuery albumQuery;
+        albumQuery.prepare("SELECT album_id FROM Albums WHERE title = :title AND artist_id_added = :artist_id");
+        albumQuery.bindValue(":title", album);
+        albumQuery.bindValue(":artist_id", artistId);
+
+        if (albumQuery.exec() && albumQuery.next()) {
+            albumId = albumQuery.value("album_id").toInt();
+        } else {
+            QMessageBox::critical(this, "Error", "Album not found or query failed: " + albumQuery.lastError().text());
+            return;
+        }
+    }
+
+    // Prepare and execute the SQL query
+    QSqlQuery query;
+    query.prepare("EXEC AddSong @artist_id = :artist_id, @title = :title, @album_id = :album_id, @genre = :genre, "
+                  "@lyrics = :lyrics, @Age_category = :Age_category, @country = :country, @address_of_picture = :address_of_picture, @can_be_added = 1");
+    query.bindValue(":artist_id", artistId);
+    query.bindValue(":title", title);
+    query.bindValue(":album_id", albumId);
+    query.bindValue(":genre", genre);
+    query.bindValue(":lyrics", lyrics);
+    query.bindValue(":Age_category", ageCategory);
+    query.bindValue(":country", country);
+    query.bindValue(":address_of_picture", newFilePath);
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to add song: " + query.lastError().text());
+        return;
+    }
+
+    QMessageBox::information(this, "Success", "Song added successfully!");
+
     // Further processing after saving the image, such as submitting the song
     // Example: SubmitSongFunction();
 
@@ -1169,6 +1223,16 @@ void Premium::on_submit_song_clicked()
 
     // Optionally clear the Song_photo label after submission
     ui->Song_photo->clear();
+
+    // Clear the input fields
+    ui->title->clear();
+    ui->Album->clear();
+    ui->Genre->clear();
+    ui->ReleaseDate->clear();
+    ui->AgeCategory->clear();
+    ui->Country->clear();
+    ui->Lyrics->clear();
+    fillSongs();
 }
 
 void Premium::on_OK_clicked()
@@ -1527,9 +1591,6 @@ void Premium::on_withdraw_clicked()
     updateBalanceLabel();
 }
 
-
-
-
 void Premium::on_premiumBuy_clicked()
 {
     QString lineEditText = ui->cartNumber->text();
@@ -1593,4 +1654,155 @@ void Premium::on_premiumBuy_clicked()
 void Premium::fillPlayListAfterNew(){
     fill_playlists();
 }
+
+void Premium::setupDateTimePicker() {
+
+
+    // Create QLineEdit for displaying selected date and time
+    QLineEdit *releaseDateLineEdit = ui->ReleaseDate;
+
+    // Create QPushButton to open the date and time picker dialog
+    QPushButton *dateTimePickerButton = ui->SelectTime;
+
+    connect(dateTimePickerButton, &QPushButton::clicked, this, [this, releaseDateLineEdit]() {
+        QDialog dialog(this);
+        QVBoxLayout dialogLayout(&dialog);
+
+        // Create and add QCalendarWidget to the dialog
+        QCalendarWidget *calendarWidget = new QCalendarWidget(&dialog);
+        dialogLayout.addWidget(calendarWidget);
+
+        // Create and add QTimeEdit to the dialog
+        QTimeEdit *timeEdit = new QTimeEdit(&dialog);
+        timeEdit->setDisplayFormat("HH:mm");
+        dialogLayout.addWidget(timeEdit);
+
+        // Create and add OK and Cancel buttons to the dialog
+        QHBoxLayout buttonLayout;
+        QPushButton okButton("OK", &dialog);
+        QPushButton cancelButton("Cancel", &dialog);
+        buttonLayout.addWidget(&okButton);
+        buttonLayout.addWidget(&cancelButton);
+        dialogLayout.addLayout(&buttonLayout);
+
+        connect(&okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+        connect(&cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+        if (dialog.exec() == QDialog::Accepted) {
+            QDate selectedDate = calendarWidget->selectedDate();
+            QTime selectedTime = timeEdit->time();
+            QString dateTimeString = selectedDate.toString("yyyy-MM-dd") + " " + selectedTime.toString("HH:mm");
+            releaseDateLineEdit->setText(dateTimeString);
+        }
+    });
+
+
+
+}
+
+void Premium::setupDateTimePicker2() {
+    // Create QLineEdit for displaying selected date and time
+    QLineEdit *releaseDateLineEdit = ui->ReleaseDate_2;
+
+    // Create QPushButton to open the date and time picker dialog
+    QPushButton *dateTimePickerButton = ui->SelectTime_2;
+
+    connect(dateTimePickerButton, &QPushButton::clicked, this, [this, releaseDateLineEdit]() {
+        QDialog dialog(this);
+        QVBoxLayout dialogLayout(&dialog);
+
+        // Create and add QCalendarWidget to the dialog
+        QCalendarWidget *calendarWidget = new QCalendarWidget(&dialog);
+        dialogLayout.addWidget(calendarWidget);
+
+        // Create and add QTimeEdit to the dialog
+        QTimeEdit *timeEdit = new QTimeEdit(&dialog);
+        timeEdit->setDisplayFormat("HH:mm");
+        dialogLayout.addWidget(timeEdit);
+
+        // Create and add OK and Cancel buttons to the dialog
+        QHBoxLayout buttonLayout;
+        QPushButton okButton("OK", &dialog);
+        QPushButton cancelButton("Cancel", &dialog);
+        buttonLayout.addWidget(&okButton);
+        buttonLayout.addWidget(&cancelButton);
+        dialogLayout.addLayout(&buttonLayout);
+
+        connect(&okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+        connect(&cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+        if (dialog.exec() == QDialog::Accepted) {
+            QDate selectedDate = calendarWidget->selectedDate();
+            QTime selectedTime = timeEdit->time();
+            QString dateTimeString = selectedDate.toString("yyyy-MM-dd") + " " + selectedTime.toString("HH:mm");
+            releaseDateLineEdit->setText(dateTimeString);
+        }
+    });
+}
+
+
+void Premium::on_submit_song_2_clicked()
+{
+    // Retrieve values from input fields
+    QString artistName = ui->signer->text();
+    QString concertDate = ui->ReleaseDate_2->text();
+    QString concertLocation = ui->Country_2->text();
+    double price1 = ui->ticket1->text().toDouble();
+    int quantity1 = ui->ticket1_quantity->text().toInt();
+    double price2 = ui->ticket2->text().toDouble();
+    int quantity2 = ui->ticket2_quantity->text().toInt();
+    double price3 = ui->ticket3->text().toDouble();
+    int quantity3 = ui->ticket3_quantity->text().toInt();
+
+    // Retrieve artist ID from artist name
+    int artistId = ID; // Assuming ID is already correctly set
+
+    // Prepare and execute the AddNewConcert stored procedure
+    QSqlQuery concertQuery;
+    concertQuery.prepare("EXEC AddNewConcert @ArtistID = :ArtistID, @ConcertDate = :ConcertDate, @ConcertLocation = :ConcertLocation");
+    concertQuery.bindValue(":ArtistID", artistId);
+    concertQuery.bindValue(":ConcertDate", concertDate);
+    concertQuery.bindValue(":ConcertLocation", concertLocation);
+
+    if (!concertQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to add concert: " + concertQuery.lastError().text());
+        return;
+    }
+
+    // Prepare and execute the AddTicketsForConcert stored procedure
+    QSqlQuery ticketQuery;
+    ticketQuery.prepare("EXEC AddTicketsForConcert @artist_id = :artist_id, @date_concert = :date_concert, "
+                        "@price1 = :price1, @quantity1 = :quantity1, "
+                        "@price2 = :price2, @quantity2 = :quantity2, "
+                        "@price3 = :price3, @quantity3 = :quantity3");
+    ticketQuery.bindValue(":artist_id", artistId);
+    ticketQuery.bindValue(":date_concert", concertDate);
+    ticketQuery.bindValue(":price1", price1);
+    ticketQuery.bindValue(":quantity1", quantity1);
+    ticketQuery.bindValue(":price2", price2);
+    ticketQuery.bindValue(":quantity2", quantity2);
+    ticketQuery.bindValue(":price3", price3);
+    ticketQuery.bindValue(":quantity3", quantity3);
+
+    if (!ticketQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to add tickets: " + ticketQuery.lastError().text());
+        return;
+    }
+
+    QMessageBox::information(this, "Success", "Concert and tickets added successfully!");
+
+    // Clear the input fields
+    ui->signer->clear();
+    ui->ReleaseDate_2->clear();
+    ui->Country_2->clear();
+    ui->ticket1->clear();
+    ui->ticket1_quantity->clear();
+    ui->ticket2->clear();
+    ui->ticket2_quantity->clear();
+    ui->ticket3->clear();
+    ui->ticket3_quantity->clear();
+    fill_concerts();
+}
+
+
 
