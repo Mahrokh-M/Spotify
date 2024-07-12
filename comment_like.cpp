@@ -405,13 +405,6 @@ void Comment_Like::on_Like_button_clicked()
         QMessageBox::critical(this, "Database Error", insertArtistLikesQuery.lastError().text());
         return;
     }
-
-    // InsertUserGenreLikes
-    QSqlQuery insertGenreLikesQuery(db);
-    if (!insertGenreLikesQuery.exec("EXEC InsertUserGenreLikes")) {
-        QMessageBox::critical(this, "Database Error", insertGenreLikesQuery.lastError().text());
-        return;
-    }
     QMessageBox::information(this, "Success", "Song liked and related records updated successfully.");
 }
 

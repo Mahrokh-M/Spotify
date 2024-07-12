@@ -1273,37 +1273,25 @@ BEGIN
 END;
 GO
 ------------------***********------------------------
+
 CREATE PROCEDURE LikePlaylist
     @user_id INT,
     @playlist_name NVARCHAR(50)
 AS
 BEGIN
-    IF EXISTS (
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (
         SELECT 1
-        FROM Premium
-        WHERE user_id = @user_id AND End_time > GETDATE()
+        FROM Like_Play_list
+        WHERE user_id = @user_id AND [name] = @playlist_name
     )
     BEGIN
-        IF NOT EXISTS (
-            SELECT 1
-            FROM Like_Play_list
-            WHERE user_id = @user_id AND [name] = @playlist_name
-        )
-        BEGIN
-            INSERT INTO Like_Play_list(user_id, [name])
-            VALUES (@user_id, @playlist_name);
-            
-            PRINT 'Playlist liked successfully.';
-        END
-        ELSE
-        BEGIN
-            PRINT 'You have already liked this playlist.';
-        END
+        INSERT INTO Like_Play_list (user_id, [name])
+        VALUES (@user_id, @playlist_name);
+
     END
-    ELSE
-    BEGIN
-        PRINT 'User does not have a valid subscription. Liking is not allowed.';
-    END
+
 END;
 GO
 ------------------***********------------------------
@@ -1326,6 +1314,7 @@ BEGIN
         Artists ar ON ahs.artist_id = ar.artist_id;
 END;
 GO
+DROP PROCEDURE InsertUserGenreLikes
 CREATE PROCEDURE InsertUserGenreLikes
 AS
 BEGIN
@@ -2166,3 +2155,9 @@ SELECT*
 FROM Play_list
 SELECT*
 FROM Favorite_Song
+exec InsertUserGenreLikes
+exec LikeSong  @user_id=3,
+    @song_id =5;
+SELECT *
+FROM Like_song
+exec InsertUserArtistLikes
