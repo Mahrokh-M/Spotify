@@ -17,6 +17,8 @@ class Comment_Like : public QWidget
 public:
     explicit Comment_Like(QWidget *parent = nullptr);
     QMap<QString, QString>  getSongDetails(int songId);
+    void clearScrollArea(QScrollArea *scrollArea);
+    void loadCommentsForSong(int ID_Song);
     ~Comment_Like();
 
 private:
@@ -24,6 +26,8 @@ private:
     void onSongButtonClicked();
     void fillPlaylists();
     void setstyle();
+    QScrollArea *commentSection;
+    QVBoxLayout *commentsLayout;
 public slots:
     void setCommentDetails(const QString &songID);
 private slots:
@@ -32,6 +36,8 @@ private slots:
     void on_addNewPlaylist_clicked();
     void on_playlistButtonClicked();
     void on_show_lyrics_clicked();
+
+    void on_Add_comment_clicked();
 
 signals:
     void goBack();

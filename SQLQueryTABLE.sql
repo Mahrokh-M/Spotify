@@ -199,14 +199,16 @@
 --	PRIMARY KEY(user_id,song_id)
 --);
 ---------------------------------------------------------
---CREATE TABLE Comment_song(
---    song_id INT,
---	[text] VARCHAR(100),
---	user_id INT,
---    FOREIGN KEY (user_id) REFERENCES Premium(user_id),
---	FOREIGN KEY (song_id) REFERENCES Songs(song_id)ON DELETE CASCADE,
---	PRIMARY KEY(user_id,song_id)
---);
+DROP TABLE Comment_song
+CREATE TABLE Comment_song(
+    song_id INT,
+	[text] VARCHAR(MAX),
+	user_id INT,
+	[date] DATETIME,
+    FOREIGN KEY (user_id) REFERENCES Premium(user_id),
+	FOREIGN KEY (song_id) REFERENCES Songs(song_id)ON DELETE CASCADE,
+	PRIMARY KEY(user_id,song_id,[date])
+);
 ---------------------------------------------------------
 --CREATE TABLE Like_song(
 --    song_id INT ,
@@ -590,49 +592,37 @@
 ------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -----------------------------------------------------------------------------------------------------------------------------------------------
 --DISPLAY SONG DETAILS:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-DROP PROCEDURE GetSongDetails;
-CREATE PROCEDURE GetSongDetails
-    @song_id INT
-AS
-BEGIN
-    -- Get the song details
-    SELECT
-        s.song_id AS ID,
-        s.title AS Title,
-        a.title AS AlbumTitle,
-        s.genre AS Genre,
-        s.country AS Country,
-        s.Age_category AS AgeCategory,
-        s.lyrics AS Lyrics,
-        s.address_of_picture AS PictureAddress  -- Add the picture address
-    FROM Songs s
-    JOIN Albums a ON s.album_id = a.album_id OR s.album_id IS NULL
-    WHERE s.song_id = @song_id;
+--DROP PROCEDURE GetSongDetails;
+--CREATE PROCEDURE GetSongDetails
+--    @song_id INT
+--AS
+--BEGIN
+--    -- Get the song details
+--    SELECT
+--        s.song_id AS ID,
+--        s.title AS Title,
+--        a.title AS AlbumTitle,
+--        s.genre AS Genre,
+--        s.country AS Country,
+--        s.Age_category AS AgeCategory,
+--        s.lyrics AS Lyrics,
+--        s.address_of_picture AS PictureAddress  -- Add the picture address
+--    FROM Songs s
+--    JOIN Albums a ON s.album_id = a.album_id OR s.album_id IS NULL
+--    WHERE s.song_id = @song_id;
 
-    -- Get all artists for the song
-    SELECT
-        u.username AS ArtistName
-    FROM artist_has_song ahs
-    JOIN Artists ar ON ahs.artist_id = ar.artist_id
-    JOIN Users u ON ar.artist_id = u.user_id
-    WHERE ahs.song_id = @song_id;
-END;
-GO
+--    -- Get all artists for the song
+--    SELECT
+--        u.username AS ArtistName
+--    FROM artist_has_song ahs
+--    JOIN Artists ar ON ahs.artist_id = ar.artist_id
+--    JOIN Users u ON ar.artist_id = u.user_id
+--    WHERE ahs.song_id = @song_id;
+--END;
+--GO
 
 
 exec GetSongDetails @song_id=5;
-------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-------------------------------------------------------------------------------------------------------------------------------------------------
-------DISPLAY SONG Lyrics :!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-----CREATE PROCEDURE GetSongLyrics 
-----    @song_id INT
-----AS
-----BEGIN
-----    SELECT
-----        s.lyrics AS Lyrics  
-----    FROM Songs s
-----    WHERE s.song_id = @song_id;
-----END;
 ------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ------ADD FUND TO WALLET:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -711,29 +701,29 @@ exec GetSongDetails @song_id=5;
 GO
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --CHECK USER IS ARTIST OR NOT:
-CREATE PROCEDURE IsUserArtist
-    @user_id INT
-AS
-BEGIN
-    -- Declare a variable to store the result
-    DECLARE @is_artist BIT = 0;
+--CREATE PROCEDURE IsUserArtist
+--    @user_id INT
+--AS
+--BEGIN
+--    -- Declare a variable to store the result
+--    DECLARE @is_artist BIT = 0;
 
-    -- Check if the user is a premium user with a valid subscription and is in the Artists table
-    IF EXISTS (
-        SELECT 1
-        FROM Premium p
-        JOIN Artists a ON p.user_id = a.artist_id
-        WHERE p.user_id = @user_id
-          AND p.End_time > GETDATE()
-    )
-    BEGIN
-        SET @is_artist = 1;
-    END
+--    -- Check if the user is a premium user with a valid subscription and is in the Artists table
+--    IF EXISTS (
+--        SELECT 1
+--        FROM Premium p
+--        JOIN Artists a ON p.user_id = a.artist_id
+--        WHERE p.user_id = @user_id
+--          AND p.End_time > GETDATE()
+--    )
+--    BEGIN
+--        SET @is_artist = 1;
+--    END
 
-    -- Return the result
-    SELECT @is_artist AS IsArtist;
-END;
-GO
+--    -- Return the result
+--    SELECT @is_artist AS IsArtist;
+--END;
+--GO
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --______________________________________________________________________________________________________
 --ADD SONG :
@@ -968,6 +958,17 @@ BEGIN
     END CATCH
 END;
 GO
+--___________________________________________________________________________________________________________________________
+CREATE PROCEDURE GetCommentsForSong
+    @song_id INT
+AS
+BEGIN
+    SELECT [text], user_id, [date]
+    FROM Comment_song
+    WHERE song_id = @song_id
+    ORDER BY [date];
+END;
+GO
 -------------------------------------------------------------------------------------------ZAHRA--------------------------------------------------------------------------------------
 CREATE PROCEDURE InsertUser
     @username NVARCHAR(50),
@@ -1127,7 +1128,7 @@ GO
 CREATE PROCEDURE AddCommentToSong
     @user_id INT,
     @song_id INT,
-    @text VARCHAR(100)
+    @text VARCHAR(MAX)
 AS
 BEGIN
     IF EXISTS (
@@ -1136,8 +1137,8 @@ BEGIN
         WHERE user_id = @user_id AND End_time > GETDATE()
     )
     BEGIN
-        INSERT INTO Comment_song (song_id, [text], user_id)
-        VALUES (@song_id, @text, @user_id);
+        INSERT INTO Comment_song (song_id, [text], user_id,[date])
+        VALUES (@song_id, @text, @user_id,GETDATE());
         
         PRINT 'Comment added successfully to song.';
     END
@@ -1842,3 +1843,14 @@ GO
 
 
 
+
+
+
+
+
+--__________________________________________________________________check___________________________________________________________--
+SELECT*
+FROM Comment_song;
+exec GetCommentsForSong @song_id=48;
+exec GetCommentsForSong @song_id=6;
+exec AddCommentToSong @user_id= 2, @song_id = 6,@text='kjhkjhgju';
