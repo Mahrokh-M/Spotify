@@ -947,10 +947,7 @@ BEGIN
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
-        -- Rollback transaction in case of error
         ROLLBACK TRANSACTION;
-
-        -- Throw the caught exception
         THROW;
     END CATCH
 END;
@@ -1635,6 +1632,7 @@ BEGIN
 END;
 GO
 --------------------------------------------
+DROP PROCEDURE GetSongsInPlaylist
 CREATE PROCEDURE GetSongsInPlaylist
     @user_id INT,
     @playlist_name VARCHAR(50)

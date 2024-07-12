@@ -31,6 +31,7 @@ private:
     void updateLikeButtonStyle(const QString &playlistName);
 public slots:
     void fillPlaylist(const QString &listID);
+    void fillAlbum(const QString &AlbumID);
 signals:
     void goBack();
     void open_comment(const QString);

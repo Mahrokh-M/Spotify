@@ -213,4 +213,7 @@ void playlist_songs::updateLikeButtonStyle(const QString &playlistName)
     }
 }
 
+void playlist_songs::fillAlbum(const QString &AlbumID){
+
+}
 
