@@ -534,59 +534,58 @@ RETURN
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ----SEARCH ALBUM AND SONG:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
---CREATE PROCEDURE SearchMusicAndAlbum
---    @name NVARCHAR(100) = NULL,
---    @artist_name NVARCHAR(100) = NULL,
---    @genre NVARCHAR(50) = NULL,
---    @country NVARCHAR(50) = NULL,
---    @age_category CHAR(2) = NULL
---AS
---BEGIN
---    DECLARE @sql NVARCHAR(MAX) = '';
+CREATE PROCEDURE SearchMusicAndAlbum
+    @name NVARCHAR(100) = NULL,
+    @artist_name NVARCHAR(100) = NULL,
+    @genre NVARCHAR(50) = NULL,
+    @country NVARCHAR(50) = NULL,
+    @age_category CHAR(2) = NULL
+AS
+BEGIN
+    DECLARE @sql NVARCHAR(MAX) = '';
     
---    -- Base SELECT statement for Songs
---    SET @sql = '
---        SELECT ''Song'' AS Type, s.song_id AS ID, s.title AS Title, a.title AS AlbumTitle, ar.bio AS ArtistBio, s.genre AS Genre, s.country AS Country, s.Age_category AS AgeCategory
---        FROM Songs s
---        JOIN Albums a ON s.album_id = a.album_id
---        JOIN Artists ar ON s.artist_id_added = ar.artist_id
---        WHERE 1=1';
+    -- Base SELECT statement for Songs
+    SET @sql = '
+        SELECT ''Song'' AS Type, s.song_id AS ID, s.title AS Title
+        FROM Songs s
+        JOIN Artists ar ON s.artist_id_added = ar.artist_id
+        WHERE 1=1';
     
---    -- Append conditions for Songs
---    IF @name IS NOT NULL
---        SET @sql = @sql + ' AND s.title LIKE ''%' + @name + '%''';
---    IF @artist_name IS NOT NULL
---        SET @sql = @sql + ' AND ar.bio LIKE ''%' + @artist_name + '%''';
---    IF @genre IS NOT NULL
---        SET @sql = @sql + ' AND s.genre LIKE ''%' + @genre + '%''';
---    IF @country IS NOT NULL
---        SET @sql = @sql + ' AND s.country LIKE ''%' + @country + '%''';
---    IF @age_category IS NOT NULL
---        SET @sql = @sql + ' AND s.Age_category = ''' + @age_category + '''';
+    -- Append conditions for Songs
+    IF @name IS NOT NULL
+        SET @sql = @sql + ' AND s.title LIKE ''%' + @name + '%''';
+    IF @artist_name IS NOT NULL
+        SET @sql = @sql + ' AND ar.bio LIKE ''%' + @artist_name + '%''';
+    IF @genre IS NOT NULL
+        SET @sql = @sql + ' AND s.genre LIKE ''%' + @genre + '%''';
+    IF @country IS NOT NULL
+        SET @sql = @sql + ' AND s.country LIKE ''%' + @country + '%''';
+    IF @age_category IS NOT NULL
+        SET @sql = @sql + ' AND s.Age_category = ''' + @age_category + '''';
     
---    -- Add UNION ALL for Albums
---    SET @sql = @sql + '
---        UNION ALL
---        SELECT ''Album'' AS Type, a.album_id AS ID, a.title AS Title, a.title AS AlbumTitle, ar.bio AS ArtistBio, a.genre AS Genre, a.country AS Country, a.Age_category AS AgeCategory
---        FROM Albums a
---        JOIN Artists ar ON a.artist_id_added = ar.artist_id
---        WHERE 1=1';
+    -- Add UNION ALL for Albums
+    SET @sql = @sql + '
+        UNION ALL
+        SELECT ''Album'' AS Type, a.album_id AS ID, a.title AS Title, a.title 
+        FROM Albums a
+        JOIN Artists ar ON a.artist_id_added = ar.artist_id
+        WHERE 1=1';
     
---    -- Append conditions for Albums
---    IF @name IS NOT NULL
---        SET @sql = @sql + ' AND a.title LIKE ''%' + @name + '%''';
---    IF @artist_name IS NOT NULL
---        SET @sql = @sql + ' AND ar.bio LIKE ''%' + @artist_name + '%''';
---    IF @genre IS NOT NULL
---        SET @sql = @sql + ' AND a.genre LIKE ''%' + @genre + '%''';
---    IF @country IS NOT NULL
---        SET @sql = @sql + ' AND a.country LIKE ''%' + @country + '%''';
---    IF @age_category IS NOT NULL
---        SET @sql = @sql + ' AND a.Age_category = ''' + @age_category + '''';
+    -- Append conditions for Albums
+    IF @name IS NOT NULL
+        SET @sql = @sql + ' AND a.title LIKE ''%' + @name + '%''';
+    IF @artist_name IS NOT NULL
+        SET @sql = @sql + ' AND ar.bio LIKE ''%' + @artist_name + '%''';
+    IF @genre IS NOT NULL
+        SET @sql = @sql + ' AND a.genre LIKE ''%' + @genre + '%''';
+    IF @country IS NOT NULL
+        SET @sql = @sql + ' AND a.country LIKE ''%' + @country + '%''';
+    IF @age_category IS NOT NULL
+        SET @sql = @sql + ' AND a.Age_category = ''' + @age_category + '''';
     
---    -- Execute the dynamic SQL
---    EXEC sp_executesql @sql;
---END;
+    -- Execute the dynamic SQL
+    EXEC sp_executesql @sql;
+END;
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ----DISPLAY SONG DETAILS:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

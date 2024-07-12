@@ -1,4 +1,7 @@
 #include "comment_like.h"
+#include "qsqlerror.h"
+#include "qsqlquery.h"
+#include "qurlquery.h"
 #include "ui_comment_like.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -25,34 +28,97 @@ Comment_Like::~Comment_Like()
 {
     delete ui;
 }
+//**************************************************************
+QMap<QString, QString>Comment_Like:: getSongDetails(int songId) {
+
+    QMap<QString, QString> songDetails;
+    QSqlQuery query;
+
+    query.prepare("{CALL GetSongDetails(?)}");
+    query.bindValue(0, songId);
+
+    if (query.exec()) {
+        // Get the first result set (song details)
+        if (query.next()) {
+            songDetails["ID"] = query.value("ID").toString();
+            songDetails["Title"] = query.value("Title").toString();
+            songDetails["AlbumTitle"] = query.value("AlbumTitle").toString();
+            songDetails["Genre"] = query.value("Genre").toString();
+            songDetails["Country"] = query.value("Country").toString();
+            songDetails["AgeCategory"] = query.value("AgeCategory").toString();
+            songDetails["Lyrics"] = query.value("Lyrics").toString();
+            songDetails["PictureAddress"] = query.value("PictureAddress").toString();
+        }
+
+        // Move to the next result set (artists)
+        if (query.nextResult()) {
+            QStringList artists;
+            while (query.next()) {
+                artists << query.value("ArtistName").toString();
+            }
+            songDetails["ArtistName"] = artists.join(", ");
+        }
+        ui->Song_name->setText("Song Name: " + songDetails["Title"]);
+        ui->Song_genr->setText("Genre: " + songDetails["Genre"]);
+        ui->Song_Country->setText(songDetails["Country"]);
+        ui->Song_AgeCategory->setText(songDetails["AgeCategory"]);
+        if(songDetails["AlbumTitle"].isEmpty()){
+             ui->Song_Album->setText("Album: Unknown");
+        }else
+            ui->Song_Album->setText("Album: " + songDetails["AlbumTitle"]);
+        if(songDetails["ArtistName"].isEmpty()){
+             ui->Song_Artist->setText("Artist: Unknown");
+        }else
+        ui->Song_Artist->setText("Artist: " + songDetails["ArtistName"]);
+        QString pictureAddress = songDetails["PictureAddress"];
+                 if (!pictureAddress.isEmpty()) {
+                     // Assuming you have a QLabel named Song_pic in your UI
+                     QPixmap pixmap(pictureAddress);
+                     ui->Song_pic->setPixmap(pixmap);
+                     ui->Song_pic->setScaledContents(true);
+                 } else {
+                     // Set default Spotify logo if no picture address
+                     QPixmap spotifyLogo(":/new/prefix1/spotify logo.png");  // Path to your default Spotify logo
+                     ui->Song_pic->setPixmap(spotifyLogo);
+                     ui->Song_pic->setScaledContents(true);
+                 }
+    }
+    else {
+        qDebug() << "Stored procedure execution error:" << query.lastError();
+    }
+
+    return songDetails;
+}
+
 
 void Comment_Like::setCommentDetails(const QString &songID)
 {
-    // Fetch and set the song details based on the songID
-    ui->Song_name->setText("Song name for ID: " + songID);
+    QMap<QString, QString> songDetails = getSongDetails(songID.toInt()); // Pass the song_id you want to fetch
+    // Update UI labels with the fetched details
 
-    // Create a widget to hold the content of the scroll area
-    QWidget *contentWidget = new QWidget(this);
-    QVBoxLayout *layout = new QVBoxLayout(contentWidget);
 
-    // Example comments
-    for (int i = 1; i <= 100; ++i)
-    {
-        QHBoxLayout *hLayout = new QHBoxLayout();
+//    // Create a widget to hold the content of the scroll area
+//    QWidget *contentWidget = new QWidget(this);
+//    QVBoxLayout *layout = new QVBoxLayout(contentWidget);
 
-        // Create label for the name of the person who wrote the comment
-        QLabel *nameLabel = new QLabel("User " + QString::number(i), contentWidget);
-        hLayout->addWidget(nameLabel);
+//    // Example comments
+//    for (int i = 1; i <= 100; ++i)
+//    {
+//        QHBoxLayout *hLayout = new QHBoxLayout();
 
-        // Create label for the comment text
-        QLabel *commentLabel = new QLabel("This is comment number " + QString::number(i), contentWidget);
-        hLayout->addWidget(commentLabel);
+//        // Create label for the name of the person who wrote the comment
+//        QLabel *nameLabel = new QLabel("User " + QString::number(i), contentWidget);
+//        hLayout->addWidget(nameLabel);
 
-        layout->addLayout(hLayout);
-    }
+//        // Create label for the comment text
+//        QLabel *commentLabel = new QLabel("This is comment number " + QString::number(i), contentWidget);
+//        hLayout->addWidget(commentLabel);
 
-    // Set the content widget as the scroll area's widget
-    ui->Comment_section->setWidget(contentWidget);
+//        layout->addLayout(hLayout);
+//    }
+
+//    // Set the content widget as the scroll area's widget
+//    ui->Comment_section->setWidget(contentWidget);
 }
 
 void Comment_Like::on_Back_clicked()
