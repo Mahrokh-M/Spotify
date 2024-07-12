@@ -66,7 +66,7 @@ private:
     void populateTickets(const QList<QPair<QString, double>>& tickets, QScrollArea* scrollArea, bool horizontal);
     void setstyle();
     void fillFriendshipRequests();
-    void acceptFriendshipRequest(const QString &);
+    void acceptFriendshipRequest(const QString &name);
     void declineFriendshipRequest(const QString &userName);
     void sendFriendshipRequest(const QString &userName);
     void fillAllUsers();

@@ -379,7 +379,7 @@ void Premium::showPlaylist(){
     QPushButton *button = qobject_cast<QPushButton*>(sender());
     if (button)
     {
-        QString songID = button->property("ID").toString();
+        QString songID = button->property("name").toString();
         emit open_playlist(songID); // Emit signal with songID
     }
 }
@@ -569,20 +569,34 @@ void Premium::onNameButtonClicked(const QString& type, const QString& itemName)
     qDebug() << "Clicked on" << type << ":" << itemName;
 }
 
-void Premium::fill_friends(){
+void Premium::fill_friends() {
+    // Clear existing content
+    qDeleteAll(ui->friends_scrollArea->widget()->children());
+    int userid=ID;
+    // Prepare and execute the SQL query
+    QSqlQuery query;
+    query.prepare("EXEC GetFriendsNames @user_id = :user_id");
+    query.bindValue(":user_id", userid);  // Assuming currentUserID is defined somewhere
 
-    // Example content: add several QLabel with images or text
+    if (!query.exec()) {
+        qDebug() << "Error executing query:" << query.lastError().text();
+        return;
+    }
+
+    // Create a new QWidget and layout for displaying friends
     QWidget *contentWidget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(contentWidget);
-    for (int i = 1; i <= 100; ++i)
-    {
+
+    // Iterate through the results and populate the layout
+    while (query.next()) {
+        QString friendName = query.value("friend_name").toString();
         QHBoxLayout *hLayout = new QHBoxLayout();
 
-        QLabel *label = new QLabel("Friend " + QString::number(i), contentWidget);
-        hLayout->addWidget(label);
+        QLabel *label = new QLabel(friendName);
+                hLayout->addWidget(label);
 
         QPushButton *chatButton = new QPushButton("Start Chat", contentWidget);
-        chatButton->setProperty("ID", QString::number(i));
+        chatButton->setProperty("FriendName", friendName);  // Setting a property to identify the friend
         connect(chatButton, &QPushButton::clicked, this, &Premium::onStartChatClicked);
         hLayout->addWidget(chatButton);
 
@@ -591,10 +605,9 @@ void Premium::fill_friends(){
 
     // Set the content widget as the scroll area's widget
     ui->friends_scrollArea->setWidget(contentWidget);
-
-
-
 }
+
+
 
 void Premium::onStartChatClicked()
 {
@@ -818,43 +831,50 @@ void Premium::populateTickets(const QList<QPair<QString, double>>& tickets, QScr
     scrollArea->setWidgetResizable(true);
 }
 
-void Premium::fillFriendshipRequests()
-{
-    // Assuming you have a list of users who sent friendship requests
-    QStringList requests = {"User1", "User2", "User3"};
+void Premium::fillFriendshipRequests() {
+    // Clear existing content
+    qDeleteAll(ui->friendship_requests->widget()->children());
 
+    // Prepare and execute the SQL query
+    QSqlQuery query;
+    QString queryString = "EXEC GetFriendRequest @target_user_id = :user_id";
+    query.prepare(queryString);
+    query.bindValue(":user_id", ID);  // Assuming currentUserID is defined somewhere
+
+    if (!query.exec()) {
+        qDebug() << "Error executing query:" << query.lastError().text();
+        return;
+    }
+
+    // Create a new QWidget and layout for displaying friend requests
     QWidget *contentWidget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(contentWidget);
 
-    for (const QString &userName : requests) {
-        // Create a horizontal layout for each row
-        QHBoxLayout *rowLayout = new QHBoxLayout();
+    // Iterate through the results and populate the layout
+    while (query.next()) {
+        QHBoxLayout *hLayout = new QHBoxLayout();
 
-        // Label to display user name
-        QLabel *nameLabel = new QLabel(userName, this);
-        rowLayout->addWidget(nameLabel);
+        QString friendName = query.value("username").toString();
 
-        // Button to accept friendship request
-        QPushButton *acceptButton = new QPushButton("Accept", this);
-        // Connect acceptButton clicked signal to slot
+        QLabel *label = new QLabel(friendName, contentWidget);
+        hLayout->addWidget(label);
+
+        QPushButton *acceptButton = new QPushButton("Accept", contentWidget);
         connect(acceptButton, &QPushButton::clicked, this, [=]() {
-            acceptFriendshipRequest(userName);
+            acceptFriendshipRequest(friendName);  // Call slot function to accept the request
         });
-        rowLayout->addWidget(acceptButton);
+        hLayout->addWidget(acceptButton);
 
-        // Button to decline friendship request
-        QPushButton *declineButton = new QPushButton("Decline", this);
-        // Connect declineButton clicked signal to slot
+        QPushButton *declineButton = new QPushButton("Decline", contentWidget);
         connect(declineButton, &QPushButton::clicked, this, [=]() {
-            declineFriendshipRequest(userName);
+            declineFriendshipRequest(friendName);  // Call slot function to decline the request
         });
-        rowLayout->addWidget(declineButton);
+        hLayout->addWidget(declineButton);
 
-        // Add row layout to main vertical layout
-        layout->addLayout(rowLayout);
+        layout->addLayout(hLayout);
     }
 
-    // Set the content widget for the scroll area
+    // Set the content widget as the scroll area's widget
     ui->friendship_requests->setWidget(contentWidget);
 }
 
@@ -941,7 +961,27 @@ void Premium::followUser(int userId, const QString &userName) {
 
 void Premium::acceptFriendshipRequest(const QString &userName)
 {
-    // Logic to accept friendship request for userName
+    int currentUserId = ID;
+
+           // Retrieve the user ID of the requester using their username
+           QSqlQuery query;
+           query.prepare("EXEC AcceptFriendRequests @target_user_id = :target_user_id, @requester_username = :requester_username");
+           query.bindValue(":target_user_id", currentUserId);
+           query.bindValue(":requester_username", userName);
+
+           if (!query.exec()) {
+               qDebug() << "Error accepting friend request:" << query.lastError().text();
+               return;
+           }
+
+           QMessageBox::information(this, "Friend Request Accepted",
+                                       QString("Friend request from %1 accepted successfully.").arg(userName));
+           fill_friends();
+
+           // Optionally, update the UI or perform other actions after accepting the request
+           // Example: Refresh the list of friendship requests
+           fillFriendshipRequests();
+
 }
 
 void Premium::declineFriendshipRequest(const QString &userName)

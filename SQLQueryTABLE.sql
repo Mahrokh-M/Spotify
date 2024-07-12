@@ -82,6 +82,7 @@
 --	FOREIGN KEY (artist_id_added) REFERENCES Artists(artist_id)
 --);
 ------------------------------------------------------
+
 --CREATE TABLE Concerts (
 --    artist_id INT ,
 --    [location] VARCHAR(100),
@@ -91,7 +92,7 @@
 --    FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
 --	PRIMARY KEY (artist_id,[date])
 --);
-------------------------------------------------------
+--------------------------------------------------------
 --CREATE TABLE Tickets (
 --    ticket_id INT PRIMARY KEY IDENTITY,
 --    user_id INT,
@@ -1226,40 +1227,7 @@ BEGIN
     END
 END;
 GO
--------------------------------------------------------
-CREATE PROCEDURE LikePlaylist
-    @user_id INT,
-    @playlist_name NVARCHAR(50)
-AS
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM Premium
-        WHERE user_id = @user_id AND End_time > GETDATE()
-    )
-    BEGIN
-        IF NOT EXISTS (
-            SELECT 1
-            FROM Like_Play_list
-            WHERE user_id = @user_id AND [name] = @playlist_name
-        )
-        BEGIN
-            INSERT INTO Like_Play_list(user_id, [name])
-            VALUES (@user_id, @playlist_name);
-            
-            PRINT 'Playlist liked successfully.';
-        END
-        ELSE
-        BEGIN
-            PRINT 'You have already liked this playlist.';
-        END
-    END
-    ELSE
-    BEGIN
-        PRINT 'User does not have a valid subscription. Liking is not allowed.';
-    END
-END;
-GO
+
 ----------------------------------------------------------
 CREATE PROCEDURE InsertUserArtistLikes
 AS
@@ -1618,21 +1586,6 @@ BEGIN
     WHERE user_id = @user_id;
 END;
 GO
---------------------------------------------
-CREATE PROCEDURE GetSongsInPlaylist
-    @user_id INT,
-    @playlist_name VARCHAR(50)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    SELECT s.title AS Song_Title
-    FROM Playlist_has_song ps
-    INNER JOIN Songs s ON ps.song_id = s.song_id
-    WHERE ps.user_id = @user_id
-    AND ps.[name] = @playlist_name;
-END;
-GO
 --------------------------------------
 CREATE PROCEDURE GetSongsByPlaylist
     @playlist_name VARCHAR(50)
@@ -1800,7 +1753,7 @@ BEGIN
     END;
     UPDATE Friend
     SET accept = 1 
-    WHERE user_id1 =@target_user_id  AND user_id2 = @requester_user_id;
+    WHERE (user_id1 =@target_user_id  AND user_id2 = @requester_user_id) OR (user_id1 =@requester_user_id AND user_id2 = @target_user_id  );
 END;
 GO
 
@@ -1859,11 +1812,41 @@ BEGIN
         la.user_id = @user_id;
 END;
 GO
+-----------------------------------------------------------
 
+CREATE PROCEDURE GetSongsInPlaylist
+    @playlist_name VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
 
+    SELECT s.title AS Song_Title
+    FROM Playlist_has_song ps
+    INNER JOIN Songs s ON ps.song_id = s.song_id
+    WHERE ps.[name] = @playlist_name;
+END;
+GO
+--------------------------------------------------------
+CREATE PROCEDURE LikePlaylist
+    @user_id INT,
+    @playlist_name NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
 
+    IF NOT EXISTS (
+        SELECT 1
+        FROM Like_Play_list
+        WHERE user_id = @user_id AND [name] = @playlist_name
+    )
+    BEGIN
+        INSERT INTO Like_Play_list (user_id, [name])
+        VALUES (@user_id, @playlist_name);
 
+    END
 
+END;
+GO
 
 
 
@@ -1878,6 +1861,12 @@ GO
 --VALUES ('user1', 'password1', 'user1@example.com', '1990-01-01', 'New York'),
 --       ('user2', 'password2', 'user2@example.com', '1992-05-15', 'Los Angeles'),
 --       ('user3', 'password3', 'user3@example.com', '1985-08-20', 'Chicago');
+
+--INSERT INTO Users (username, [password], email, birth_date, [location])
+--VALUES ('user4', 'password4', 'user4@example.com', '1990-01-01', 'New York');
+
+--INSERT INTO Premium (user_id, Start_time, End_time)
+--VALUES (4, '2023-01-01 10:00:00', '2025-12-31 23:59:59');
 
 --INSERT INTO Premium (user_id, Start_time, End_time)
 --VALUES (1, '2023-01-01 10:00:00', '2023-12-31 23:59:59'),
