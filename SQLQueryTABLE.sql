@@ -32,19 +32,21 @@
 --	FOREIGN KEY (user_id) REFERENCES Users(user_id)
 --);
 -------------------------------------------------------
+--DROP:
 --CREATE TABLE Play_list(
 --    user_id INT ,
 --	[name] VARCHAR(50) NOT NULL ,
 --    ispublic BIT DEFAULT 0,
---	address_of_picture VARCHAR(100),
+--	address_of_picture VARCHAR(200),
 --    FOREIGN KEY (user_id) REFERENCES Users(user_id),
 --	PRIMARY KEY(user_id,[name])
 --);
 -------------------------------------------------------
+--DROP:
 --CREATE TABLE Digital_wallet (
 --    Digital_wallet_id INT PRIMARY KEY IDENTITY,
 --    user_id INT,
---    amount DECIMAL(10, 2) DEFAULT 0.00,
+--    amount DECIMAL(10, 2) DEFAULT 0.00 NOT NULL,
 --    FOREIGN KEY (user_id) REFERENCES Users(user_id)
 --);
 -------------------------------------------------------
@@ -54,6 +56,7 @@
 --    FOREIGN KEY (artist_id) REFERENCES Users(user_id)
 --);
 --------------------------------------------------------------
+--DROP:
 --CREATE TABLE Albums (
 --    album_id INT PRIMARY KEY IDENTITY,
 --	title VARCHAR(100) NOT NULL,
@@ -62,10 +65,11 @@
 --    release_date DATE,
 --	Age_category CHAR(2),
 --	country VARCHAR(50),
---	address_of_picture VARCHAR(100),
+--	address_of_picture VARCHAR(200),
 --	FOREIGN KEY (artist_id_added) REFERENCES Artists(artist_id)
 --);
 -------------------------------------------------------
+--DROP:
 --CREATE TABLE Songs (
 --    song_id INT PRIMARY KEY IDENTITY,
 --	artist_id_added INT,
@@ -76,18 +80,19 @@
 --    lyrics VARCHAR(MAX),
 --	Age_category CHAR(2),
 --	country VARCHAR(50),
---	address_of_picture VARCHAR(100),
+--	address_of_picture VARCHAR(200),
 --    can_be_added BIT DEFAULT 0,
 --	FOREIGN KEY (album_id) REFERENCES Albums(album_id)ON DELETE CASCADE,
 --	FOREIGN KEY (artist_id_added) REFERENCES Artists(artist_id)
 --);
 ------------------------------------------------------
+--DROP:
 --CREATE TABLE Concerts (
 --    artist_id INT ,
 --    [location] VARCHAR(100),
 --    [date] DATETIME ,
 --    cancel BIT  DEFAULT 0, --laghv nist
---	address_of_picture VARCHAR(100),
+--	address_of_picture VARCHAR(200),
 --    FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
 --	PRIMARY KEY (artist_id,[date])
 --);
@@ -139,10 +144,11 @@ CREATE TABLE Tickets (
 --	PRIMARY KEY(user_id1,user_id2)
 --);
 ------------------------------------------------------
+--DROP:
 --CREATE TABLE Message_Premium (
 --    user_id1 INT,
 --    user_id2 INT,
---    [text] VARCHAR(100),
+--    [text] VARCHAR(Max),
 --	CreatedDate DATETIME DEFAULT GETDATE(),
 --    FOREIGN KEY (user_id1) REFERENCES Premium(user_id),
 --    FOREIGN KEY (user_id2) REFERENCES Premium(user_id),
@@ -152,15 +158,16 @@ CREATE TABLE Tickets (
 --CREATE TABLE follower(
 --	user_id1 INT,
 --	user_id2 INT,
---    FOREIGN KEY (user_id1) REFERENCES Premium(user_id),
+--  FOREIGN KEY (user_id1) REFERENCES Premium(user_id),
 --	FOREIGN KEY (user_id2) REFERENCES Premium(user_id),
 --	PRIMARY KEY(user_id1,user_id2)
 --);
 ---------------------------------------------------------
+--DROP:
 --CREATE TABLE Comment_Album (
 --    user_id INT,                  
 --    album_id INT,
---    [text] VARCHAR(100),
+--    [text] VARCHAR(MAX),
 --    FOREIGN KEY (user_id) REFERENCES Premium(user_id),
 --    FOREIGN KEY (album_id) REFERENCES Albums(album_id)ON DELETE CASCADE,
 --	PRIMARY KEY(user_id,album_id)
@@ -199,6 +206,7 @@ CREATE TABLE Tickets (
 --	PRIMARY KEY(user_id,song_id)
 --);
 ---------------------------------------------------------
+--DROP
 --DROP TABLE Comment_song
 --CREATE TABLE Comment_song(
 --    song_id INT,
@@ -227,15 +235,7 @@ CREATE TABLE Tickets (
 
 --);
 ---------------------------------------------------------
-----CREATE TABLE Return_money(
-----    Digital_wallet_id INT ,
-----	artist_id INT  ,
-----    [date] DATETIME ,
-----	amount DECIMAL(10, 2), --**
-----    FOREIGN KEY (artist_id,[date]) REFERENCES Concerts(artist_id,[date]),
-----	FOREIGN KEY (Digital_wallet_id) REFERENCES Digital_wallet(Digital_wallet_id),
-----	PRIMARY KEY(artist_id,Digital_wallet_id,[date])
-----);
+
 ---------------------------------------------------------
 --CREATE TABLE Play_song(
 --   song_id INT ,

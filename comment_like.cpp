@@ -388,7 +388,31 @@ void Comment_Like::clearScrollArea(QScrollArea *scrollArea) {
 
 void Comment_Like::on_Like_button_clicked()
 {
+    // LikeSong
+    QSqlQuery likeSongQuery(db);
+    likeSongQuery.prepare("EXEC LikeSong @user_id = :user_id, @song_id = :song_id");
+    likeSongQuery.bindValue(":user_id", ID);
+    likeSongQuery.bindValue(":song_id", ID_Song);
 
+    if (!likeSongQuery.exec()) {
+        QMessageBox::critical(this, "Database Error", likeSongQuery.lastError().text());
+        return;
+    }
+
+    //InsertUserArtistLikes
+    QSqlQuery insertArtistLikesQuery(db);
+    if (!insertArtistLikesQuery.exec("EXEC InsertUserArtistLikes")) {
+        QMessageBox::critical(this, "Database Error", insertArtistLikesQuery.lastError().text());
+        return;
+    }
+
+    // InsertUserGenreLikes
+    QSqlQuery insertGenreLikesQuery(db);
+    if (!insertGenreLikesQuery.exec("EXEC InsertUserGenreLikes")) {
+        QMessageBox::critical(this, "Database Error", insertGenreLikesQuery.lastError().text());
+        return;
+    }
+    QMessageBox::information(this, "Success", "Song liked and related records updated successfully.");
 }
 
 
@@ -411,5 +435,9 @@ void Comment_Like::on_add_favorite_clicked()
 
     QMessageBox::information(this, "Add to Favorites", resultMessage);
 }
+
+
+
+
 
 
