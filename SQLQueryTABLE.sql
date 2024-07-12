@@ -631,8 +631,6 @@ BEGIN
     WHERE ahs.song_id = @song_id;
 END;
 GO
-
-
 exec GetSongDetails @song_id=5;
 ------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -837,12 +835,10 @@ CREATE PROCEDURE AddAlbumAndArtists
     @age_category CHAR(2),
     @country VARCHAR(50),
     @address_of_picture VARCHAR(100),
+	@artist_id INT,
     @collaborator_artists ArtistIdTableType READONLY
 AS
 BEGIN
-    DECLARE @artist_id INT;
-    DECLARE @album_id INT;
-
     INSERT INTO Albums (title, artist_id_added, genre, release_date, Age_category, country, address_of_picture)
     VALUES (@album_title, @artist_id, @genre,  GETDATE(), @age_category, @country, @address_of_picture);
 
@@ -850,10 +846,6 @@ BEGIN
 
     INSERT INTO artist_has_album (album_id, artist_id)
     VALUES (@album_id, @artist_id);
-
-    INSERT INTO artist_has_album (album_id, artist_id)
-    SELECT @album_id, artist_id
-    FROM @collaborator_artists;
 END;
 GO
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -993,6 +985,7 @@ BEGIN
     END CATCH
 END;
 GO
+
 -------------------------------------------------------------------------------------------ZAHRA--------------------------------------------------------------------------------------
 CREATE PROCEDURE InsertUser
     @username NVARCHAR(50),
@@ -1632,7 +1625,6 @@ GO
 --------------------------------------------
 DROP PROCEDURE GetSongsInPlaylist
 CREATE PROCEDURE GetSongsInPlaylist
-    @user_id INT,
     @playlist_name VARCHAR(50)
 AS
 BEGIN
@@ -1641,8 +1633,7 @@ BEGIN
     SELECT s.title AS Song_Title
     FROM Playlist_has_song ps
     INNER JOIN Songs s ON ps.song_id = s.song_id
-    WHERE ps.user_id = @user_id
-    AND ps.[name] = @playlist_name;
+    WHERE ps.[name] = @playlist_name;
 END;
 GO
 --------------------------------------
