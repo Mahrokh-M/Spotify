@@ -83,6 +83,8 @@ private:
     void followUser(int userId, const QString &userName);
     void show_album_page();
     void clearScrollArea(QScrollArea *scrollArea);
+    void clearTickets(QScrollArea* scrollArea);
+    void updateBalanceLabel();
 
 
 signals:
@@ -99,6 +101,11 @@ private slots:
     void on_OK_clicked();
 
     void on_Search_pushButton_clicked();
+    void on_charge_clicked();
+
+    void on_withdraw_clicked();
+
+
 public slots:
     void setUserID(const QString &userType);
 };

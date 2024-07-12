@@ -363,7 +363,7 @@
 --FROM Concerts
 --WHERE [date] > GETDATE();
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-----SHOW ALL Available Tickets:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--SHOW ALL Available Tickets:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --CREATE PROCEDURE GetAvailableTickets
 --    @artist_id INT,
 --    @date_concert DATETIME
@@ -436,10 +436,9 @@ RETURN
     JOIN 
         Artists a ON t.artist_id = a.artist_id
     WHERE 
-        t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 0 AND t.date_concert>GETDATE() 
+        t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 0 AND t.date_concert > GETDATE()
 );
 
-----SHOW ALL TICKET THAT BUY(1):
 CREATE FUNCTION SHOWALLTICKET1 (@user_id INT)
 RETURNS TABLE
 AS
@@ -458,8 +457,9 @@ RETURN
     JOIN 
         Artists a ON t.artist_id = a.artist_id
     WHERE 
-        t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 1 AND t.date_concert<=GETDATE() 
+        t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 1 AND t.date_concert <= GETDATE()
 );
+
 ----!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 ----ADD SONG TO FSVORITE:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1847,9 +1847,59 @@ BEGIN
 
 END;
 GO
+--------------------------------------------------------
+-- Procedure to get all valid tickets
+CREATE PROCEDURE GetValidTickets
+    @user_id INT
+AS
+BEGIN
+    SELECT 
+        t.ticket_id,
+        a.bio AS Artist_information,
+        c.[date] AS concert_date,
+        c.location,
+        t.price
+    FROM 
+        Tickets t
+    JOIN 
+        Concerts c ON t.artist_id = c.artist_id AND t.date_concert = c.[date]
+    JOIN 
+        Artists a ON t.artist_id = a.artist_id
+    WHERE 
+        t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 0 AND t.date_concert > GETDATE();
+END;
+GO
+--------------------------------------------------------
+-- Procedure to get all expired tickets
+CREATE PROCEDURE GetExpiredTickets
+    @user_id INT
+AS
+BEGIN
+    SELECT 
+        t.ticket_id,
+        a.bio AS Artist_information,
+        c.[date] AS concert_date,
+        c.location,
+        t.price
+    FROM 
+        Tickets t
+    JOIN 
+        Concerts c ON t.artist_id = c.artist_id AND t.date_concert = c.[date]
+    JOIN 
+        Artists a ON t.artist_id = a.artist_id
+    WHERE 
+        t.user_id = @user_id AND t.is_sold = 1 AND t.Expiration = 1 AND t.date_concert <= GETDATE();
+END;
+GO
 
 
+-- Replace 1 with the actual user_id you want to test
+EXEC GetValidTickets @user_id = 1;
+GO
 
+-- Replace 1 with the actual user_id you want to test
+EXEC GetExpiredTickets @user_id = 1;
+GO
 
 
 
@@ -1898,15 +1948,25 @@ GO
 --       (2, 'Song 2', 2, 'Rock', '2023-02-20', 'Lyrics for Song 2', 'PG', 'UK', '/images/song2.jpg', 1),
 --       (3, 'Song 3', 3, 'Electronic', '2023-03-10', 'Lyrics for Song 3', 'PG', 'Canada', '/images/song3.jpg', 1);
 
---INSERT INTO Concerts (artist_id, [location], [date], address_of_picture)
---VALUES (1, 'New York Concert Hall', '2023-04-01 19:00:00', '/images/concert1.jpg'),
---       (2, 'LA Stadium', '2023-05-15 20:00:00', '/images/concert2.jpg'),
---       (3, 'Chicago Arena', '2023-06-20 18:30:00', '/images/concert3.jpg');
 
---INSERT INTO Tickets (user_id, artist_id, price, Expiration, is_sold, date_concert)
---VALUES (1, 1, 50.00, 1, 0, '2023-04-01 19:00:00'),
---       (2, 2, 75.00, 1, 0, '2023-05-15 20:00:00'),
---       (3, 3, 60.00, 1, 0, '2023-06-20 18:30:00');
+
+---- Insert sample data into the Concerts table
+--INSERT INTO Concerts (artist_id, location, date, cancel, address_of_picture) VALUES
+--(1, 'Location 1', '2025-08-01 19:00:00', 0, 'address1.jpg'),
+--(2, 'Location 2', '2025-08-15 19:00:00', 0, 'address2.jpg'),
+--(3, 'Location 3', '2025-09-01 19:00:00', 0, 'address3.jpg'),
+--(1, 'Location 1', '2022-07-01 19:00:00', 0, 'address4.jpg'),
+--(2, 'Location 2', '2022-07-15 19:00:00', 0, 'address5.jpg');
+
+---- Inserting new rows into the Tickets table
+--INSERT INTO Tickets (user_id, artist_id, price, Expiration, is_sold, date_concert) VALUES
+--(1, 1, 100.00, 0, 1, '2025-08-01 19:00:00'),
+--(1, 2, 50.00, 0, 1, '2025-08-15 19:00:00'),
+--(1, 3, 150.00, 0, 1, '2025-09-01 19:00:00'),
+--(2, 1, 100.00, 1, 1, '2022-07-01 19:00:00'),
+--(2, 2, 50.00, 1, 1, '2022-07-15 19:00:00');
+
+
 
 --INSERT INTO Favorite_Play_list (user_id, user_id_owner, [name])
 --VALUES (1, 2, 'Favorites'),

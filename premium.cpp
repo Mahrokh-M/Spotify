@@ -607,8 +607,6 @@ void Premium::fill_friends() {
     ui->friends_scrollArea->setWidget(contentWidget);
 }
 
-
-
 void Premium::onStartChatClicked()
 {
     QPushButton *button = qobject_cast<QPushButton*>(sender());
@@ -779,56 +777,98 @@ double Premium::getUserBalance()
 
 void Premium::fill_wallet()
 {
-    // Example tickets
-    QList<QPair<QString, double>> validTickets = {
-        {"Concert 1", 100.0},
-        {"Concert 3", 50.0},
-        {"Concert 5", 150.0}
-    };
+    int userId=ID;
+    // Clear existing tickets from the UI
+    clearTickets(ui->valid_tickets_scrollArea);
+    clearTickets(ui->expired_tickets_scrollArea);
+    ui->balance->clear();
 
-    QList<QPair<QString, double>> expiredTickets = {
-        {"Concert 2", 100.0},
-        {"Concert 4", 50.0}
-    };
+    // Fetch valid tickets using GetValidTickets procedure
+    QSqlQuery validQuery(db);
+    validQuery.prepare("EXEC GetValidTickets @user_id = :user_id");
+    validQuery.bindValue(":user_id", userId);
 
-    double totalBalance = calculateTotalBalance(validTickets);
-    updateBalanceLabel(totalBalance);
+    QList<QPair<QString, double>> validTickets;
+    double totalBalance = 0.0;
+
+    if (!validQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve valid tickets: " + validQuery.lastError().text());
+        return;
+    }
+
+    while (validQuery.next()) {
+        QString ticketId = validQuery.value(0).toString();
+        double price = validQuery.value(4).toDouble();
+        validTickets.append(qMakePair(ticketId, price));
+    }
+
+    // Fetch expired tickets using GetExpiredTickets procedure
+    QSqlQuery expiredQuery(db);
+    expiredQuery.prepare("EXEC GetExpiredTickets @user_id = :user_id");
+    expiredQuery.bindValue(":user_id", userId);
+
+    QList<QPair<QString, double>> expiredTickets;
+
+    if (!expiredQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve expired tickets: " + expiredQuery.lastError().text());
+        return;
+    }
+
+    while (expiredQuery.next()) {
+        QString ticketId = expiredQuery.value(0).toString();
+        double price = expiredQuery.value(4).toDouble();
+        expiredTickets.append(qMakePair(ticketId, price));
+    }
+
+    // Update the balance label
+   updateBalanceLabel();
+
+    // Populate the tickets in the UI
     populateTickets(validTickets, ui->valid_tickets_scrollArea, true); // horizontal layout
     populateTickets(expiredTickets, ui->expired_tickets_scrollArea, true); // horizontal layout
 }
 
-double Premium::calculateTotalBalance(const QList<QPair<QString, double>>& validTickets)
+void Premium::clearTickets(QScrollArea* scrollArea)
 {
-    double balance = 0.0;
-    for (const auto& ticket : validTickets)
-    {
-        balance += ticket.second;
+    QWidget* widget = scrollArea->widget();
+    if (widget) {
+        delete widget;
     }
-    return balance;
+    scrollArea->setWidget(nullptr);
+}
+void Premium::updateBalanceLabel() {
+    int userId = ID; // Assuming ID is the current user's ID
+
+    QSqlQuery query;
+    query.prepare("SELECT amount FROM Digital_wallet WHERE user_id = :userID");
+    query.bindValue(":userID", userId);
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve wallet balance: " + query.lastError().text());
+        return;
+    }
+
+    if (query.next()) {
+        double balance = query.value("amount").toDouble();
+        ui->balance->setText(QString::number(balance, 'f', 2)); // Assuming ui->balance is the QLabel for the wallet balance
+    } else {
+        QMessageBox::warning(this, "No Balance", "No wallet balance found for this user.");
+    }
 }
 
-void Premium::updateBalanceLabel(double balance)
-{
-    ui->balance->setText(QString("Balance: $%1").arg(balance));
-}
 
 void Premium::populateTickets(const QList<QPair<QString, double>>& tickets, QScrollArea* scrollArea, bool horizontal)
 {
-    QWidget *contentWidget = new QWidget(this);
-    QHBoxLayout *layout = new QHBoxLayout(contentWidget);
+    QWidget* contentWidget = new QWidget();
+    QBoxLayout* layout = horizontal ? static_cast<QBoxLayout*>(new QHBoxLayout()) : static_cast<QBoxLayout*>(new QVBoxLayout());
+    contentWidget->setLayout(layout);
 
-    for (const auto& ticket : tickets)
-    {
-        QString concertName = ticket.first;
-        double ticketPrice = ticket.second;
-
-        QLabel *ticketLabel = new QLabel(QString("%1 - $%2").arg(concertName).arg(ticketPrice), this);
+    for (const QPair<QString, double>& ticket : tickets) {
+        QLabel* ticketLabel = new QLabel(ticket.first + " - $" + QString::number(ticket.second));
         layout->addWidget(ticketLabel);
     }
 
-    contentWidget->setLayout(layout);
     scrollArea->setWidget(contentWidget);
-    scrollArea->setWidgetResizable(true);
 }
 
 void Premium::fillFriendshipRequests() {
@@ -1330,4 +1370,75 @@ void Premium::clearScrollAreaSearch() {
         }
     }
 }
+
+
+void Premium::on_charge_clicked()
+{
+    int userId = ID; // Assuming ID is the current user's ID
+    double amount = ui->charge_amount->text().toDouble();
+
+    if (amount <= 0) {
+        QMessageBox::warning(this, "Invalid Amount", "Please enter a valid amount to charge.");
+        return;
+    }
+
+    QSqlQuery query;
+    query.prepare("EXEC UpdateWalletBalance @UserID = :userID, @Amount = :amount");
+    query.bindValue(":userID", userId);
+    query.bindValue(":amount", amount); // Charge is a positive transaction
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to update wallet balance: " + query.lastError().text());
+        return;
+    }
+
+    QMessageBox::information(this, "Success", "Charge successful.");
+    updateBalanceLabel();
+}
+
+void Premium::on_withdraw_clicked()
+{
+    int userId = ID; // Assuming ID is the current user's ID
+    double amount = ui->withdraw_amount->text().toDouble();
+
+    if (amount <= 0) {
+        QMessageBox::warning(this, "Invalid Amount", "Please enter a valid amount to withdraw.");
+        return;
+    }
+
+    QSqlQuery balanceQuery;
+    balanceQuery.prepare("SELECT amount FROM Digital_wallet WHERE user_id = :userID");
+    balanceQuery.bindValue(":userID", userId);
+
+    if (!balanceQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve wallet balance: " + balanceQuery.lastError().text());
+        return;
+    }
+
+    if (balanceQuery.next()) {
+        double currentBalance = balanceQuery.value("amount").toDouble();
+        if (amount > currentBalance) {
+            QMessageBox::warning(this, "Insufficient Funds", "You do not have enough funds to complete this withdrawal.");
+            return;
+        }
+    } else {
+        QMessageBox::warning(this, "No Balance", "No wallet balance found for this user.");
+        return;
+    }
+
+    QSqlQuery query;
+    query.prepare("EXEC UpdateWalletBalance @UserID = :userID, @Amount = :amount");
+    query.bindValue(":userID", userId);
+    query.bindValue(":amount", -amount); // Withdraw is a negative transaction
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to update wallet balance: " + query.lastError().text());
+        return;
+    }
+
+    QMessageBox::information(this, "Success", "Withdrawal successful.");
+    updateBalanceLabel();
+}
+
+
 
