@@ -1,6 +1,7 @@
 #ifndef PREMIUM_H
 #define PREMIUM_H
 
+#include "chatbox.h"
 #include <QWidget>
 #include <QGridLayout>
 #include <QScrollArea>

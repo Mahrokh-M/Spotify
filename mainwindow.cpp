@@ -64,8 +64,8 @@ void MainWindow::showPlaylist(const QString &songID){
     playlist->fillPlaylist(songID);
     ui->stackedWidget->setCurrentWidget(playlist);
 }
-void MainWindow::startChat(const QString &personID){
-    chatbox->fillChat(personID);
+void MainWindow::startChat(const QString &personname){
+    chatbox->fillChat(personname);
     ui->stackedWidget->setCurrentWidget(chatbox);
 }
 

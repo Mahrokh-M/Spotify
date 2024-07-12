@@ -5,7 +5,6 @@
 #include "qurlquery.h"
 #include "ui_premium.h"
 
-
 Premium::Premium(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Premium),
@@ -614,8 +613,8 @@ void Premium::onStartChatClicked()
     QPushButton *button = qobject_cast<QPushButton*>(sender());
     if (button)
     {
-        QString friendID = button->property("ID").toString();
-        emit startChat(friendID); // Emit signal with friendID
+        QString friendName = button->property("FriendName").toString();
+                emit startChat(friendName);
     }
 }
 
@@ -837,7 +836,7 @@ void Premium::fillFriendshipRequests() {
 
     // Prepare and execute the SQL query
     QSqlQuery query;
-    QString queryString = "EXEC GetFriendRequest @target_user_id = :user_id";
+    QString queryString = "EXEC GetFriendSRequest @target_user_id = :user_id";
     query.prepare(queryString);
     query.bindValue(":user_id", ID);  // Assuming currentUserID is defined somewhere
 
@@ -935,12 +934,23 @@ void Premium::fillAllUsers() {
     // Set the content widget for the scroll area
     ui->allUsers_scrollBar->setWidget(contentWidget);
 }
-
+//---------------------------------------------------------------
 void Premium::sendFriendshipRequest(const QString &userName) {
-    // Your logic to send a friendship request to the user
-    QMessageBox::information(this, "Friendship Request", "Friendship request sent to " + userName);
-}
+    // Database connection and query execution
+    QSqlQuery query;
+    query.prepare("EXEC SendFriendRequest1 @user_id1 = :user_id1, @friend_username = :friend_username");
+    query.bindValue(":user_id1", ID);  // Assuming currentUserID is defined elsewhere
+    query.bindValue(":friend_username", userName);
 
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to send friendship request: " + query.lastError().text());
+        return;
+    }
+
+    QMessageBox::information(this, "Friendship Request", "Friendship request sent to " + userName);
+    fillFriendshipRequests();
+}
+//------------------------------------------------------
 void Premium::followUser(int userId, const QString &userName) {
     // Your logic to follow the user
     int currentUserId = ID; // Replace this with your logic to get the current user's ID
@@ -986,8 +996,23 @@ void Premium::acceptFriendshipRequest(const QString &userName)
 
 void Premium::declineFriendshipRequest(const QString &userName)
 {
-    // Logic to decline friendship request for userName
+    QSqlQuery query;
+    query.prepare("EXEC DeclineFriendRequest @current_user_id = :user_id, @requester_username = :friend_username");
+    query.bindValue(":user_id", ID);
+    query.bindValue(":friend_username", userName);
+
+
+    if (!query.exec()) {
+
+        QMessageBox::critical(this, "Error", "Failed to decline friendship request: " + query.lastError().text());
+        return;
+    }
+
+    QMessageBox::information(this, "Friendship Request", "Friend request from " + userName + " declined successfully.");
+
+    fillFriendshipRequests();
 }
+
 
 void Premium::on_UploadPhoto_clicked()
 {

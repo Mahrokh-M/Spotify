@@ -263,6 +263,16 @@
 --	FOREIGN KEY (song_id) REFERENCES Songs(song_id),
 --	PRIMARY KEY(user_id,song_id)
 --);
+-------------------------------------------------------------------------
+CREATE TABLE Chat (
+    chat_id INT PRIMARY KEY IDENTITY(1,1),
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    message_content VARCHAR(MAX) NOT NULL,
+    sent_at DATETIME NOT NULL DEFAULT GETDATE(),
+    FOREIGN KEY (sender_id) REFERENCES Users(user_id),
+    FOREIGN KEY (receiver_id) REFERENCES Users(user_id)
+);
 --------------------------------------------------------------ASAL-----------------------------------------------------------------------
 ----ADD Fllowers:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --CREATE PROCEDURE AddFollower
@@ -1621,14 +1631,16 @@ BEGIN
 END;
 GO
 ---------------------------------------------
-CREATE PROCEDURE SendMessag
+CREATE PROCEDURE SendMessageS
     @SenderID INT,
-    @ReceiverID INT,
+    @ReceiverUsername VARCHAR(50),
     @MessageContent VARCHAR(MAX)
 AS
 BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
+
+        DECLARE @ReceiverID INT;
 
         -- Check if SenderID exists in Users table
         IF NOT EXISTS (SELECT 1 FROM Users WHERE user_id = @SenderID)
@@ -1636,10 +1648,15 @@ BEGIN
             THROW 50000, 'Sender ID is invalid.', 1;
         END;
 
-        -- Check if ReceiverID exists in Users table
-        IF NOT EXISTS (SELECT 1 FROM Users WHERE user_id = @ReceiverID)
+        -- Get ReceiverID from Users table based on ReceiverUsername
+        SELECT @ReceiverID = user_id
+        FROM Users
+        WHERE username = @ReceiverUsername;
+
+        -- Check if ReceiverID is found
+        IF @ReceiverID IS NULL
         BEGIN
-            THROW 50001, 'Receiver ID is invalid.', 1;
+            THROW 50001, 'Receiver Username is invalid.', 1;
         END;
 
         -- Check if the users are friends and the friendship request is accepted
@@ -1668,15 +1685,24 @@ BEGIN
         THROW;
     END CATCH
 END;
+
 GO
 --********
-CREATE PROCEDURE GetChatsBetweenUsers
+CREATE PROCEDURE GetChatsBetweenUser
     @sender_id INT,
-    @receiver_id INT
+    @receiver_username NVARCHAR(50)
 AS
 BEGIN
     SET NOCOUNT ON;
-
+	DECLARE @user_id2 INT;
+    SELECT @user_id2 = user_id
+    FROM Users
+    WHERE username = @receiver_username;
+	IF @user_id2 IS NULL
+    BEGIN
+        RAISERROR ('User with the specified username does not exist.', 16, 1);
+        RETURN;
+    END
     SELECT  message_content, sent_at
     FROM Chat
     WHERE (sender_id = @sender_id AND receiver_id = @receiver_id)
@@ -1685,12 +1711,25 @@ BEGIN
 END;
 GO
 --******************************************************
-CREATE PROCEDURE SendFriendRequest
+CREATE PROCEDURE SendFriendRequest1
     @user_id1 INT,
-    @user_id2 INT
+    @friend_username NVARCHAR(50)
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    -- Get user_id2 from the username
+    DECLARE @user_id2 INT;
+    SELECT @user_id2 = user_id
+    FROM Users
+    WHERE username = @friend_username;
+
+    -- Check if the user with given username exists
+    IF @user_id2 IS NULL
+    BEGIN
+        RAISERROR ('User with the specified username does not exist.', 16, 1);
+        RETURN;
+    END
 
     -- Check if there is already a friend request or friendship exists
     DECLARE @existing_accept INT;
@@ -1721,18 +1760,30 @@ BEGIN
 
     PRINT 'Friend request sent successfully.';
 END;
+
 GO
-CREATE PROCEDURE GetFriendRequest
+--**********************
+CREATE PROCEDURE GetFriendSRequest
     @target_user_id INT
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT U.username
-    FROM Friend F
-    JOIN Users U ON  F.user_id2= U.user_id
-    WHERE F.user_id1 = @target_user_id AND F.accept = 3;
+    SELECT 
+        CASE 
+            WHEN F.user_id1 = @target_user_id THEN U2.username 
+            WHEN F.user_id2 = @target_user_id THEN U1.username 
+        END AS username
+    FROM 
+        Friend F
+    LEFT JOIN 
+        Users U1 ON F.user_id1 = U1.user_id
+    LEFT JOIN 
+        Users U2 ON F.user_id2 = U2.user_id
+    WHERE 
+        (F.user_id1 = @target_user_id OR F.user_id2 = @target_user_id) AND F.accept = 3;
 END;
+
 GO
 --------------------------------------------
 CREATE PROCEDURE AcceptFriendRequest
@@ -1776,6 +1827,20 @@ BEGIN
     UPDATE Friend
     SET accept = 0
     WHERE user_id1 =  @current_user_id AND user_id2 = @requester_user_id;
+END;
+GO
+-------------------**************---------------------------
+CREATE PROCEDURE GetFriendsNames
+    @user_id INT
+AS
+BEGIN
+    SELECT u.username AS friend_name
+    FROM Users u
+    INNER JOIN (
+        SELECT user_id2 AS friend_id FROM Friend WHERE user_id1 = @user_id AND accept = 1
+        UNION ALL
+        SELECT user_id1 AS friend_id FROM Friend WHERE user_id2 = @user_id AND accept = 1
+    ) f ON u.user_id = f.friend_id;
 END;
 GO
 ----------------------------------------------------------------------Mahrokh---------------------------------------------------------------------
