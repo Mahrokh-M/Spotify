@@ -694,23 +694,23 @@ exec GetSongDetails @song_id=5;
 ----END;
 ------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ----ADD ARTIST:
---CREATE PROCEDURE AddArtist
---    @user_id INT,
---	@bio VARCHAR(100)
---AS
---BEGIN
---    -- Check if the user exists
---    IF EXISTS (SELECT 1 FROM Users WHERE user_id = @user_id)
---    BEGIN
---        -- Insert into Artists table with username as bio
---        INSERT INTO Artists (artist_id, bio)
---        VALUES (@user_id,@bio)
---    END
---    ELSE
---    BEGIN
---        RAISERROR('User does not exist.', 16, 1);
---    END
---END;
+CREATE PROCEDURE AddArtist
+    @user_id INT,
+	@bio VARCHAR(100)
+AS
+BEGIN
+    -- Check if the user exists
+    IF EXISTS (SELECT 1 FROM Users WHERE user_id = @user_id)
+    BEGIN
+        -- Insert into Artists table with username as bio
+        INSERT INTO Artists (artist_id, bio)
+        VALUES (@user_id,@bio)
+    END
+    ELSE
+    BEGIN
+        RAISERROR('User does not exist.', 16, 1);
+    END
+END;
 GO
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --CHECK USER IS ARTIST OR NOT:
@@ -995,7 +995,7 @@ BEGIN
     VALUES (@username, @password, @Email, @birth_date, @location);
 END;
 GO
----------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE InsertPremium
     @user_id INT, 
     @end_time DATETIME,
@@ -1008,7 +1008,7 @@ BEGIN
     PRINT 'Premium subscription added successfully.'; 
 END;
 GO
--------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE CreatePlaylist
     @user_id INT,
     @playlist_name NVARCHAR(50),
@@ -1046,7 +1046,7 @@ BEGIN
     END;
 END;
 GO
-----------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE AddSongToPlaylist
     @user_id INT,
     @playlist_name NVARCHAR(50),
@@ -1083,7 +1083,7 @@ BEGIN
     END
 END;
 GO
---------------------
+------------------***********------------------------
 CREATE PROCEDURE ViewPlaylistSongsWithArtists
     @playlist_name NVARCHAR(50),
     @user_id INT
@@ -1114,7 +1114,7 @@ BEGIN
         S.song_id;
 END;
 GO
------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE AddCommentToPlaylist
     @user_id INT,
     @playlist_name NVARCHAR(50),
@@ -1137,7 +1137,7 @@ BEGIN
     END
 END;
 GO
------------------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE AddCommentToSong
     @user_id INT,
     @song_id INT,
@@ -1161,7 +1161,7 @@ BEGIN
     END
 END;
 GO
-----------------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE AddCommentToAlbum
     @user_id INT,
     @album_id INT,
@@ -1186,7 +1186,7 @@ BEGIN
     END
 END;
 GO
------------------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE LikeSong
     @user_id INT,
     @song_id INT
@@ -1220,7 +1220,7 @@ BEGIN
     END
 END;
 GO
----------------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE LikeAlbum
     @user_id INT,
     @album_id INT
@@ -1254,7 +1254,7 @@ BEGIN
     END
 END;
 GO
--------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE LikePlaylist
     @user_id INT,
     @playlist_name NVARCHAR(50)
@@ -1288,7 +1288,7 @@ BEGIN
     END
 END;
 GO
-----------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE InsertUserArtistLikes
 AS
 BEGIN
@@ -1322,10 +1322,7 @@ BEGIN
         Songs s ON ls.song_id = s.song_id;
 END;
 GO
-
-
---EXEC GetUserInterests @user_id = 1;
--------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE GetRecommendedAlb
 (
     @user_id INT
@@ -1353,7 +1350,7 @@ BEGIN
         NEWID(); -- Random order for diversity in recommendations
 END;
 GO
-------------------------------------------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE GetRecommendedSongsByArtistLike
 (
     @user_id INT
@@ -1384,6 +1381,7 @@ BEGIN
         UAL.Likes_Count DESC, NEWID();
 END;
 GO
+------------------***********------------------------
 CREATE PROCEDURE GetRecommendedSongsByGenreLike
 (
     @user_id INT
@@ -1449,7 +1447,7 @@ END;
         GL.Likes_Count DESC, NEWID();-- Order by likes count of genre and then randomize
 END;
 GO
--------------------------------------
+------------------***********------------------------
 CREATE PROCEDURE CheckSSS
     @username VARCHAR(50),
     @password VARCHAR(50)
@@ -1482,8 +1480,7 @@ BEGIN
 END;
 
 
-----EXEC GetUserInterests @user_id = 1;
----------------------------------------------------------
+------------------***********------------------------
 --CREATE PROCEDURE GetRecommendedAlb
 --(
 --    @user_id INT
@@ -1585,66 +1582,40 @@ END;
 --        GL.Likes_Count DESC, NEWID(); -- Order by likes count of genre and then randomize
 --END;
 --GO
----------------------------------------
---CREATE PROCEDURE CheckS
---    @username VARCHAR(50),
---    @password VARCHAR(50)
---AS
---BEGIN
---    SET NOCOUNT ON;
---    DECLARE @user_id INT;
---    SELECT @user_id = user_id
---    FROM Users
---    WHERE username = @username AND [password] = @password;
-    
---    IF @user_id IS NOT NULL
---    BEGIN
---        SELECT @user_id AS User_Id,
---            CASE
---                WHEN EXISTS (SELECT 1 FROM Premium WHERE user_id = @user_id AND GETDATE() < End_time) THEN 'Premium User'
---                ELSE 'Regular User'
---            END AS User_Type;
---    END
---    ELSE
---    BEGIN
---        SELECT NULL AS User_Id, 'Invalid User' AS User_Type;
---    END
---END;
---GO 
 ----------------------------------------------
---CREATE PROCEDURE CheckUserByEmailAndUsername
---    @username VARCHAR(50),
---    @email VARCHAR(100)
---AS
---BEGIN
---    SET NOCOUNT ON;
+CREATE PROCEDURE CheckUserByEmailAndUsername
+    @username VARCHAR(50),
+    @email VARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
 
---    DECLARE @user_id INT;
---    SELECT @user_id = user_id
---    FROM Users
---    WHERE username = @username AND email = @email;
---    SELECT 
---        CASE
---            WHEN @user_id IS NOT NULL THEN 'Valid'
---            ELSE 'Invalid'
---        END AS Result;
---END;
---GO
+    DECLARE @user_id INT;
+    SELECT @user_id = user_id
+    FROM Users
+    WHERE username = @username AND email = @email;
+    SELECT 
+        CASE
+            WHEN @user_id IS NOT NULL THEN 'Valid'
+            ELSE 'Invalid'
+        END AS Result;
+END;
+GO
 ------------------------------------------------
---CREATE PROCEDURE UpdatePassword
---    @username VARCHAR(50),
---    @newPassword VARCHAR(50)
---AS
---BEGIN
---    SET NOCOUNT ON;
+CREATE PROCEDURE UpdatePassword
+    @username VARCHAR(50),
+    @newPassword VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
 
---    UPDATE Users
---    SET [password] = @newPassword
---    WHERE username = @username;
+    UPDATE Users
+    SET [password] = @newPassword
+    WHERE username = @username;
 
---    SELECT @@ROWCOUNT AS AffectedRows; -- Return the number of affected rows
---END;
---GO
+    SELECT @@ROWCOUNT AS AffectedRows; -- Return the number of affected rows
+END;
+GO
 --------------------------------------------------------
 CREATE PROCEDURE GetPlaylistsByUserId
     @user_id INT
@@ -1919,6 +1890,8 @@ BEGIN
     ) f ON u.user_id = f.friend_id;
 END;
 GO
+------------------------------------premum---------------------------------
+
 ----------------------------------------------------------------------Mahrokh---------------------------------------------------------------------
 CREATE PROCEDURE GetFavoriteSongsAndAlbums
     @user_id INT

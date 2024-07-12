@@ -39,7 +39,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="page">
      <widget class="QLineEdit" name="username">
@@ -795,7 +795,7 @@ color: rgb(255, 255, 255);</string>
      <x>0</x>
      <y>0</y>
      <width>1647</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

@@ -1529,3 +1529,29 @@ void Premium::on_withdraw_clicked()
 
 
 
+
+void Premium::on_premiumBuy_clicked()
+{
+    QString lineEditText = ui->cartNumber->text();
+    QString lineEditText1 = ui->SecondPass_card->text();
+    QString comboBoxText = ui->comboBox_month_card->currentText();
+    QString comboBoxText1 = ui->comboBox_2->currentText();
+    bool isRadioButton1Checked = ui->premium1month->isChecked();
+    bool isRadioButton2Checked = ui->premium3month->isChecked();
+    bool isRadioButton3Checked = ui->premium6month->isChecked();
+
+        if (!isRadioButton1Checked && !isRadioButton2Checked && !isRadioButton3Checked) {
+            QMessageBox::warning(this, "Selection Error", "Please select one of the options.");
+            return;
+        }
+        if (lineEditText.isEmpty() ||lineEditText1.isEmpty() || comboBoxText.isEmpty() || comboBoxText1.isEmpty()) {
+            QMessageBox::warning(this, "Input Error", "Please fill in all required fields.");
+            return;
+        }
+        //ADD Premum user
+        if (ui->Imartist->isChecked()) {
+                // Add Artist
+                QMessageBox::information(this, "Checkbox Checked", "The checkbox is checked.");
+            }
+}
+

@@ -107,9 +107,11 @@ private slots:
 
     void on_withdraw_clicked();
 
+    void on_premiumBuy_clicked();
 
 public slots:
     void setUserID(const QString &userType);
+
 };
 
 #endif // PREMIUM_H
