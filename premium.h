@@ -20,6 +20,9 @@
 #include<QCalendarWidget>
 #include<QTimeEdit>
 #include<QTextEdit>
+extern int songId;
+extern int albumid;
+extern QDate concertDate;
 
 namespace Ui {
 class Premium;

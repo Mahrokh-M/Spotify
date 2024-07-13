@@ -26,7 +26,7 @@
     <string notr="true">background-color: rgb(46, 47, 51);</string>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>9</number>
    </property>
    <widget class="QWidget" name="songs_tab">
     <attribute name="title">
@@ -1974,9 +1974,9 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>540</y>
+       <y>490</y>
        <width>1501</width>
-       <height>181</height>
+       <height>141</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -1991,7 +1991,7 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
         <x>0</x>
         <y>0</y>
         <width>1499</width>
-        <height>179</height>
+        <height>139</height>
        </rect>
       </property>
      </widget>

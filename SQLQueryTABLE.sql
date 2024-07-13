@@ -680,6 +680,46 @@ BEGIN
         user_id = @user_id;
 END;
 GO
+----------------------------------------------------------------
+CREATE PROCEDURE GetUserSong
+    @user_id INT
+	AS
+BEGIN
+    SELECT 
+        song_id,title,
+        address_of_picture
+    FROM 
+        Songs
+    WHERE 
+        artist_id_added = @user_id;
+END;
+GO
+CREATE PROCEDURE GetUserAlbum
+    @user_id INT
+	AS
+BEGIN
+    SELECT 
+        album_id,title,
+        address_of_picture
+    FROM 
+        Albums
+    WHERE 
+        artist_id_added = @user_id;
+END;
+GO
+CREATE PROCEDURE GetUserConcerts
+    @user_id INT
+	AS
+BEGIN
+    SELECT 
+        [date],
+        address_of_picture
+    FROM 
+        Concerts
+    WHERE 
+        artist_id = @user_id;
+END;
+GO
 -------------------------------------------------------------------------------------------------------------------------------------------------
 ------UPDATE WALLET:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ----CREATE PROCEDURE UpdateWalletBalance
