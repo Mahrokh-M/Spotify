@@ -5,6 +5,10 @@
 #include "qurlquery.h"
 #include "ui_premium.h"
 
+int songId;
+int albumid;
+QDate concertDate;
+
 Premium::Premium(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Premium),
@@ -42,23 +46,19 @@ void Premium::setstyle(){
     this->setStyleSheet(styleSheet);
 }
 
-
 void Premium::setUserID(const QString &userType){
-   // Type=userType;
+   Type=userType;
     //// if is premium
-  //  if(userType=="Premium User"){
-  // ui->tabWidget->removeTab(7);
-  //  ui->tabWidget->removeTab(7);}
+    if(userType=="Premium User"){
+   ui->tabWidget->removeTab(7);
+    ui->tabWidget->removeTab(7);}
 
-    //if(userType=="Artist"){
-   //ui->tabWidget->removeTab(7);
-   // ui->tabWidget->removeTab(7);}
     // // if is simple user
-   //if(userType=="Regular User"){
-    //  while (ui->tabWidget->count() > 2) {
-        //  ui->tabWidget->removeTab(2);
-     //  }
- //  }
+   if(userType=="Regular User"){
+      while (ui->tabWidget->count() > 2) {
+         ui->tabWidget->removeTab(2);
+      }
+   }
 
     fillSongs();
     fill_favorites();
@@ -68,10 +68,12 @@ void Premium::setUserID(const QString &userType){
     fillAllUsers();
     fill_concerts();
     fill_wallet();
+    fillAlbums();
     fillFriendshipRequests();
     fill_my_belongings();
     setupDateTimePicker();
     setupDateTimePicker2();
+    setupDateTimePicker3();
 }
 
 bool Premium::initializeDatabase(QSqlDatabase &db) {
@@ -118,7 +120,7 @@ void Premium::fillSongs()
 
     QSqlQuery query("SELECT song_id, address_of_picture, title FROM Songs");
     int row = 0, col = 0;
-    const int maxColumns = 4; // Adjust this value based on your layout preference
+    const int maxColumns = 9; // Adjust this value based on your layout preference
 
     while (query.next()) {
         QString songID = query.value(0).toString();
@@ -175,6 +177,75 @@ void Premium::fillSongs()
 
     // Set the content widget as the scroll area's widget
     ui->scrollArea->setWidget(contentWidget);
+}
+
+void Premium::fillAlbums()
+{
+    // Create a new content widget for the scroll area
+    QWidget *contentWidget = new QWidget(this);
+    QGridLayout *layout = new QGridLayout(contentWidget);
+    layout->setAlignment(Qt::AlignTop | Qt::AlignLeft); // Align content to the top-left
+
+    QSqlQuery query("SELECT album_id, address_of_picture, title FROM Albums");
+    int row = 0, col = 0;
+    const int maxColumns = 9; // Adjust this value based on your layout preference
+
+    while (query.next()) {
+        QString albumID = query.value(0).toString();
+        QString picturePath = query.value(1).toString();
+        QString albumName = query.value(2).toString();
+        QString imagePath;
+
+        // Check if picturePath is empty or the file does not exist
+        if (picturePath.isEmpty() || !QFile::exists(picturePath)) {
+            imagePath = ":/new/prefix1/spotify logo.png"; // Use default image
+        } else {
+            imagePath = picturePath;
+        }
+
+        // Create a frame with a green border
+        QFrame *frame = new QFrame(contentWidget);
+        frame->setFrameShape(QFrame::Box);
+        frame->setLineWidth(2);
+        frame->setFixedSize(150, 200); // Set fixed size for the frame
+        frame->setStyleSheet("border: 2px solid green;");
+
+        // Create a vertical layout to hold image and album name
+        QVBoxLayout *vLayout = new QVBoxLayout(frame);
+
+        // Create label for album image
+        QLabel *imageLabel = new QLabel(frame);
+        QPixmap pixmap;
+        if (!imagePath.isEmpty() && pixmap.load(imagePath)) {
+            imageLabel->setPixmap(pixmap.scaled(100, 100, Qt::KeepAspectRatio));
+        } else {
+            imageLabel->setPixmap(QPixmap(":/new/prefix1/spotify logo.png").scaled(100, 100, Qt::KeepAspectRatio));
+        }
+        vLayout->addWidget(imageLabel);
+
+        // Create button for album name
+        QPushButton *albumButton = new QPushButton(albumName, frame);
+        albumButton->setProperty("ID", albumID);
+        albumButton->setProperty("name", albumName);
+        albumButton->setProperty("pic_path", imagePath);
+        // Connect button click to a relevant slot if needed, similar to songs
+         connect(albumButton, &QPushButton::clicked, this, &Premium::show_album_page);
+        vLayout->addWidget(albumButton);
+
+        // Add frame to the grid layout
+        layout->addWidget(frame, row, col);
+
+        // Move to the next column
+        col++;
+        // If we've reached the maximum number of columns, move to the next row
+        if (col >= maxColumns) {
+            col = 0;
+            row++;
+        }
+    }
+
+    // Set the content widget as the scroll area's widget
+    ui->albumScroll->setWidget(contentWidget);
 }
 
 void Premium::addComment_like()
@@ -510,69 +581,177 @@ void Premium::fillScrollArea(QScrollArea* scrollArea, const QString& type)
     QHBoxLayout* scrollLayout = new QHBoxLayout();
 
     // Example data for demonstration purposes
-    // Replace this with your actual data source
     QStringList itemNames;
+    QStringList itemImages;
+    QStringList itemIds;
+
     if (type == "Song") {
-        itemNames << "Song 1" << "Song 2" << "Song 3";
+        QSqlQuery query;
+        query.prepare("EXEC GetUserSong @user_id = :user_id");
+        query.bindValue(":user_id", ID); // Assuming userID is a member variable with the current user ID
+
+        if (query.exec()) {
+            while (query.next()) {
+                QString songid = query.value("song_id").toString();
+                QString title = query.value("title").toString();
+                QString imagePath = query.value("address_of_picture").toString();
+                QString image = (imagePath.isEmpty() || !QFile::exists(imagePath)) ? ":/new/prefix1/spotify logo.png" : imagePath;
+                 songId= songid.toInt();
+                itemIds << songid;
+                itemNames << title;
+                itemImages << image;
+            }
+        } else {
+            qDebug() << "Query execution error:" << query.lastError().text();
+            QMessageBox::critical(this, "Database Error", "Failed to execute query.");
+            return;
+        }
     } else if (type == "Album") {
-        itemNames << "Album 1" << "Album 2" << "Album 3";
+        QSqlQuery query1;
+        query1.prepare("EXEC GetUserAlbum @user_id = :user_id");
+        query1.bindValue(":user_id", ID); // Assuming userID is a member variable with the current user ID
+
+        if (query1.exec()) {
+            while (query1.next()) {
+                QString albumid = query1.value("album_id").toString();
+                QString title = query1.value("title").toString();
+                QString imagePath = query1.value("address_of_picture").toString();
+                QString image = (imagePath.isEmpty() || !QFile::exists(imagePath)) ? ":/new/prefix1/spotify logo.png" : imagePath;
+
+                itemIds << albumid;
+                itemNames << title;
+                itemImages << image;
+            }
+        } else {
+            qDebug() << "Query execution error:" << query1.lastError().text();
+            QMessageBox::critical(this, "Database Error", "Failed to execute query.");
+            return;
+        }
     } else if (type == "Concert") {
-        itemNames << "Concert 1" << "Concert 2" << "Concert 3";
+        QSqlQuery query2;
+        query2.prepare("EXEC GetUserConcerts @user_id = :user_id");
+        query2.bindValue(":user_id", ID); // Assuming userID is a member variable with the current user ID
+
+        if (query2.exec()) {
+            while (query2.next()) {
+                QDateTime dateTimeString = query2.value("title").toDateTime();
+                QString imagePath = query2.value("address_of_picture").toString();
+                QString image = (imagePath.isEmpty() || !QFile::exists(imagePath)) ? ":/new/prefix1/spotify logo.png" : imagePath;
+                QString title = dateTimeString.toString("yyyy-MM-dd HH:mm");
+
+                itemIds << title;
+               itemNames << title;
+                itemImages << image;
+            }
+        } else {
+            qDebug() << "Query execution error:" << query2.lastError().text();
+            QMessageBox::critical(this, "Database Error", "Failed to execute query.");
+            return;
+        }
     }
 
-    for (const QString& itemName : itemNames) {
-        // Create a vertical layout for each item
-        QVBoxLayout* itemLayout = new QVBoxLayout();
+    for (const QString& itemId : itemIds) {
+            // Create a vertical layout for each item
+            QVBoxLayout* itemLayout = new QVBoxLayout();
 
-        // Create a label for the image
-        QLabel* imageLabel = new QLabel();
-        QPixmap pixmap(":/new/prefix1/spotify logo.png"); // Use the provided image path
-        imageLabel->setPixmap(pixmap.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-        imageLabel->setAlignment(Qt::AlignCenter);
+            // Create a label for the image
+            QLabel* imageLabel = new QLabel();
+            QPixmap pixmap(":/new/prefix1/spotify logo.png"); // Use the provided image path
+            imageLabel->setPixmap(pixmap.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            imageLabel->setAlignment(Qt::AlignCenter);
 
-        // Create buttons for the name and delete action
-        QPushButton* nameButton = new QPushButton(itemName);
-        QPushButton* deleteButton = new QPushButton("Delete");
+            // Create buttons for the name and delete action
+            QPushButton* nameButton = new QPushButton(itemId);
+            QPushButton* deleteButton = new QPushButton("Delete");
+            connect(nameButton, &QPushButton::clicked, this ,&Premium::addComment_like);
+            nameButton->setProperty("ID" ,itemId);
+            // Set styles for buttons
+            QString buttonStyle = "font: 12pt 'Segoe UI Historic';"
+                                  "background-color: rgb(46, 189, 89);"
+                                  "border-radius: 10px;"
+                                  "color: rgb(255, 255, 255);";
+            nameButton->setStyleSheet(buttonStyle);
+            deleteButton->setStyleSheet(buttonStyle);
 
-        // Set styles for buttons
-        QString buttonStyle = "font: 12pt 'Segoe UI Historic';"
-                              "background-color: rgb(46, 189, 89);"
-                              "border-radius: 10px;"
-                              "color: rgb(255, 255, 255);";
-        nameButton->setStyleSheet(buttonStyle);
-        deleteButton->setStyleSheet(buttonStyle);
+            // Add widgets to the item layout
+            itemLayout->addWidget(imageLabel);
+            itemLayout->addWidget(nameButton);
+            itemLayout->addWidget(deleteButton);
 
-        // Add widgets to the item layout
-        itemLayout->addWidget(imageLabel);
-        itemLayout->addWidget(nameButton);
-        itemLayout->addWidget(deleteButton);
+            // Add the item layout to the scroll layout
+            QWidget* itemWidget = new QWidget();
+            itemWidget->setLayout(itemLayout);
+            scrollLayout->addWidget(itemWidget);
 
-        // Add the item layout to the scroll layout
-        QWidget* itemWidget = new QWidget();
-        itemWidget->setLayout(itemLayout);
-        scrollLayout->addWidget(itemWidget);
+            // Connect the delete button to the appropriate slot
+            connect(deleteButton, &QPushButton::clicked, [this, type, itemId]() {
+                onDeleteButtonClicked(type, itemId);
+            });
 
-        // Connect the delete button to the appropriate slot
-        connect(deleteButton, &QPushButton::clicked, [this, type, itemName]() {
-            onDeleteButtonClicked(type, itemName);
-        });
+            // Connect the name button to the appropriate slot (if needed)
+            connect(nameButton, &QPushButton::clicked, [this, type, itemId]() {
+                onNameButtonClicked(type, itemId);
+            });
+        }
 
-        // Connect the name button to the appropriate slot (if needed)
-        connect(nameButton, &QPushButton::clicked, [this, type, itemName]() {
-            onNameButtonClicked(type, itemName);
-        });
+        // Set the layout to the scroll area
+        QWidget* scrollAreaWidget = new QWidget();
+        scrollAreaWidget->setLayout(scrollLayout);
+        scrollArea->setWidget(scrollAreaWidget);
     }
 
-    // Set the layout to the scroll area
-    QWidget* scrollAreaWidget = new QWidget();
-    scrollAreaWidget->setLayout(scrollLayout);
-    scrollArea->setWidget(scrollAreaWidget);
-}
+
 
 void Premium::onDeleteButtonClicked(const QString& type, const QString& itemName)
 {
     // Handle the deletion of the item (e.g., remove from data source and UI)
-    qDebug() << "Delete" << type << ":" << itemName;
+    if (type == "Song") {
+        QSqlQuery query;
+            query.prepare("EXEC RemoveSong @MusicID = :musicId");
+            query.bindValue(":musicId", itemName.toInt()); // Convert itemId to int assuming it's a numeric ID
+
+            if (query.exec()) {
+                QMessageBox::information(this, "Success", "Song removed successfully.");
+                // If you need to update the UI after deletion, implement that here
+                fill_my_belongings();
+            } else {
+                qDebug() << "Error executing RemoveSong procedure:" << query.lastError().text();
+                QMessageBox::critical(this, "Database Error", "Failed to remove song.");
+            }
+            }
+            if (type == "Album") {
+                QSqlQuery query1;
+                    query1.prepare("EXEC RemoveAlbum @AlbumID = :albumId");
+                    query1.bindValue(":albumId", itemName.toInt()); // Convert itemId to int assuming it's a numeric ID
+
+                    if (query1.exec()) {
+                        QMessageBox::information(this, "Success", "Album removed successfully.");
+                        fill_my_belongings();
+                        // If you need to update the UI after deletion, implement that here
+                    } else {
+                        qDebug() << "Error executing RemoveAlbum procedure:" << query1.lastError().text();
+                        QMessageBox::critical(this, "Database Error", "Failed to remove album.");
+                    }
+                 }
+            if (type == "Concert"){
+                QSqlQuery query2;
+                //QDateTime tDate = QDateTime::fromString(itemName, "yyyy-MM-dd HH:mm");
+                    query2.prepare("EXEC CancelConcert @artist_id = :artistId, @date_concert = :concertDate");
+                    query2.bindValue(":artistId", ID);
+                    query2.bindValue(":concertDate", itemName);
+
+                    if (query2.exec()) {
+                        QMessageBox::information(this, "Success", "Concert cancelled successfully.");
+
+                        fill_my_belongings();
+                        // If you need to update the UI after cancellation, implement that here
+                    } else {
+                        qDebug() << "Error executing CancelConcert procedure:" << query2.lastError().text();
+                        QMessageBox::critical(this, "Database Error", "Failed to cancel concert.");
+                    }
+
+            }
+
 }
 
 void Premium::onNameButtonClicked(const QString& type, const QString& itemName)
@@ -1235,108 +1414,6 @@ void Premium::on_submit_song_clicked()
     fillSongs();
 }
 
-void Premium::on_OK_clicked()
-{
-    // Clear previous dynamically added widgets
-    clearScrollArea();
-
-    // Get the number of songs from num_songs line edit
-    int numSongs = ui->num_songs->text().toInt();
-    if (numSongs <= 0) {
-        qDebug() << "Invalid number of songs";
-        return;
-    }
-
-    songCount = numSongs;
-
-    // Create a layout to hold the dynamically added widgets
-    QVBoxLayout *scrollLayout = new QVBoxLayout();
-
-    QString lineEditStyle = "border-radius: 15px;"
-                            "background-color: rgb(255, 255, 255);"
-                            "padding: 10px;"
-                            "font: 700 12pt 'UD Digi Kyokasho NP-B';";
-
-    QString labelStyle = "color: rgb(255, 255, 255);"
-                         "font: 700 12pt 'UD Digi Kyokasho NP-B';";
-
-    for (int i = 0; i < songCount; ++i) {
-        QGroupBox *songGroup = new QGroupBox(tr("Song %1").arg(i + 1), this);
-        QFormLayout *formLayout = new QFormLayout();
-
-        // Create line edits for each song's properties
-        QLineEdit *titleEdit = new QLineEdit();
-        QLineEdit *albumEdit = new QLineEdit();
-        QLineEdit *genreEdit = new QLineEdit();
-        QLineEdit *releaseDateEdit = new QLineEdit();
-        QLineEdit *ageCategoryEdit = new QLineEdit();
-        QLineEdit *countryEdit = new QLineEdit();
-
-        // Set the stylesheet for line edits
-        titleEdit->setStyleSheet(lineEditStyle);
-        albumEdit->setStyleSheet(lineEditStyle);
-        genreEdit->setStyleSheet(lineEditStyle);
-        releaseDateEdit->setStyleSheet(lineEditStyle);
-        ageCategoryEdit->setStyleSheet(lineEditStyle);
-        countryEdit->setStyleSheet(lineEditStyle);
-
-        // Create custom labels with the specified stylesheet
-        QLabel *titleLabel = new QLabel(tr("Title"));
-        QLabel *albumLabel = new QLabel(tr("Album"));
-        QLabel *genreLabel = new QLabel(tr("Genre"));
-        QLabel *releaseDateLabel = new QLabel(tr("Release Date"));
-        QLabel *ageCategoryLabel = new QLabel(tr("Age Category"));
-        QLabel *countryLabel = new QLabel(tr("Country"));
-
-        // Set the stylesheet for labels
-        titleLabel->setStyleSheet(labelStyle);
-        albumLabel->setStyleSheet(labelStyle);
-        genreLabel->setStyleSheet(labelStyle);
-        releaseDateLabel->setStyleSheet(labelStyle);
-        ageCategoryLabel->setStyleSheet(labelStyle);
-        countryLabel->setStyleSheet(labelStyle);
-
-        // Add line edits and labels to the form layout
-        formLayout->addRow(titleLabel, titleEdit);
-        formLayout->addRow(albumLabel, albumEdit);
-        formLayout->addRow(genreLabel, genreEdit);
-        formLayout->addRow(releaseDateLabel, releaseDateEdit);
-        formLayout->addRow(ageCategoryLabel, ageCategoryEdit);
-        formLayout->addRow(countryLabel, countryEdit);
-
-        // Add the form layout to the group box
-        songGroup->setLayout(formLayout);
-
-        // Add the group box to the scroll layout
-        scrollLayout->addWidget(songGroup);
-
-        // Store pointers to the line edits for later use
-        titleEdits.append(titleEdit);
-        albumEdits.append(albumEdit);
-        genreEdits.append(genreEdit);
-        releaseDateEdits.append(releaseDateEdit);
-        ageCategoryEdits.append(ageCategoryEdit);
-        countryEdits.append(countryEdit);
-    }
-
-    // Create and add the submit button to the layout
-    submitSongsButton = new QPushButton(tr("Submit All Songs"));
-    QString buttonStyle = "font: 12pt 'Segoe UI Historic';"
-                          "background-color: rgb(46, 189, 89);"
-                          "border-radius: 30px;"
-                          "color: rgb(255, 255, 255);";
-    submitSongsButton->setStyleSheet(buttonStyle);
-    scrollLayout->addWidget(submitSongsButton);
-
-    // Connect the submit button to the appropriate slot
-    connect(submitSongsButton, &QPushButton::clicked, this, &Premium::on_SubmitSongs_clicked);
-
-    // Set the layout to the scroll area
-    QWidget *scrollAreaWidget = new QWidget();
-    scrollAreaWidget->setLayout(scrollLayout);
-    ui->song_scroll_area->setWidget(scrollAreaWidget);
-}
-
 void Premium::clearScrollArea()
 {
     // Remove all dynamically created widgets from the scroll area
@@ -1379,30 +1456,231 @@ void Premium::clearScrollArea(QScrollArea *scrollArea) {
     scrollArea->setWidget(nullptr); // Set scroll area's widget to null
 }
 
+void Premium::on_OK_clicked()
+{
+    // Clear previous dynamically added widgets
+    clearScrollArea();
+
+    // Get the number of songs from num_songs line edit
+    int numSongs = ui->num_songs->text().toInt();
+    if (numSongs <= 0) {
+        qDebug() << "Invalid number of songs";
+        return;
+    }
+
+    songCount = numSongs;
+
+    // Create a layout to hold the dynamically added widgets
+    QVBoxLayout *scrollLayout = new QVBoxLayout();
+
+    QString lineEditStyle = "border-radius: 15px;"
+                            "background-color: rgb(255, 255, 255);"
+                            "padding: 10px;"
+                            "font: 700 12pt 'UD Digi Kyokasho NP-B';";
+
+    QString labelStyle = "color: rgb(255, 255, 255);"
+                         "font: 700 12pt 'UD Digi Kyokasho NP-B';";
+
+    for (int i = 0; i < songCount; ++i) {
+        QGroupBox *songGroup = new QGroupBox(tr("Song %1").arg(i + 1), this);
+        QFormLayout *formLayout = new QFormLayout();
+
+        // Create line edits for each song's properties
+        QLineEdit *titleEdit = new QLineEdit();
+        QLineEdit *albumEdit = new QLineEdit();
+        QLineEdit *genreEdit = new QLineEdit();
+        QLineEdit *releaseDateEdit = new QLineEdit();
+        QLineEdit *ageCategoryEdit = new QLineEdit();
+        QLineEdit *countryEdit = new QLineEdit();
+        QTextEdit *lyricsEdit = new QTextEdit(); // Add QTextEdit for lyrics
+
+        // Set the stylesheet for line edits
+        titleEdit->setStyleSheet(lineEditStyle);
+        albumEdit->setStyleSheet(lineEditStyle);
+        genreEdit->setStyleSheet(lineEditStyle);
+        releaseDateEdit->setStyleSheet(lineEditStyle);
+        ageCategoryEdit->setStyleSheet(lineEditStyle);
+        countryEdit->setStyleSheet(lineEditStyle);
+        lyricsEdit->setStyleSheet(lineEditStyle); // Set stylesheet for lyricsEdit
+
+        // Create custom labels with the specified stylesheet
+        QLabel *titleLabel = new QLabel(tr("Title"));
+        QLabel *albumLabel = new QLabel(tr("Album"));
+        QLabel *genreLabel = new QLabel(tr("Genre"));
+        QLabel *releaseDateLabel = new QLabel(tr("Release Date"));
+        QLabel *ageCategoryLabel = new QLabel(tr("Age Category"));
+        QLabel *countryLabel = new QLabel(tr("Country"));
+        QLabel *lyricsLabel = new QLabel(tr("Lyrics")); // Add label for lyrics
+
+        // Set the stylesheet for labels
+        titleLabel->setStyleSheet(labelStyle);
+        albumLabel->setStyleSheet(labelStyle);
+        genreLabel->setStyleSheet(labelStyle);
+        releaseDateLabel->setStyleSheet(labelStyle);
+        ageCategoryLabel->setStyleSheet(labelStyle);
+        countryLabel->setStyleSheet(labelStyle);
+        lyricsLabel->setStyleSheet(labelStyle); // Set stylesheet for lyricsLabel
+
+        // Add line edits and labels to the form layout
+        formLayout->addRow(titleLabel, titleEdit);
+        formLayout->addRow(albumLabel, albumEdit);
+        formLayout->addRow(genreLabel, genreEdit);
+        formLayout->addRow(releaseDateLabel, releaseDateEdit);
+        formLayout->addRow(ageCategoryLabel, ageCategoryEdit);
+        formLayout->addRow(countryLabel, countryEdit);
+        formLayout->addRow(lyricsLabel, lyricsEdit); // Add lyrics to form layout
+
+        // Add the form layout to the group box
+        songGroup->setLayout(formLayout);
+
+        // Add the group box to the scroll layout
+        scrollLayout->addWidget(songGroup);
+
+        // Store pointers to the line edits for later use
+        titleEdits.append(titleEdit);
+        albumEdits.append(albumEdit);
+        genreEdits.append(genreEdit);
+        releaseDateEdits.append(releaseDateEdit);
+        ageCategoryEdits.append(ageCategoryEdit);
+        countryEdits.append(countryEdit);
+        lyricsEdits.append(lyricsEdit); // Store lyricsEdit pointer
+    }
+
+    // Create and add the submit button to the layout
+    submitSongsButton = new QPushButton(tr("Submit All Songs"));
+    QString buttonStyle = "font: 12pt 'Segoe UI Historic';"
+                          "background-color: rgb(46, 189, 89);"
+                          "border-radius: 30px;"
+                          "color: rgb(255, 255, 255);";
+    submitSongsButton->setStyleSheet(buttonStyle);
+    scrollLayout->addWidget(submitSongsButton);
+
+    // Connect the submit button to the appropriate slot
+    connect(submitSongsButton, &QPushButton::clicked, this, &Premium::on_SubmitSongs_clicked);
+
+    // Set the layout to the scroll area
+    QWidget *scrollAreaWidget = new QWidget();
+    scrollAreaWidget->setLayout(scrollLayout);
+    ui->song_scroll_area->setWidget(scrollAreaWidget);
+}
+
 void Premium::on_SubmitSongs_clicked()
 {
-    // Collect data from all dynamically created line edits
+    // Collect album details from input fields
+    QString albumTitle = ui->title_2->text();
+    QString albumGenre = ui->Genre_2->text();
+    QString albumReleaseDate = ui->ReleaseDate_3->text();
+    QString albumAgeCategory = ui->AgeCategory_2->text();
+    QString albumCountry = ui->Country_3->text();
+    QString albumAddressOfPicture = m_imagePath; // Use the stored image path
+
+    // Retrieve artist ID from artist name (you need to replace ID with actual logic to get artist ID)
+    int artistId = ID;
+
+    // Insert album into the database
+    QSqlQuery albumQuery;
+    albumQuery.prepare("EXEC AddAlbumAndArtists @artist_name = :artist_name, @album_title = :album_title, @genre = :genre, "
+                       "@age_category = :age_category, @country = :country, @address_of_picture = :address_of_picture, "
+                       "@artist_id = :artist_id, @release_date = :release_date");
+    albumQuery.bindValue(":artist_name", ui->signer->text());
+    albumQuery.bindValue(":album_title", albumTitle);
+    albumQuery.bindValue(":genre", albumGenre);
+    albumQuery.bindValue(":age_category", albumAgeCategory);
+    albumQuery.bindValue(":country", albumCountry);
+    albumQuery.bindValue(":address_of_picture", albumAddressOfPicture);
+    albumQuery.bindValue(":artist_id", artistId);
+    albumQuery.bindValue(":release_date", albumReleaseDate);
+
+    if (!albumQuery.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to add album: " + albumQuery.lastError().text());
+        return;
+    }
+
+    // Get the album ID that was just inserted
+    int albumId = albumQuery.lastInsertId().toInt();
+
+    // Collect data from all dynamically created line edits and text edits
     for (int i = 0; i < songCount; ++i) {
         QString title = titleEdits[i]->text();
-        QString album = albumEdits[i]->text();
         QString genre = genreEdits[i]->text();
         QString releaseDate = releaseDateEdits[i]->text();
         QString ageCategory = ageCategoryEdits[i]->text();
         QString country = countryEdits[i]->text();
+        QString lyrics = lyricsEdits[i]->toPlainText();
+        QString songAddressOfPicture = albumAddressOfPicture; // Use the same image path
 
-        // Process the collected data (e.g., save to file, database, etc.)
-        qDebug() << "Song " << i + 1 << ": "
-                 << title << ", "
-                 << album << ", "
-                 << genre << ", "
-                 << releaseDate << ", "
-                 << ageCategory << ", "
-                 << country;
+        // Insert song into the database
+        QSqlQuery songQuery;
+        songQuery.prepare("EXEC AddSong @artist_id = :artist_id, @title = :title, @album_id = :album_id, @genre = :genre, "
+                          "@lyrics = :lyrics, @Age_category = :Age_category, @country = :country, "
+                          "@address_of_picture = :address_of_picture, @can_be_added = 1, @release_date = :release_date");
+        songQuery.bindValue(":artist_id", artistId);
+        songQuery.bindValue(":title", title);
+        songQuery.bindValue(":album_id", albumId); // Use the album ID
+        songQuery.bindValue(":genre", genre);
+        songQuery.bindValue(":lyrics", lyrics);
+        songQuery.bindValue(":Age_category", ageCategory);
+        songQuery.bindValue(":country", country);
+        songQuery.bindValue(":address_of_picture", songAddressOfPicture);
+        songQuery.bindValue(":release_date", releaseDate);
+
+        if (!songQuery.exec()) {
+            QMessageBox::critical(this, "Error", "Failed to add song: " + songQuery.lastError().text());
+            return;
+        }
     }
 
+    QMessageBox::information(this, "Success", "Album and songs added successfully!");
+
     // Optionally clear the dynamically created widgets after submission
+    fillSongs();
+    ui->AgeCategory_2->clear();
+    ui->Country_3->clear();
+    ui->Genre_2->clear();
+    ui->title_2->clear();
+    ui->ReleaseDate_3->clear();
+    ui->num_songs->clear();
     clearScrollArea();
 }
+
+void Premium::clearScrollArea2()
+{
+    // Remove all dynamically created widgets from the scroll area
+    QWidget *scrollAreaWidget = ui->song_scroll_area->widget();
+    if (scrollAreaWidget) {
+        delete scrollAreaWidget;
+    }
+
+    // Clear the stored pointers to the line edits and text edits
+    titleEdits.clear();
+    albumEdits.clear();
+    genreEdits.clear();
+    releaseDateEdits.clear();
+    ageCategoryEdits.clear();
+    countryEdits.clear();
+    lyricsEdits.clear();
+}
+
+void Premium::on_UploadPhoto_2_clicked()
+{
+    // Example: Ask user to choose a file
+    QString imagePath = QFileDialog::getOpenFileName(this, tr("Choose Image"), "", tr("Images (*.png *.jpg *.jpeg)"));
+
+    if (imagePath.isEmpty()) {
+        // User canceled the selection
+        return;
+    }
+
+    // Load the selected image
+    QPixmap image(imagePath);
+
+    // Display the image on QLabel named Song_photo
+    ui->Song_photo->setPixmap(image.scaled(ui->Song_photo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+    // Store imagePath in a member variable to use it later
+    m_imagePath = imagePath;
+}
+
 
 void Premium::displaySearchResults(const QList<QVariantMap> &results) {
     // Create a new content widget for the scroll area
@@ -1740,6 +2018,46 @@ void Premium::setupDateTimePicker2() {
     });
 }
 
+void Premium::setupDateTimePicker3() {
+    // Create QLineEdit for displaying selected date and time
+    QLineEdit *releaseDateLineEdit = ui->ReleaseDate_3;
+
+    // Create QPushButton to open the date and time picker dialog
+    QPushButton *dateTimePickerButton = ui->SelectTime_3;
+
+    connect(dateTimePickerButton, &QPushButton::clicked, this, [this, releaseDateLineEdit]() {
+        QDialog dialog(this);
+        QVBoxLayout dialogLayout(&dialog);
+
+        // Create and add QCalendarWidget to the dialog
+        QCalendarWidget *calendarWidget = new QCalendarWidget(&dialog);
+        dialogLayout.addWidget(calendarWidget);
+
+        // Create and add QTimeEdit to the dialog
+        QTimeEdit *timeEdit = new QTimeEdit(&dialog);
+        timeEdit->setDisplayFormat("HH:mm");
+        dialogLayout.addWidget(timeEdit);
+
+        // Create and add OK and Cancel buttons to the dialog
+        QHBoxLayout buttonLayout;
+        QPushButton okButton("OK", &dialog);
+        QPushButton cancelButton("Cancel", &dialog);
+        buttonLayout.addWidget(&okButton);
+        buttonLayout.addWidget(&cancelButton);
+        dialogLayout.addLayout(&buttonLayout);
+
+        connect(&okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+        connect(&cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+        if (dialog.exec() == QDialog::Accepted) {
+            QDate selectedDate = calendarWidget->selectedDate();
+            QTime selectedTime = timeEdit->time();
+            QString dateTimeString = selectedDate.toString("yyyy-MM-dd") + " " + selectedTime.toString("HH:mm");
+            releaseDateLineEdit->setText(dateTimeString);
+        }
+    });
+}
+
 
 void Premium::on_submit_song_2_clicked()
 {
@@ -1803,6 +2121,11 @@ void Premium::on_submit_song_2_clicked()
     ui->ticket3_quantity->clear();
     fill_concerts();
 }
+
+
+
+
+
 
 
 

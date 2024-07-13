@@ -76,5 +76,5 @@ void MainWindow::OpenAlbum(const QString &albumID){
     ui->stackedWidget->setCurrentWidget(playlist);
 }
 void MainWindow::Addnewplaylist(){
-    //premium->fill_playlists();
+    premium->fillPlayListAfterNew();
 }

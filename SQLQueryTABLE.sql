@@ -678,6 +678,46 @@ BEGIN
         user_id = @user_id;
 END;
 GO
+----------------------------------------------------------------
+CREATE PROCEDURE GetUserSong
+    @user_id INT
+	AS
+BEGIN
+    SELECT 
+        song_id,title,
+        address_of_picture
+    FROM 
+        Songs
+    WHERE 
+        artist_id_added = @user_id;
+END;
+GO
+CREATE PROCEDURE GetUserAlbum
+    @user_id INT
+	AS
+BEGIN
+    SELECT 
+        album_id,title,
+        address_of_picture
+    FROM 
+        Albums
+    WHERE 
+        artist_id_added = @user_id;
+END;
+GO
+CREATE PROCEDURE GetUserConcerts
+    @user_id INT
+	AS
+BEGIN
+    SELECT 
+        [date],
+        address_of_picture
+    FROM 
+        Concerts
+    WHERE 
+        artist_id = @user_id;
+END;
+GO
 -------------------------------------------------------------------------------------------------------------------------------------------------
 ------UPDATE WALLET:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ----CREATE PROCEDURE UpdateWalletBalance
@@ -761,6 +801,7 @@ GO
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --______________________________________________________________________________________________________
 --ADD SONG :
+drop PROCEDURE AddSong
 CREATE PROCEDURE AddSong
     @artist_id INT,
     @title VARCHAR(100),
@@ -769,9 +810,9 @@ CREATE PROCEDURE AddSong
     @lyrics VARCHAR(MAX),
     @Age_category CHAR(2),
     @country VARCHAR(50),
-	@address_of_picture VARCHAR(100),
-	@can_be_added BIT ,
-	@release_date DATETIME
+  @address_of_picture VARCHAR(200),
+  @can_be_added BIT ,
+  @release_date DATETIME
 AS
 BEGIN
     -- Insert the song into the Songs table with the current date
@@ -792,7 +833,7 @@ CREATE PROCEDURE AddSongWithAllArtist
     @lyrics VARCHAR(MAX),
     @Age_category CHAR(2),
     @country VARCHAR(50),
-    @address_of_picture VARCHAR(100),
+    @address_of_picture VARCHAR(200),
     @can_be_added BIT,
     @other_artists ArtistIdTableType READONLY -- Table-valued parameter for other artists
 AS
@@ -829,12 +870,13 @@ CREATE PROCEDURE AddAlbumAndArtists
     @genre VARCHAR(50),
     @age_category CHAR(2),
     @country VARCHAR(50),
-    @address_of_picture VARCHAR(100),
-	@artist_id INT
+    @address_of_picture VARCHAR(200),
+  @artist_id INT,
+� @release_date DATETIME
 AS
 BEGIN
     INSERT INTO Albums (title, artist_id_added, genre, release_date, Age_category, country, address_of_picture)
-    VALUES (@album_title, @artist_id, @genre,  GETDATE(), @age_category, @country, @address_of_picture);
+    VALUES (@album_title, @artist_id, @genre,  � @release_date, @age_category, @country, @address_of_picture);
 END;
 GO
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1020,7 +1062,7 @@ CREATE PROCEDURE CreatePlaylist
     @user_id INT,
     @playlist_name NVARCHAR(50),
     @is_public BIT,
-	@address_of_picture VARCHAR(100)
+  @address_of_picture VARCHAR(100)
 AS
 BEGIN
     -- Check if the user has a valid subscription
