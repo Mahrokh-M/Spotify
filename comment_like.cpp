@@ -52,20 +52,12 @@ QMap<QString, QString>Comment_Like:: getSongDetails(int songId) {
             songDetails["ID"] = query.value("ID").toString();
             songDetails["Title"] = query.value("Title").toString();
             songDetails["AlbumTitle"] = query.value("AlbumTitle").toString();
+            songDetails["ArtistName"]=query.value("ArtistName").toString();
             songDetails["Genre"] = query.value("Genre").toString();
             songDetails["Country"] = query.value("Country").toString();
             songDetails["AgeCategory"] = query.value("AgeCategory").toString();
             songDetails["Lyrics"] = query.value("Lyrics").toString();
             songDetails["PictureAddress"] = query.value("PictureAddress").toString();
-        }
-
-        // Move to the next result set (artists)
-        if (query.nextResult()) {
-            QStringList artists;
-            while (query.next()) {
-                artists << query.value("ArtistName").toString();
-            }
-            songDetails["ArtistName"] = artists.join(", ");
         }
         ui->Song_name->setText("Song Name: " + songDetails["Title"]);
         ui->Song_genr->setText("Genre: " + songDetails["Genre"]);
@@ -385,7 +377,6 @@ void Comment_Like::clearScrollArea(QScrollArea *scrollArea) {
 
 
 }
-
 
 void Comment_Like::on_Like_button_clicked()
 {

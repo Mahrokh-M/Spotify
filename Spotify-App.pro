@@ -13,16 +13,15 @@ SOURCES += \
     comment_like.cpp \
     main.cpp \
     mainwindow.cpp \
-    newplaylistdialog.cpp \
     playlist_songs.cpp \
     premium.cpp \
     register.cpp
 
 HEADERS += \
+    NewPlaylistDialog.h \
     chatbox.h \
     comment_like.h \
     mainwindow.h \
-    newplaylistdialog.h \
     playlist_songs.h \
     premium.h \
     register.h

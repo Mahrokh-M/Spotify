@@ -26,7 +26,7 @@
     <string notr="true">background-color: rgb(46, 47, 51);</string>
    </property>
    <property name="currentIndex">
-    <number>8</number>
+    <number>9</number>
    </property>
    <widget class="QWidget" name="songs_tab">
     <attribute name="title">
@@ -1188,8 +1188,8 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1251</width>
-        <height>576</height>
+        <width>100</width>
+        <height>30</height>
        </rect>
       </property>
       <attribute name="label">
