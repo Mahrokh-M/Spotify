@@ -7,6 +7,139 @@ playlist_songs::playlist_songs(QWidget *parent) :
     ui(new Ui::playlist_songs)
 {
     ui->setupUi(this);
+    // Set background color
+    ui->Backgound->setStyleSheet("background-color: rgb(24, 24, 24);");
+
+    QString scrollAreaStyle = R"(
+    QScrollArea {
+        border: none;
+        background-color: #121212; /* Dark background */
+        color: #FFFFFF; /* White text color */
+    }
+
+    QScrollBar:vertical {
+        border: none;
+        background: #2A2A2A; /* Darker background for scrollbar */
+        width: 12px;
+        margin: 15px 0 15px 0;
+    }
+
+    QScrollBar::handle:vertical {
+        background: #1DB954; /* Spotify green for the scrollbar handle */
+        min-height: 20px;
+        border-radius: 6px;
+    }
+
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+        border: none;
+        background: none;
+    }
+
+    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+        background: none;
+    }
+
+    QScrollBar:horizontal {
+        border: none;
+        background: #2A2A2A; /* Darker background for scrollbar */
+        height: 12px;
+        margin: 0px 15px 0px 15px;
+    }
+
+    QScrollBar::handle:horizontal {
+        background: #1DB954; /* Spotify green for the scrollbar handle */
+        min-width: 20px;
+        border-radius: 6px;
+    }
+
+    QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+        border: none;
+        background: none;
+    }
+
+    QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+        background: none;
+    }
+
+    QWidget {
+        background-color: #121212; /* Dark background for inner content */
+    }
+
+    QLabel {
+        color: #FFFFFF; /* White text color for labels */
+    }
+
+    QPushButton {
+        background-color: #1DB954; /* Spotify green for buttons */
+        border: none;
+        color: #FFFFFF; /* White text color */
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 12pt;
+    }
+
+    QPushButton:hover {
+        background-color: #1ED760; /* Slightly lighter green for hover state */
+    }
+
+    QPushButton:pressed {
+        background-color: #1AAE48; /* Slightly darker green for pressed state */
+    }
+
+    QVBoxLayout, QHBoxLayout {
+        margin: 0;
+        spacing: 10px;
+    }
+)";
+ui->scrollArea->setStyleSheet(scrollAreaStyle);
+    // Set playlist name style
+    ui->playlist_name->setStyleSheet(
+        "color: white;"
+        "font: bold 18pt 'Segoe UI';"
+    );
+
+    // Set playlist pic style
+    ui->playlist_pic->setStyleSheet(
+        "border-radius: 10px;"
+        "background-color: rgb(24, 24, 24);"
+    );
+
+    // Set Like button style
+    ui->Like_button->setIcon(QIcon(":/icons/heart.png"));
+    ui->Like_button->setIconSize(QSize(24, 24));
+    ui->Like_button->setCheckable(true);
+    ui->Like_button->setStyleSheet(
+        "QPushButton {"
+        "    background-color: transparent;"
+        "    border: none;"
+        "}"
+        "QPushButton:checked {"
+        "    background-color: transparent;"
+        "    border: none;"
+        "    icon: url(:/icons/heart_filled.png);"
+        "}"
+    );
+
+    // Set Back button style
+    ui->Back->setIcon(QIcon(":/icons/back_arrow.png"));
+    ui->Back->setIconSize(QSize(24, 24));
+    ui->Back->setStyleSheet(
+        "QPushButton {"
+        "    background-color: transparent;"
+        "    border: none;"
+        "    color: white;"
+        "    font: 12pt 'Segoe UI';"
+        "}"
+        "QPushButton:hover {"
+        "    color: rgb(180, 180, 180);"
+        "}"
+    );
+
+    // Set sizes and alignment
+    ui->playlist_name->setAlignment(Qt::AlignCenter);
+    ui->playlist_pic->setAlignment(Qt::AlignCenter);
+    ui->Like_button->setIconSize(QSize(24, 24));
+    ui->Back->setIconSize(QSize(24, 24));
     setstyle();
 }
 
@@ -97,6 +230,7 @@ void playlist_songs::setstyle(){
 
     // Apply the stylesheet to all child widgets of this widget
     this->setStyleSheet(styleSheet);
+
 }
 
 void playlist_songs::on_Like_button_clicked()

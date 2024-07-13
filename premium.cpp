@@ -23,6 +23,32 @@ Premium::Premium(QWidget *parent) :
 
     contentWidget->setLayout(gridLayout);
     scrollArea->setWidget(contentWidget);
+    ui->tabWidget->setStyleSheet(
+        "QTabWidget::pane {"
+        "    border: 1px solid #262626;" // Dark border color
+        "    background-color: #121212;" // Dark background color for the tab widget
+        "    border-radius: 10px;"       // Rounded corners
+        "}"
+        "QTabBar::tab {"
+        "    background: #282828;"       // Dark background for inactive tabs
+        "    color: #B3B3B3;"            // Light grey text color for inactive tabs
+        "    padding: 10px 20px;"        // Padding for tabs
+        "    border: 1px solid #262626;" // Border for tabs
+        "    border-bottom: none;"       // Remove bottom border
+        "    border-radius: 5px 5px 0 0;" // Rounded top corners
+        "}"
+        "QTabBar::tab:selected {"
+        "    background: #1DB954;"       // Spotify green for active tab
+        "    color: #FFFFFF;"            // White text color for active tab
+        "    border-bottom: 2px solid #1DB954;" // Add bottom border for active tab
+        "}"
+        "QTabBar::tab:hover {"
+        "    background: #1ED760;"       // Lighter green for hover state
+        "}"
+        "QTabBar::tab:!selected {"
+        "    margin-top: 2px;"           // Slight margin for inactive tabs
+        "}"
+    );
 
     setstyle();
 
@@ -44,21 +70,123 @@ void Premium::setstyle(){
 
     // Apply the stylesheet to all child widgets of this widget
     this->setStyleSheet(styleSheet);
-}
+    QString scrollAreaStyle = R"(
+    QScrollArea {
+        border: 2px solid #1DB954;
+        border-radius: 10px; /* Rounded corners */
+        background-color: #121212; /* Dark background */
+        color: #FFFFFF; /* White text color */
+        border-color: rgb(0, 170, 0);
+    }
 
+    QScrollBar:vertical {
+        border: none;
+        background: #2A2A2A; /* Darker background for scrollbar */
+        width: 12px;
+        margin: 15px 0 15px 0;
+    }
+
+    QScrollBar::handle:vertical {
+        background: #1DB954; /* Spotify green for the scrollbar handle */
+        min-height: 20px;
+        border-radius: 6px;
+    }
+
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+        border: none;
+        background: none;
+    }
+
+    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+        background: none;
+    }
+
+    QScrollBar:horizontal {
+        border: none;
+        background: #2A2A2A; /* Darker background for scrollbar */
+        height: 12px;
+        margin: 0px 15px 0px 15px;
+    }
+
+    QScrollBar::handle:horizontal {
+        background: #1DB954; /* Spotify green for the scrollbar handle */
+        min-width: 20px;
+        border-radius: 6px;
+    }
+
+    QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+        border: none;
+        background: none;
+    }
+
+    QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+        background: none;
+    }
+
+    QWidget {
+        background-color: #121212; /* Dark background for inner content */
+    }
+
+    QLabel {
+        color: #FFFFFF; /* White text color for labels */
+    }
+
+    QPushButton {
+        background-color: #1DB954; /* Spotify green for buttons */
+        border: none;
+        color: #FFFFFF; /* White text color */
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 12pt;
+    }
+
+    QPushButton:hover {
+        background-color: #1ED760; /* Slightly lighter green for hover state */
+    }
+
+    QPushButton:pressed {
+        background-color: #1AAE48; /* Slightly darker green for pressed state */
+    }
+
+    QVBoxLayout, QHBoxLayout {
+        margin: 0;
+        spacing: 10px;
+    }
+)";
+ui->scrollArea->setStyleSheet(scrollAreaStyle);
+ui->albumScroll->setStyleSheet(scrollAreaStyle);
+ui->scrollArea_2->setStyleSheet(scrollAreaStyle);
+ui->scrollArea_3->setStyleSheet(scrollAreaStyle);
+ui->your_playlist_scrollbar->setStyleSheet(scrollAreaStyle);
+ui->friend_playlist_scrollbar->setStyleSheet(scrollAreaStyle);
+ui->publicPlaylist_scrollbar->setStyleSheet(scrollAreaStyle);
+ui->friendship_requests->setStyleSheet(scrollAreaStyle);
+ui->friends_scrollArea->setStyleSheet(scrollAreaStyle);
+ui->followin_scrollBar->setStyleSheet(scrollAreaStyle);
+ui->follower_scrollBar->setStyleSheet(scrollAreaStyle);
+ui->allUsers_scrollBar->setStyleSheet(scrollAreaStyle);
+ui->concerts_scrollBar->setStyleSheet(scrollAreaStyle);
+ui->valid_tickets_scrollArea->setStyleSheet(scrollAreaStyle);
+ui->expired_tickets_scrollArea->setStyleSheet(scrollAreaStyle);
+ui->my_songs_scrollBar->setStyleSheet(scrollAreaStyle);
+ui->my_albums_scrollBar->setStyleSheet(scrollAreaStyle);
+ui->my_concerts_scrollBar->setStyleSheet(scrollAreaStyle);
+
+
+}
 void Premium::setUserID(const QString &userType){
    Type=userType;
-    // if is premium
-    if(userType=="Premium User"){
-   ui->tabWidget->removeTab(7);
-    ui->tabWidget->removeTab(7);}
+     ////if is premium
+//    if(userType=="Premium User"){
+//   ui->tabWidget->removeTab(7);
+//    ui->tabWidget->removeTab(7);}
 
-    // // if is simple user
-   if(userType=="Regular User"){
-      while (ui->tabWidget->count() > 2) {
-         ui->tabWidget->removeTab(2);
-      }
-   }
+//    // // if is simple user
+//   if(userType=="Regular User"){
+//      while (ui->tabWidget->count() > 2) {
+//         ui->tabWidget->removeTab(2);
+//      }
+//   }
 
     fillSongs();
     fill_favorites();
@@ -120,7 +248,7 @@ void Premium::fillSongs()
 
     QSqlQuery query("SELECT song_id, address_of_picture, title FROM Songs");
     int row = 0, col = 0;
-    const int maxColumns = 9; // Adjust this value based on your layout preference
+    const int maxColumns = 4; // Adjust this value based on your layout preference
 
     while (query.next()) {
         QString songID = query.value(0).toString();
@@ -139,8 +267,12 @@ void Premium::fillSongs()
         QFrame *frame = new QFrame(contentWidget);
         frame->setFrameShape(QFrame::Box);
         frame->setLineWidth(2);
-        frame->setFixedSize(150, 200); // Set fixed size for the frame
-        frame->setStyleSheet("border: 2px solid green;");
+        frame->setFixedSize(160, 230); // Set fixed size for the frame
+
+        // Set the stylesheet for the frame
+        frame->setStyleSheet("border: 2px solid #1DB954; "
+                             "background-color: #121212; "
+                             "border-radius: 10px;");
 
         // Create a vertical layout to hold image and song name
         QVBoxLayout *vLayout = new QVBoxLayout(frame);
@@ -160,6 +292,25 @@ void Premium::fillSongs()
         songButton->setProperty("ID", songID);
         songButton->setProperty("name", songName);
         songButton->setProperty("pic_path", imagePath);
+
+        // Set the stylesheet for the song button
+        songButton->setStyleSheet(
+            "QPushButton {"
+            "    background-color: #1DB954; /* Spotify green for buttons */"
+            "    border: none;"
+            "    color: #FFFFFF; /* White text color */"
+            "    padding: 10px;"
+            "    border-radius: 5px;"
+            "    font-size: 12pt;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #1ED760; /* Slightly lighter green for hover state */"
+            "}"
+            "QPushButton:pressed {"
+            "    background-color: #1AAE48; /* Slightly darker green for pressed state */"
+            "}"
+        );
+
         connect(songButton, &QPushButton::clicked, this, &Premium::addComment_like);
         vLayout->addWidget(songButton);
 
@@ -179,6 +330,7 @@ void Premium::fillSongs()
     ui->scrollArea->setWidget(contentWidget);
 }
 
+
 void Premium::fillAlbums()
 {
     // Create a new content widget for the scroll area
@@ -188,7 +340,7 @@ void Premium::fillAlbums()
 
     QSqlQuery query("SELECT album_id, address_of_picture, title FROM Albums");
     int row = 0, col = 0;
-    const int maxColumns = 9; // Adjust this value based on your layout preference
+    const int maxColumns = 4; // Adjust this value based on your layout preference
 
     while (query.next()) {
         QString albumID = query.value(0).toString();
@@ -207,8 +359,12 @@ void Premium::fillAlbums()
         QFrame *frame = new QFrame(contentWidget);
         frame->setFrameShape(QFrame::Box);
         frame->setLineWidth(2);
-        frame->setFixedSize(150, 200); // Set fixed size for the frame
-        frame->setStyleSheet("border: 2px solid green;");
+        frame->setFixedSize(160, 230); // Set fixed size for the frame
+
+        // Set the stylesheet for the frame
+        frame->setStyleSheet("border: 2px solid #1DB954; "
+                             "background-color: #121212; "
+                             "border-radius: 10px;");
 
         // Create a vertical layout to hold image and album name
         QVBoxLayout *vLayout = new QVBoxLayout(frame);
@@ -228,8 +384,27 @@ void Premium::fillAlbums()
         albumButton->setProperty("ID", albumID);
         albumButton->setProperty("name", albumName);
         albumButton->setProperty("pic_path", imagePath);
-        // Connect button click to a relevant slot if needed, similar to songs
-         connect(albumButton, &QPushButton::clicked, this, &Premium::show_album_page);
+
+        // Set the stylesheet for the album button
+        albumButton->setStyleSheet(
+            "QPushButton {"
+            "    background-color: #1DB954; /* Spotify green for buttons */"
+            "    border: none;"
+            "    color: #FFFFFF; /* White text color */"
+            "    padding: 10px;"
+            "    border-radius: 5px;"
+            "    font-size: 12pt;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #1ED760; /* Slightly lighter green for hover state */"
+            "}"
+            "QPushButton:pressed {"
+            "    background-color: #1AAE48; /* Slightly darker green for pressed state */"
+            "}"
+        );
+
+        // Connect button click to a relevant slot if needed
+        connect(albumButton, &QPushButton::clicked, this, &Premium::show_album_page);
         vLayout->addWidget(albumButton);
 
         // Add frame to the grid layout
@@ -247,6 +422,7 @@ void Premium::fillAlbums()
     // Set the content widget as the scroll area's widget
     ui->albumScroll->setWidget(contentWidget);
 }
+
 
 void Premium::addComment_like()
 {
@@ -270,7 +446,7 @@ void Premium::show_album_page()
 
 void Premium::fill_favorites() {
     // Get user ID from the current session or context
-    int userId = 1; // Replace this with your logic to get the current user's ID
+    int userId = ID; // Replace this with your logic to get the current user's ID
 
     // Fill favorites
     QWidget *contentWidget = new QWidget(this);
@@ -296,8 +472,10 @@ void Premium::fill_favorites() {
         QFrame *frame = new QFrame(contentWidget);
         frame->setFrameShape(QFrame::Box);
         frame->setLineWidth(2);
-        frame->setFixedSize(150, 200); // Set fixed size for the frame
-        frame->setStyleSheet("border: 2px solid green;"); // Set green border color
+        frame->setFixedSize(160, 230); // Set fixed size for the frame
+        frame->setStyleSheet("border: 2px solid #1DB954; "
+                             "background-color: #121212; "
+                             "border-radius: 10px;"); // Set green border color and rounded corners
         QVBoxLayout *vLayout = new QVBoxLayout(frame);
 
         QLabel *label = new QLabel(frame);
@@ -308,6 +486,24 @@ void Premium::fill_favorites() {
         itemButton->setProperty("ID", itemId);
         itemButton->setProperty("name", itemName);
         itemButton->setProperty("pic_path", imagePath);
+
+        // Set the stylesheet for the item button
+        itemButton->setStyleSheet(
+            "QPushButton {"
+            "    background-color: #1DB954; /* Spotify green for buttons */"
+            "    border: none;"
+            "    color: #FFFFFF; /* White text color */"
+            "    padding: 10px;"
+            "    border-radius: 5px;"
+            "    font-size: 12pt;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #1ED760; /* Slightly lighter green for hover state */"
+            "}"
+            "QPushButton:pressed {"
+            "    background-color: #1AAE48; /* Slightly darker green for pressed state */"
+            "}"
+        );
 
         if (itemType == "Song") {
             connect(itemButton, &QPushButton::clicked, this, &Premium::addComment_like);
@@ -345,8 +541,10 @@ void Premium::fill_favorites() {
         QFrame *frame = new QFrame(contentWidget_2);
         frame->setFrameShape(QFrame::Box);
         frame->setLineWidth(2);
-        frame->setFixedSize(150, 200); // Set fixed size for the frame
-        frame->setStyleSheet("border: 2px solid green;"); // Set green border color
+        frame->setFixedSize(160, 230); // Set fixed size for the frame
+        frame->setStyleSheet("border: 2px solid #1DB954; "
+                             "background-color: #121212; "
+                             "border-radius: 10px;"); // Set green border color and rounded corners
         QVBoxLayout *vLayout = new QVBoxLayout(frame);
 
         QLabel *label = new QLabel(frame);
@@ -357,6 +555,25 @@ void Premium::fill_favorites() {
         albumButton->setProperty("ID", albumId);
         albumButton->setProperty("name", albumName);
         albumButton->setProperty("pic_path", imagePath);
+
+        // Set the stylesheet for the album button
+        albumButton->setStyleSheet(
+            "QPushButton {"
+            "    background-color: #1DB954; /* Spotify green for buttons */"
+            "    border: none;"
+            "    color: #FFFFFF; /* White text color */"
+            "    padding: 10px;"
+            "    border-radius: 5px;"
+            "    font-size: 12pt;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #1ED760; /* Slightly lighter green for hover state */"
+            "}"
+            "QPushButton:pressed {"
+            "    background-color: #1AAE48; /* Slightly darker green for pressed state */"
+            "}"
+        );
+
         connect(albumButton, &QPushButton::clicked, this, &Premium::show_album_page);
         vLayout->addWidget(albumButton);
 
@@ -382,8 +599,10 @@ void Premium::fill_favorites() {
         QFrame *frame = new QFrame(contentWidget_2);
         frame->setFrameShape(QFrame::Box);
         frame->setLineWidth(2);
-        frame->setFixedSize(150, 200); // Set fixed size for the frame
-        frame->setStyleSheet("border: 2px solid green;"); // Set green border color
+        frame->setFixedSize(100, 150); // Set fixed size for the frame
+        frame->setStyleSheet("border: 2px solid #1DB954; "
+                             "background-color: #121212; "
+                             "border-radius: 10px;"); // Set green border color and rounded corners
         QVBoxLayout *vLayout = new QVBoxLayout(frame);
 
         QLabel *label = new QLabel(frame);
@@ -394,6 +613,25 @@ void Premium::fill_favorites() {
         songButton->setProperty("ID", songId);
         songButton->setProperty("name", songName);
         songButton->setProperty("pic_path", imagePath);
+
+        // Set the stylesheet for the song button
+        songButton->setStyleSheet(
+            "QPushButton {"
+            "    background-color: #1DB954; /* Spotify green for buttons */"
+            "    border: none;"
+            "    color: #FFFFFF; /* White text color */"
+            "    padding: 10px;"
+            "    border-radius: 5px;"
+            "    font-size: 12pt;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #1ED760; /* Slightly lighter green for hover state */"
+            "}"
+            "QPushButton:pressed {"
+            "    background-color: #1AAE48; /* Slightly darker green for pressed state */"
+            "}"
+        );
+
         connect(songButton, &QPushButton::clicked, this, &Premium::addComment_like);
         vLayout->addWidget(songButton);
 
@@ -403,12 +641,12 @@ void Premium::fill_favorites() {
     ui->scrollArea_3->setWidget(contentWidget_2);
 }
 
+
 void Premium::fill_playlists()
 {
     myPlaylist();
     friendPlaylist();
     publicPlaylist();
-
 }
 
 void Premium::myPlaylist() {
@@ -438,33 +676,45 @@ void Premium::myPlaylist() {
         QFrame *frame = new QFrame(contentWidget);
         frame->setFrameShape(QFrame::Box);
         frame->setLineWidth(2);
-        frame->setFixedSize(150, 180); // Set fixed size for the frame
-        frame->setStyleSheet("border: 2px solid green;"); // Set green border color
+        frame->setFixedSize(160, 190); // Set fixed size for the frame
+        frame->setStyleSheet("border: 2px solid #1DB954; "
+                             "background-color: #121212; "
+                             "border-radius: 10px;"); // Set green border color and rounded corners
+        QVBoxLayout *frameLayout = new QVBoxLayout(frame);
 
         QLabel *label = new QLabel(frame);
         label->setPixmap(QPixmap(imagePath).scaled(100, 100, Qt::KeepAspectRatio));
-        vLayout->addWidget(label);
+        frameLayout->addWidget(label);
 
         QPushButton *playlistButton = new QPushButton(playlistName, frame);
         playlistButton->setProperty("name", playlistName);
         playlistButton->setProperty("pic_path", imagePath);
-        connect(playlistButton, &QPushButton::clicked, this, &Premium::showPlaylist);
-        vLayout->addWidget(playlistButton);
 
-        frame->setLayout(vLayout);
+        // Set button stylesheet
+        playlistButton->setStyleSheet(
+            "QPushButton {"
+            "    background-color: #1DB954; /* Spotify green for buttons */"
+            "    border: none;"
+            "    color: #FFFFFF; /* White text color */"
+            "    padding: 10px;"
+            "    border-radius: 5px;"
+            "    font-size: 12pt;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #1ED760; /* Slightly lighter green for hover state */"
+            "}"
+            "QPushButton:pressed {"
+            "    background-color: #1AAE48; /* Slightly darker green for pressed state */"
+            "}"
+        );
+
+        connect(playlistButton, &QPushButton::clicked, this, &Premium::showPlaylist);
+        frameLayout->addWidget(playlistButton);
+
         layout->addWidget(frame);
     }
 
     ui->your_playlist_scrollbar->setWidget(contentWidget);
-}
-
-void Premium::showPlaylist(){
-    QPushButton *button = qobject_cast<QPushButton*>(sender());
-    if (button)
-    {
-        QString songID = button->property("name").toString();
-        emit open_playlist(songID); // Emit signal with songID
-    }
 }
 
 void Premium::friendPlaylist() {
@@ -495,9 +745,11 @@ void Premium::friendPlaylist() {
         QFrame *frame = new QFrame(contentWidget);
         frame->setFrameShape(QFrame::Box);
         frame->setLineWidth(2);
-        frame->setFixedSize(150, 180); // Set fixed size for the frame
-        frame->setStyleSheet("border: 2px solid green;"); // Set green border color
-        QVBoxLayout *vLayout = new QVBoxLayout(frame);
+        frame->setFixedSize(160, 190); // Set fixed size for the frame
+        frame->setStyleSheet("border: 2px solid #1DB954; "
+                             "background-color: #121212; "
+                             "border-radius: 10px;"); // Set green border color and rounded corners
+        QVBoxLayout *frameLayout = new QVBoxLayout(frame);
 
         // Get the playlist image address (use address_of_picture or default to Spotify logo)
         QString picPath = query.value("address_of_picture").toString();
@@ -508,20 +760,37 @@ void Premium::friendPlaylist() {
         // Create label for playlist image
         QLabel *label = new QLabel(frame);
         label->setPixmap(QPixmap(picPath).scaled(100, 100, Qt::KeepAspectRatio));
-        vLayout->addWidget(label);
+        frameLayout->addWidget(label);
 
         // Create button for playlist name
         QPushButton *playlistButton = new QPushButton(playlistName, frame);
         playlistButton->setProperty("Name", playlistName); // Set playlist name property
         playlistButton->setProperty("pic_path", picPath); // Set playlist image path property
-        connect(playlistButton, &QPushButton::clicked, this, &Premium::showPlaylist); // Connect signal
-        vLayout->addWidget(playlistButton);
 
-        // Add the frame layout to the main layout
+        // Set button stylesheet
+        playlistButton->setStyleSheet(
+            "QPushButton {"
+            "    background-color: #1DB954; /* Spotify green for buttons */"
+            "    border: none;"
+            "    color: #FFFFFF; /* White text color */"
+            "    padding: 10px;"
+            "    border-radius: 5px;"
+            "    font-size: 12pt;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #1ED760; /* Slightly lighter green for hover state */"
+            "}"
+            "QPushButton:pressed {"
+            "    background-color: #1AAE48; /* Slightly darker green for pressed state */"
+            "}"
+        );
+
+        connect(playlistButton, &QPushButton::clicked, this, &Premium::showPlaylist);
+        frameLayout->addWidget(playlistButton);
+
         mainLayout->addWidget(frame);
     }
 
-    // Set the content widget as the scroll area's widget
     ui->friend_playlist_scrollbar->setWidget(contentWidget);
 }
 
@@ -548,24 +817,55 @@ void Premium::publicPlaylist() {
         QFrame *frame = new QFrame(contentWidget);
         frame->setFrameShape(QFrame::Box);
         frame->setLineWidth(2);
-        frame->setFixedSize(150, 180); // Set fixed size for the frame
-        frame->setStyleSheet("border: 2px solid green;"); // Set green border color
+        frame->setFixedSize(160, 190); // Set fixed size for the frame
+        frame->setStyleSheet("border: 2px solid #1DB954; "
+                             "background-color: #121212; "
+                             "border-radius: 10px;"); // Set green border color and rounded corners
+        QVBoxLayout *frameLayout = new QVBoxLayout(frame);
 
         QLabel *label = new QLabel(frame);
         label->setPixmap(QPixmap(imagePath).scaled(100, 100, Qt::KeepAspectRatio));
-        vLayout->addWidget(label);
+        frameLayout->addWidget(label);
 
         QPushButton *playlistButton = new QPushButton(playlistName, frame);
         playlistButton->setProperty("name", playlistName);
         playlistButton->setProperty("pic_path", imagePath);
-        connect(playlistButton, &QPushButton::clicked, this, &Premium::showPlaylist);
-        vLayout->addWidget(playlistButton);
 
-        frame->setLayout(vLayout);
+        // Set button stylesheet
+        playlistButton->setStyleSheet(
+            "QPushButton {"
+            "    background-color: #1DB954; /* Spotify green for buttons */"
+            "    border: none;"
+            "    color: #FFFFFF; /* White text color */"
+            "    padding: 10px;"
+            "    border-radius: 5px;"
+            "    font-size: 12pt;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #1ED760; /* Slightly lighter green for hover state */"
+            "}"
+            "QPushButton:pressed {"
+            "    background-color: #1AAE48; /* Slightly darker green for pressed state */"
+            "}"
+        );
+
+        connect(playlistButton, &QPushButton::clicked, this, &Premium::showPlaylist);
+        frameLayout->addWidget(playlistButton);
+
         layout->addWidget(frame);
     }
 
     ui->publicPlaylist_scrollbar->setWidget(contentWidget);
+}
+
+
+void Premium::showPlaylist(){
+    QPushButton *button = qobject_cast<QPushButton*>(sender());
+    if (button)
+    {
+        QString songID = button->property("name").toString();
+        emit open_playlist(songID); // Emit signal with songID
+    }
 }
 
 void Premium::fill_my_belongings()
@@ -843,7 +1143,8 @@ void Premium::fill_follow() {
 void Premium::fill_concerts()
 {
     QWidget *contentWidget = new QWidget(this);
-    QVBoxLayout *mainLayout = new QVBoxLayout(contentWidget);
+    QGridLayout *layout = new QGridLayout(contentWidget);
+    layout->setAlignment(Qt::AlignTop | Qt::AlignLeft); // Align content to the top-left
 
     QSqlQuery concertQuery;
     concertQuery.prepare("SELECT artist_id, location, [date], address_of_picture FROM Concerts WHERE [date] > GETDATE() AND cancel != 1");
@@ -853,6 +1154,9 @@ void Premium::fill_concerts()
         return;
     }
 
+    int row = 0, col = 0;
+    const int maxColumns = 4; // Adjust this value based on your layout preference
+
     while (concertQuery.next()) {
         int artistId = concertQuery.value("artist_id").toInt();
         QString location = concertQuery.value("location").toString();
@@ -861,7 +1165,95 @@ void Premium::fill_concerts()
         QString concertName = QString("%1 - %2").arg(artistId).arg(location);
 
         if (areTicketsAvailable(artistId, date)) {
-            addConcertItem(mainLayout, concertName, artistId, date, addressOfPicture);
+            // Create a frame with a green border
+            QFrame *frame = new QFrame(contentWidget);
+            frame->setFrameShape(QFrame::Box);
+            frame->setLineWidth(2);
+            frame->setFixedSize(300, 400); // Set fixed size for the frame
+
+            // Set the stylesheet for the frame
+            frame->setStyleSheet("border: 2px solid #1DB954; "
+                                 "background-color: #121212; "
+                                 "border-radius: 10px;");
+
+            // Create a vertical layout to hold image and concert name
+            QVBoxLayout *vLayout = new QVBoxLayout(frame);
+
+            // Create label for concert image
+            QLabel *imageLabel = new QLabel(frame);
+            QString resolvedImagePath = addressOfPicture;
+
+            if (resolvedImagePath.isEmpty() || !QFile::exists(resolvedImagePath)) {
+                resolvedImagePath = ":/new/prefix1/spotify logo.png"; // Use default image if the specified one is empty or not found
+            }
+
+            QPixmap pixmap(resolvedImagePath);
+            imageLabel->setPixmap(pixmap.scaled(200, 200, Qt::KeepAspectRatio));
+            vLayout->addWidget(imageLabel);
+
+            // Create button for concert name
+            QPushButton *concertButton = new QPushButton(concertName, frame);
+            concertButton->setProperty("artistId", artistId);
+            concertButton->setProperty("date", date);
+
+            // Set the stylesheet for the concert button
+            concertButton->setStyleSheet(
+                "QPushButton {"
+                "    background-color: #1DB954; /* Spotify green for buttons */"
+                "    border: none;"
+                "    color: #FFFFFF; /* White text color */"
+                "    padding: 10px;"
+                "    border-radius: 5px;"
+                "    font-size: 12pt;"
+                "}"
+                "QPushButton:hover {"
+                "    background-color: #1ED760; /* Slightly lighter green for hover state */"
+                "}"
+                "QPushButton:pressed {"
+                "    background-color: #1AAE48; /* Slightly darker green for pressed state */"
+                "}"
+            );
+
+            connect(concertButton, &QPushButton::clicked, this, &Premium::toggleTicketOptions);
+            vLayout->addWidget(concertButton);
+
+            QWidget *ticketWidget = new QWidget(this);
+            QVBoxLayout *ticketLayout = new QVBoxLayout(ticketWidget);
+            ticketWidget->setObjectName("ticketWidget");
+            ticketWidget->setVisible(false);
+
+            QSqlQuery ticketQuery;
+            ticketQuery.prepare("EXEC GetAvailableTickets @artist_id = :artistId, @date_concert = :date");
+            ticketQuery.bindValue(":artistId", artistId);
+            ticketQuery.bindValue(":date", date);
+
+            if (!ticketQuery.exec()) {
+                QMessageBox::critical(this, "Error", "Failed to retrieve tickets: " + ticketQuery.lastError().text());
+                return;
+            }
+
+            while (ticketQuery.next()) {
+                int ticketId = ticketQuery.value("ticket_id").toInt();
+                double price = ticketQuery.value("price").toDouble();
+                QString ticketOption = QString("Ticket ID %1 - $%2").arg(ticketId).arg(price);
+
+                QPushButton *ticketButton = new QPushButton(ticketOption, this);
+                ticketButton->setProperty("ticketId", ticketId);
+                ticketButton->setProperty("price", price);
+                connect(ticketButton, &QPushButton::clicked, this, &Premium::buyTicket);
+                ticketLayout->addWidget(ticketButton);
+            }
+
+            vLayout->addWidget(ticketWidget);
+            layout->addWidget(frame, row, col);
+
+            // Move to the next column
+            col++;
+            // If we've reached the maximum number of columns, move to the next row
+            if (col >= maxColumns) {
+                col = 0;
+                row++;
+            }
         }
     }
 
