@@ -18,6 +18,7 @@ class playlist_songs : public QWidget
 public:
     explicit playlist_songs(QWidget *parent = nullptr);
     ~playlist_songs();
+    int albumid;
 
 private slots:
     void on_Back_clicked();

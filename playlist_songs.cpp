@@ -1,7 +1,7 @@
 #include "playlist_songs.h"
 #include "mainwindow.h"
 #include "ui_playlist_songs.h"
-
+bool flagcheck;//0=playlist //1=album
 playlist_songs::playlist_songs(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::playlist_songs)
@@ -23,6 +23,7 @@ void playlist_songs::on_Back_clicked()
 
 void playlist_songs::fillPlaylist(const QString &listID)
 {
+    flagcheck=0;
     QWidget *contentWidget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(contentWidget);
     ui->playlist_name->setText(listID);
@@ -100,75 +101,144 @@ void playlist_songs::setstyle(){
 
 void playlist_songs::on_Like_button_clicked()
 {
-    updateLikeButtonStyle(ui->playlist_name->text());
-    // Replace with actual user ID logic
-    int userId = ID;
+    if(flagcheck==0){
+        updateLikeButtonStyle(ui->playlist_name->text());
+        // Replace with actual user ID logic
+        int userId = ID;
 
-    // Get the playlist name from UI element (assuming ui->playlist_name is a QLabel or similar)
-    QString playlistName = ui->playlist_name->text();
+        // Get the playlist name from UI element (assuming ui->playlist_name is a QLabel or similar)
+        QString playlistName = ui->playlist_name->text();
 
-    // Check if the playlist exists in Play_list
-    QSqlQuery checkQuery(db);
-    checkQuery.prepare("SELECT 1 FROM Play_list WHERE [name] = :playlist_name");
-    checkQuery.bindValue(":playlist_name", playlistName);
+        // Check if the playlist exists in Play_list
+        QSqlQuery checkQuery(db);
+        checkQuery.prepare("SELECT 1 FROM Play_list WHERE [name] = :playlist_name");
+        checkQuery.bindValue(":playlist_name", playlistName);
 
-    if (!checkQuery.exec()) {
-        QMessageBox::critical(this, "Error", "Failed to check playlist existence: " + checkQuery.lastError().text());
-        return;
+        if (!checkQuery.exec()) {
+            QMessageBox::critical(this, "Error", "Failed to check playlist existence: " + checkQuery.lastError().text());
+            return;
+        }
+
+        if (!checkQuery.next()) {
+            QMessageBox::critical(this, "Error", "Playlist does not exist.");
+            return;
+        }
+
+        // Prepare and execute the SQL query to like the playlist
+        QSqlQuery query(db);
+        query.prepare("EXEC LikePlaylist @user_id = :user_id, @playlist_name = :playlist_name");
+        query.bindValue(":user_id", userId);
+        query.bindValue(":playlist_name", playlistName);
+
+        if (!query.exec()) {
+            QMessageBox::critical(this, "Error", "Failed to like the playlist: " + query.lastError().text());
+            return;
+        }
+
+        // Check if the playlist was liked or already liked
+        QSqlQuery likeCheckQuery(db);
+        likeCheckQuery.prepare("SELECT 1 FROM Like_Play_list WHERE user_id = :user_id AND [name] = :playlist_name");
+        likeCheckQuery.bindValue(":user_id", userId);
+        likeCheckQuery.bindValue(":playlist_name", playlistName);
+
+        if (!likeCheckQuery.exec()) {
+            QMessageBox::critical(this, "Error", "Failed to verify like status: " + likeCheckQuery.lastError().text());
+            return;
+        }
+
+        if (likeCheckQuery.next()) {
+            // If the entry is found, it means the playlist was already liked
+            QMessageBox::information(this, "Info", "You have already liked this playlist.");
+        } else {
+            // If the entry is not found, it means the playlist was liked just now
+            QMessageBox::information(this, "Success", "Playlist liked successfully.");
+
+            // Change the button color to a gradient of red
+            QPushButton *likeButton = qobject_cast<QPushButton *>(sender());
+            if (likeButton) {
+                likeButton->setStyleSheet(
+                            "QPushButton {"
+                            "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 red, stop:1 darkred);"
+                            "color: white;"
+                            "border: none;"
+                            "padding: 10px;"
+                            "border-radius: 5px;"
+                            "}"
+                            "QPushButton:hover {"
+                            "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 lightcoral, stop:1 indianred);"
+                            "}"
+                            "QPushButton:pressed {"
+                            "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 darkred, stop:1 red);"
+                            "}"
+                            );
+            }
+        }
     }
+    else if(flagcheck==1){
+         int userId = ID;
+        // Check if the user has a valid subscription
+        QSqlQuery checkSubscriptionQuery(db);
+        checkSubscriptionQuery.prepare("SELECT 1 FROM Premium WHERE user_id = :user_id AND End_time > GETDATE()");
+        checkSubscriptionQuery.bindValue(":user_id", userId);
 
-    if (!checkQuery.next()) {
-        QMessageBox::critical(this, "Error", "Playlist does not exist.");
-        return;
-    }
+        if (!checkSubscriptionQuery.exec()) {
+            QMessageBox::critical(nullptr, "Error", "Failed to check subscription: " + checkSubscriptionQuery.lastError().text());
+            return;
+        }
 
-    // Prepare and execute the SQL query to like the playlist
-    QSqlQuery query(db);
-    query.prepare("EXEC LikePlaylist @user_id = :user_id, @playlist_name = :playlist_name");
-    query.bindValue(":user_id", userId);
-    query.bindValue(":playlist_name", playlistName);
+        if (!checkSubscriptionQuery.next()) {
+            QMessageBox::critical(nullptr, "Error", "User does not have a valid subscription. Liking is not allowed.");
+            return;
+        }
 
-    if (!query.exec()) {
-        QMessageBox::critical(this, "Error", "Failed to like the playlist: " + query.lastError().text());
-        return;
-    }
+        // Check if the album is already liked
+        QSqlQuery likeCheckQuery(db);
+        likeCheckQuery.prepare("SELECT 1 FROM Like_album WHERE user_id = :user_id AND album_id = :album_id");
+        likeCheckQuery.bindValue(":user_id", userId);
+        likeCheckQuery.bindValue(":album_id", albumid);
 
-    // Check if the playlist was liked or already liked
-    QSqlQuery likeCheckQuery(db);
-    likeCheckQuery.prepare("SELECT 1 FROM Like_Play_list WHERE user_id = :user_id AND [name] = :playlist_name");
-    likeCheckQuery.bindValue(":user_id", userId);
-    likeCheckQuery.bindValue(":playlist_name", playlistName);
+        if (!likeCheckQuery.exec()) {
+            QMessageBox::critical(nullptr, "Error", "Failed to check if album is already liked: " + likeCheckQuery.lastError().text());
+            return;
+        }
 
-    if (!likeCheckQuery.exec()) {
-        QMessageBox::critical(this, "Error", "Failed to verify like status: " + likeCheckQuery.lastError().text());
-        return;
-    }
+        if (likeCheckQuery.next()) {
+            // The album is already liked
+            QMessageBox::information(nullptr, "Info", "You have already liked this album.");
+        } else {
+            // Like the album
+            QSqlQuery likeAlbumQuery(db);
+            likeAlbumQuery.prepare("INSERT INTO Like_album (user_id, album_id) VALUES (:user_id, :album_id)");
+            likeAlbumQuery.bindValue(":user_id", userId);
+            likeAlbumQuery.bindValue(":album_id", albumid);
 
-    if (likeCheckQuery.next()) {
-        // If the entry is found, it means the playlist was already liked
-        QMessageBox::information(this, "Info", "You have already liked this playlist.");
-    } else {
-        // If the entry is not found, it means the playlist was liked just now
-        QMessageBox::information(this, "Success", "Playlist liked successfully.");
+            if (!likeAlbumQuery.exec()) {
+                QMessageBox::critical(nullptr, "Error", "Failed to like the album: " + likeAlbumQuery.lastError().text());
+                return;
+            }
 
-        // Change the button color to a gradient of red
-        QPushButton *likeButton = qobject_cast<QPushButton *>(sender());
-        if (likeButton) {
-            likeButton->setStyleSheet(
-                        "QPushButton {"
-                        "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 red, stop:1 darkred);"
-                        "color: white;"
-                        "border: none;"
-                        "padding: 10px;"
-                        "border-radius: 5px;"
-                        "}"
-                        "QPushButton:hover {"
-                        "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 lightcoral, stop:1 indianred);"
-                        "}"
-                        "QPushButton:pressed {"
-                        "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 darkred, stop:1 red);"
-                        "}"
-                        );
+            // Notify the user that the album was liked successfully
+            QMessageBox::information(nullptr, "Success", "Album liked successfully.");
+
+            // Example of changing the button style after liking an album (assuming there is a QPushButton for this action)
+            QPushButton *likeButton = qobject_cast<QPushButton *>(sender());
+            if (likeButton) {
+                likeButton->setStyleSheet(
+                            "QPushButton {"
+                            "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 red, stop:1 darkred);"
+                            "color: white;"
+                            "border: none;"
+                            "padding: 10px;"
+                            "border-radius: 5px;"
+                            "}"
+                            "QPushButton:hover {"
+                            "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 lightcoral, stop:1 indianred);"
+                            "}"
+                            "QPushButton:pressed {"
+                            "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 darkred, stop:1 red);"
+                            "}"
+                            );
+            }
         }
     }
 }
@@ -215,6 +285,8 @@ void playlist_songs::updateLikeButtonStyle(const QString &playlistName)
 }
 
 void playlist_songs::fillAlbum(const QString &AlbumID){
+    flagcheck=1;
+    albumid=AlbumID.toInt();
     QWidget *contentWidget = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout(contentWidget);
     // Prepare and execute the SQL query
@@ -250,7 +322,7 @@ void playlist_songs::fillAlbum(const QString &AlbumID){
 
         // Create button for song name
         QPushButton *songButton = new QPushButton(songTitle, contentWidget);
-        songButton->setProperty("ID", ID); // Use song ID as ID for this example
+        songButton->setProperty("ID", songID); // Use song ID as ID for this example
         songButton->setProperty("name", songTitle);
         songButton->setProperty("pic_path", imagePath);
         connect(songButton, &QPushButton::clicked, this, &playlist_songs::onSongButtonClicked);
@@ -264,5 +336,6 @@ void playlist_songs::fillAlbum(const QString &AlbumID){
     setstyle();
     updateLikeButtonStyle(ui->playlist_name->text());
 }
+
 
 
