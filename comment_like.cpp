@@ -31,6 +31,112 @@ Comment_Like::Comment_Like(QWidget *parent) :
     scrollAreaWidgetContents->setLayout(commentsLayout);
     commentSection->setWidget(scrollAreaWidgetContents);
     commentSection->setWidgetResizable(true);
+
+    QString styleSheet = R"(
+/* General font and background */
+QWidget {
+    background-color: #121212; /* Dark background similar to Spotify */
+    color: #FFFFFF; /* White text */
+    font: 15pt "Segoe UI Historic"; /* Specified font */
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #191414; /* Dark background */
+    color: white;
+    border: 2px solid #1DB954; /* Darker green border */
+    padding: 10px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: #1ED760; /* Lighter green for hover */
+    border: 2px solid #1DB954;
+}
+
+QPushButton:pressed {
+    background-color: #1DB954; /* Spotify green for pressed */
+    border: 2px solid #1DB954;
+}
+
+/* Labels */
+QLabel {
+    color: white;
+    background-color: #1DB954; /* Spotify green */
+    padding: 5px;
+    border-radius: 25px; /* Fully rounded corners */
+    font-size: 14px;
+}
+
+/* Scroll areas */
+QScrollArea {
+    background-color: #191414; /* Dark background */
+    color: white; /* White text */
+}
+
+/* Scrollbar */
+QScrollBar:vertical {
+    border: none;
+    background: #191414; /* Dark background */
+    width: 10px;
+    margin: 0px 0px 0px 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: #1DB954; /* Spotify green */
+    min-height: 20px;
+    border-radius: 5px;
+}
+
+QScrollBar::add-line:vertical {
+    background: none;
+    height: 0px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:vertical {
+    background: none;
+    height: 0px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+
+/* Text Edit */
+QTextEdit {
+    background-color: #191414; /* Dark background */
+    color: white;
+    border: 1px solid #1DB954;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+/* Line Edit */
+QLineEdit {
+    background-color: #191414; /* Dark background */
+    color: white;
+    border: 1px solid #1DB954;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+/* Specific styling for Like_button */
+#Like_button {
+    background-color: #191414; /* Dark background */
+    color: white;
+    border: 2px solid #1DB954;
+    padding: 10px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+
+    )";
+   this->setStyleSheet(styleSheet);
+    //ui->Comment_section->setStyleSheet(scrollAreaStyle);
 }
 
 Comment_Like::~Comment_Like()
@@ -140,6 +246,7 @@ void Comment_Like::on_Back_clicked()
 //**************************************************************
 void Comment_Like::on_add_playlist_clicked()
 {
+    ui->textEdit_Lyrics->hide();
     // Show the question label and the playlists scroll area
     ui->question_label->show();
     ui->playlists_scrollBar->show();
@@ -297,7 +404,7 @@ void Comment_Like::on_Add_comment_clicked()
         } else {
             qDebug() << "Comment added successfully!";
             clearScrollArea(ui->Comment_section);
-             loadCommentsForSong(ID_Song);
+            loadCommentsForSong(ID_Song);
             //QMessageBox::information(this, "Success", "Comment added successfully to song.");
             ui->write_comment->clear();
         }
