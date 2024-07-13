@@ -1677,8 +1677,8 @@ color: rgb(255, 255, 255);</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1251</width>
-        <height>576</height>
+        <width>100</width>
+        <height>30</height>
        </rect>
       </property>
       <attribute name="label">
@@ -1976,7 +1976,7 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
        <x>10</x>
        <y>490</y>
        <width>1501</width>
-       <height>141</height>
+       <height>181</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -1991,7 +1991,7 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
         <x>0</x>
         <y>0</y>
         <width>1499</width>
-        <height>139</height>
+        <height>179</height>
        </rect>
       </property>
      </widget>

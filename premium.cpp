@@ -48,7 +48,7 @@ void Premium::setstyle(){
 
 void Premium::setUserID(const QString &userType){
    Type=userType;
-    //// if is premium
+    // if is premium
     if(userType=="Premium User"){
    ui->tabWidget->removeTab(7);
     ui->tabWidget->removeTab(7);}
@@ -573,6 +573,9 @@ void Premium::fill_my_belongings()
     fillScrollArea(ui->my_songs_scrollBar, "Song");
     fillScrollArea(ui->my_albums_scrollBar, "Album");
     fillScrollArea(ui->my_concerts_scrollBar, "Concert");
+    fillSongs();
+    fillAlbums();
+    fill_concerts();
 }
 
 void Premium::fillScrollArea(QScrollArea* scrollArea, const QString& type)
@@ -580,185 +583,160 @@ void Premium::fillScrollArea(QScrollArea* scrollArea, const QString& type)
     // Create a horizontal layout for the scroll area
     QHBoxLayout* scrollLayout = new QHBoxLayout();
 
-    // Example data for demonstration purposes
+    // Lists for item names, images, and IDs
     QStringList itemNames;
     QStringList itemImages;
     QStringList itemIds;
 
+    QSqlQuery query;
+
+    if (type == "Song") {
+        query.prepare("EXEC GetUserSong @user_id = :user_id");
+        query.bindValue(":user_id", ID); // Assuming ID is a member variable with the current user ID
+    } else if (type == "Album") {
+        query.prepare("EXEC GetUserAlbum @user_id = :user_id");
+        query.bindValue(":user_id", ID);
+    } else if (type == "Concert") {
+        query.prepare("EXEC GetUserConcerts @user_id = :user_id");
+        query.bindValue(":user_id", ID);
+    }
+
+    if (query.exec()) {
+        while (query.next()) {
+            QString itemId = query.value(0).toString();
+            QString title = query.value(1).toString();
+            QString imagePath = query.value(2).toString();
+            QString image = (imagePath.isEmpty() || !QFile::exists(imagePath)) ? ":/new/prefix1/spotify logo.png" : imagePath;
+
+            if (type == "Concert") {
+                // Format concert date if it's being fetched
+                QString concertDate = query.value(0).toDateTime().toString("yyyy-MM-dd HH:mm");
+                title = concertDate; // Use concert date as title for display
+            }
+
+            itemIds << itemId;
+            itemNames << title;
+            itemImages << image;
+        }
+    } else {
+        qDebug() << "Query execution error:" << query.lastError().text();
+        QMessageBox::critical(this, "Database Error", "Failed to execute query.");
+        return;
+    }
+
+    for (int i = 0; i < itemIds.size(); ++i) {
+        QString itemId = itemIds[i];
+        QString itemName = itemNames[i];
+        QString itemImage = itemImages[i];
+
+        // Create a vertical layout for each item
+        QVBoxLayout* itemLayout = new QVBoxLayout();
+
+        // Create a label for the image
+        QLabel* imageLabel = new QLabel();
+        QPixmap pixmap(itemImage);
+        imageLabel->setPixmap(pixmap.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        imageLabel->setAlignment(Qt::AlignCenter);
+
+        // Create buttons for the name and delete action
+        QPushButton* nameButton = new QPushButton(itemName);
+        QPushButton* deleteButton = new QPushButton("Delete");
+
+        nameButton->setProperty("ID", itemId);
+        deleteButton->setProperty("ID", itemId);
+
+        // Set styles for buttons
+        QString buttonStyle = "font: 12pt 'Segoe UI Historic';"
+                              "background-color: rgb(46, 189, 89);"
+                              "border-radius: 10px;"
+                              "color: rgb(255, 255, 255);";
+        nameButton->setStyleSheet(buttonStyle);
+        deleteButton->setStyleSheet(buttonStyle);
+
+        // Add widgets to the item layout
+        itemLayout->addWidget(imageLabel);
+        itemLayout->addWidget(nameButton);
+        itemLayout->addWidget(deleteButton);
+
+        // Add the item layout to the scroll layout
+        QWidget* itemWidget = new QWidget();
+        itemWidget->setLayout(itemLayout);
+        scrollLayout->addWidget(itemWidget);
+
+        // Connect the delete button to the appropriate slot
+        connect(deleteButton, &QPushButton::clicked, [this, type, itemId]() {
+            onDeleteButtonClicked(type, itemId);
+        });
+
+        // Connect the name button to the appropriate slot (if needed)
+        connect(nameButton, &QPushButton::clicked, this, [=]() {
+            if (type == "Song") {
+                addComment_like();
+            } else if (type == "Album") {
+                show_album_page();
+            } else if (type == "Concert") {
+                // Handle concert button click
+                QMessageBox::information(this, "Concert Date", "Concert Date: " + itemName);
+            }
+        });
+    }
+
+    // Set the layout to the scroll area
+    QWidget* scrollAreaWidget = new QWidget();
+    scrollAreaWidget->setLayout(scrollLayout);
+    scrollArea->setWidget(scrollAreaWidget);
+}
+
+
+
+void Premium::onDeleteButtonClicked(const QString& type, const QString& itemId)
+{
     if (type == "Song") {
         QSqlQuery query;
-        query.prepare("EXEC GetUserSong @user_id = :user_id");
-        query.bindValue(":user_id", ID); // Assuming userID is a member variable with the current user ID
+        query.prepare("EXEC RemoveSong @MusicID = :musicId");
+        query.bindValue(":musicId", itemId.toInt());
 
         if (query.exec()) {
-            while (query.next()) {
-                QString songid = query.value("song_id").toString();
-                QString title = query.value("title").toString();
-                QString imagePath = query.value("address_of_picture").toString();
-                QString image = (imagePath.isEmpty() || !QFile::exists(imagePath)) ? ":/new/prefix1/spotify logo.png" : imagePath;
-                 songId= songid.toInt();
-                itemIds << songid;
-                itemNames << title;
-                itemImages << image;
-            }
+            QMessageBox::information(this, "Success", "Song removed successfully.");
+            fill_my_belongings();
         } else {
-            qDebug() << "Query execution error:" << query.lastError().text();
-            QMessageBox::critical(this, "Database Error", "Failed to execute query.");
-            return;
+            qDebug() << "Error executing RemoveSong procedure:" << query.lastError().text();
+            QMessageBox::critical(this, "Database Error", "Failed to remove song.");
         }
     } else if (type == "Album") {
-        QSqlQuery query1;
-        query1.prepare("EXEC GetUserAlbum @user_id = :user_id");
-        query1.bindValue(":user_id", ID); // Assuming userID is a member variable with the current user ID
-
-        if (query1.exec()) {
-            while (query1.next()) {
-                QString albumid = query1.value("album_id").toString();
-                QString title = query1.value("title").toString();
-                QString imagePath = query1.value("address_of_picture").toString();
-                QString image = (imagePath.isEmpty() || !QFile::exists(imagePath)) ? ":/new/prefix1/spotify logo.png" : imagePath;
-
-                itemIds << albumid;
-                itemNames << title;
-                itemImages << image;
-            }
-        } else {
-            qDebug() << "Query execution error:" << query1.lastError().text();
-            QMessageBox::critical(this, "Database Error", "Failed to execute query.");
-            return;
-        }
-    } else if (type == "Concert") {
-        QSqlQuery query2;
-        query2.prepare("EXEC GetUserConcerts @user_id = :user_id");
-        query2.bindValue(":user_id", ID); // Assuming userID is a member variable with the current user ID
-
-        if (query2.exec()) {
-            while (query2.next()) {
-                QDateTime dateTimeString = query2.value("title").toDateTime();
-                QString imagePath = query2.value("address_of_picture").toString();
-                QString image = (imagePath.isEmpty() || !QFile::exists(imagePath)) ? ":/new/prefix1/spotify logo.png" : imagePath;
-                QString title = dateTimeString.toString("yyyy-MM-dd HH:mm");
-
-                itemIds << title;
-               itemNames << title;
-                itemImages << image;
-            }
-        } else {
-            qDebug() << "Query execution error:" << query2.lastError().text();
-            QMessageBox::critical(this, "Database Error", "Failed to execute query.");
-            return;
-        }
-    }
-
-    for (const QString& itemId : itemIds) {
-            // Create a vertical layout for each item
-            QVBoxLayout* itemLayout = new QVBoxLayout();
-
-            // Create a label for the image
-            QLabel* imageLabel = new QLabel();
-            QPixmap pixmap(":/new/prefix1/spotify logo.png"); // Use the provided image path
-            imageLabel->setPixmap(pixmap.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-            imageLabel->setAlignment(Qt::AlignCenter);
-
-            // Create buttons for the name and delete action
-            QPushButton* nameButton = new QPushButton(itemId);
-            QPushButton* deleteButton = new QPushButton("Delete");
-            connect(nameButton, &QPushButton::clicked, this ,&Premium::addComment_like);
-            nameButton->setProperty("ID" ,itemId);
-            // Set styles for buttons
-            QString buttonStyle = "font: 12pt 'Segoe UI Historic';"
-                                  "background-color: rgb(46, 189, 89);"
-                                  "border-radius: 10px;"
-                                  "color: rgb(255, 255, 255);";
-            nameButton->setStyleSheet(buttonStyle);
-            deleteButton->setStyleSheet(buttonStyle);
-
-            // Add widgets to the item layout
-            itemLayout->addWidget(imageLabel);
-            itemLayout->addWidget(nameButton);
-            itemLayout->addWidget(deleteButton);
-
-            // Add the item layout to the scroll layout
-            QWidget* itemWidget = new QWidget();
-            itemWidget->setLayout(itemLayout);
-            scrollLayout->addWidget(itemWidget);
-
-            // Connect the delete button to the appropriate slot
-            connect(deleteButton, &QPushButton::clicked, [this, type, itemId]() {
-                onDeleteButtonClicked(type, itemId);
-            });
-
-            // Connect the name button to the appropriate slot (if needed)
-            connect(nameButton, &QPushButton::clicked, [this, type, itemId]() {
-                onNameButtonClicked(type, itemId);
-            });
-        }
-
-        // Set the layout to the scroll area
-        QWidget* scrollAreaWidget = new QWidget();
-        scrollAreaWidget->setLayout(scrollLayout);
-        scrollArea->setWidget(scrollAreaWidget);
-    }
-
-
-
-void Premium::onDeleteButtonClicked(const QString& type, const QString& itemName)
-{
-    // Handle the deletion of the item (e.g., remove from data source and UI)
-    if (type == "Song") {
         QSqlQuery query;
-            query.prepare("EXEC RemoveSong @MusicID = :musicId");
-            query.bindValue(":musicId", itemName.toInt()); // Convert itemId to int assuming it's a numeric ID
+        query.prepare("EXEC RemoveAlbum @AlbumID = :albumId");
+        query.bindValue(":albumId", itemId.toInt());
 
-            if (query.exec()) {
-                QMessageBox::information(this, "Success", "Song removed successfully.");
-                // If you need to update the UI after deletion, implement that here
-                fill_my_belongings();
-            } else {
-                qDebug() << "Error executing RemoveSong procedure:" << query.lastError().text();
-                QMessageBox::critical(this, "Database Error", "Failed to remove song.");
-            }
-            }
-            if (type == "Album") {
-                QSqlQuery query1;
-                    query1.prepare("EXEC RemoveAlbum @AlbumID = :albumId");
-                    query1.bindValue(":albumId", itemName.toInt()); // Convert itemId to int assuming it's a numeric ID
+        if (query.exec()) {
+            QMessageBox::information(this, "Success", "Album removed successfully.");
+            fill_my_belongings();
+        } else {
+            qDebug() << "Error executing RemoveAlbum procedure:" << query.lastError().text();
+            QMessageBox::critical(this, "Database Error", "Failed to remove album.");
+        }
+    }     if (type == "Concert") {
+        QString concertDate = itemId;
+        QString artistId = QString::number(ID); // Assuming ID is the current artist ID
 
-                    if (query1.exec()) {
-                        QMessageBox::information(this, "Success", "Album removed successfully.");
-                        fill_my_belongings();
-                        // If you need to update the UI after deletion, implement that here
-                    } else {
-                        qDebug() << "Error executing RemoveAlbum procedure:" << query1.lastError().text();
-                        QMessageBox::critical(this, "Database Error", "Failed to remove album.");
-                    }
-                 }
-            if (type == "Concert"){
-                QSqlQuery query2;
-                //QDateTime tDate = QDateTime::fromString(itemName, "yyyy-MM-dd HH:mm");
-                    query2.prepare("EXEC CancelConcert @artist_id = :artistId, @date_concert = :concertDate");
-                    query2.bindValue(":artistId", ID);
-                    query2.bindValue(":concertDate", itemName);
+        QSqlQuery query;
+        query.prepare("EXEC CancelConcert @artist_id = :artistId, @date_concert = :concertDate");
+        query.bindValue(":artistId", artistId);
+        query.bindValue(":concertDate", concertDate);
 
-                    if (query2.exec()) {
-                        QMessageBox::information(this, "Success", "Concert cancelled successfully.");
-
-                        fill_my_belongings();
-                        // If you need to update the UI after cancellation, implement that here
-                    } else {
-                        qDebug() << "Error executing CancelConcert procedure:" << query2.lastError().text();
-                        QMessageBox::critical(this, "Database Error", "Failed to cancel concert.");
-                    }
-
-            }
-
+        if (query.exec()) {
+            QMessageBox::information(this, "Success", "Concert cancelled successfully.");
+            fill_my_belongings(); // Refresh UI
+        } else {
+            qDebug() << "Error executing CancelConcert procedure:" << query.lastError().text();
+            QMessageBox::critical(this, "Database Error", "Failed to cancel concert.");
+        }
+    }
+    fillSongs();
+    fillAlbums();
+    fill_concerts();
 }
 
-void Premium::onNameButtonClicked(const QString& type, const QString& itemName)
-{
-    // Handle the action for the name button (e.g., open details or play the song/album/concert)
-    qDebug() << "Clicked on" << type << ":" << itemName;
-}
 
 void Premium::fill_friends() {
     // Clear existing content
@@ -1929,6 +1907,7 @@ void Premium::on_premiumBuy_clicked()
         //////////////////////////////////////
 
 }
+
 void Premium::fillPlayListAfterNew(){
     fill_playlists();
 }
@@ -2057,7 +2036,6 @@ void Premium::setupDateTimePicker3() {
         }
     });
 }
-
 
 void Premium::on_submit_song_2_clicked()
 {
