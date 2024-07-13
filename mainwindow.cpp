@@ -35,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(chatbox, &ChatBox::goBack, this, &MainWindow::goBacktoHome);
     connect(premium, &Premium::open_album, this, &MainWindow::OpenAlbum);
     connect(comment_like, &Comment_Like::newPlayList,this,&::MainWindow::Addnewplaylist);
+    //connect(premium, &Premium::Logout,this,&::MainWindow::showRegister);
+    connect(premium, &Premium::Logout,this,&::MainWindow::close);
     // Initially show the register page
     ui->stackedWidget->setCurrentWidget(registerPage);
 }
@@ -47,6 +49,13 @@ MainWindow::~MainWindow()
 void MainWindow::showRegister(){
     ui->stackedWidget->setCurrentWidget(registerPage);
 }
+void MainWindow::close(){
+    QTimer *timer = new QTimer(this);
+    //connect(timer, &QTimer::timeout, this, &Register::onTimeout);
+    timer->start(3000);
+    this->close();
+}
+
 
 void MainWindow::showPremium(const QString &userType){
     premium->setUserID(userType);

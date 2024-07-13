@@ -100,12 +100,12 @@ private:
     void setupDateTimePicker3();
     void fillAlbums();
 
-
 signals:
     void open_comment(const QString);
     void open_playlist(const QString);
     void startChat(const QString);
     void open_album(const QString);
+    void Logout();
 
 private slots:
     void addComment_like();

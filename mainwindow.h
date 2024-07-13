@@ -40,6 +40,8 @@ private slots:
     void startChat(const QString &);
     void OpenAlbum(const QString &songID);
     void Addnewplaylist();
+    void close();
+
 
 };
 
