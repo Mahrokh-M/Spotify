@@ -215,6 +215,54 @@ void playlist_songs::updateLikeButtonStyle(const QString &playlistName)
 }
 
 void playlist_songs::fillAlbum(const QString &AlbumID){
+    QWidget *contentWidget = new QWidget(this);
+    QVBoxLayout *layout = new QVBoxLayout(contentWidget);
+    // Prepare and execute the SQL query
+    QSqlQuery query(db);
+    query.prepare("EXEC GetSongsByAlbumID @AlbumID = :albumID");
+    query.bindValue(":albumID", AlbumID.toInt());
 
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to retrieve songs for the album: " + query.lastError().text());
+        return;
+    }
+
+    // Set the album picture (example, replace with actual logic)
+    QString albumImagePath = ":/new/prefix1/spotify logo.png";
+    QLabel *albumPicLabel = this->findChild<QLabel*>("playlist_pic");
+    if (albumPicLabel) {
+        albumPicLabel->setPixmap(QPixmap(albumImagePath).scaled(100, 100, Qt::KeepAspectRatio));
+    }
+
+    // Process each song from the query result
+    while (query.next()) {
+        QString songTitle = query.value("Song_Title").toString();
+        QString songID=query.value("ID").toString();
+        QString picturePath = query.value("addr").toString(); // Replace with actual picture path logic if available
+        QString imagePath = (picturePath.isEmpty() || !QFile::exists(picturePath)) ? ":/new/prefix1/spotify logo.png" : picturePath;
+
+        QHBoxLayout *hLayout = new QHBoxLayout();
+
+        // Create label for song image
+        QLabel *label = new QLabel(contentWidget);
+        label->setPixmap(QPixmap(imagePath).scaled(50, 50, Qt::KeepAspectRatio));
+        hLayout->addWidget(label);
+
+        // Create button for song name
+        QPushButton *songButton = new QPushButton(songTitle, contentWidget);
+        songButton->setProperty("ID", ID); // Use song ID as ID for this example
+        songButton->setProperty("name", songTitle);
+        songButton->setProperty("pic_path", imagePath);
+        connect(songButton, &QPushButton::clicked, this, &playlist_songs::onSongButtonClicked);
+        hLayout->addWidget(songButton);
+
+        layout->addLayout(hLayout);
+    }
+
+    // Set the content widget as the scroll area's widget
+    ui->scrollArea->setWidget(contentWidget);
+    setstyle();
+    updateLikeButtonStyle(ui->playlist_name->text());
 }
+
 

@@ -72,6 +72,7 @@ void MainWindow::startChat(const QString &personname){
 
 void MainWindow::OpenAlbum(const QString &albumID){
     //fill songs in the album
+    playlist->fillAlbum(albumID);
     ui->stackedWidget->setCurrentWidget(playlist);
 }
 void MainWindow::Addnewplaylist(){

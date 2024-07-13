@@ -86,16 +86,16 @@
 --	FOREIGN KEY (artist_id_added) REFERENCES Artists(artist_id)
 --);
 ------------------------------------------------------
---DROP:
---CREATE TABLE Concerts (
---    artist_id INT ,
---    [location] VARCHAR(100),
---    [date] DATETIME ,
---    cancel BIT  DEFAULT 0, --laghv nist
---	address_of_picture VARCHAR(200),
---    FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
---	PRIMARY KEY (artist_id,[date])
---);
+DROP TABLE Concerts
+CREATE TABLE Concerts (
+    artist_id INT ,
+    [location] VARCHAR(100),
+    [date] DATETIME ,
+    cancel BIT  DEFAULT 0, --laghv nist
+	address_of_picture VARCHAR(200),
+    FOREIGN KEY (artist_id) REFERENCES Artists(artist_id),
+	PRIMARY KEY (artist_id,[date])
+);
 ------------------------------------------------------
 CREATE TABLE Tickets (
     ticket_id INT PRIMARY KEY IDENTITY,
@@ -608,29 +608,27 @@ CREATE PROCEDURE GetSongDetails
     @song_id INT
 AS
 BEGIN
-    -- Get the song details
+    -- Get the song details along with the artist's username
     SELECT
         s.song_id AS ID,
         s.title AS Title,
         a.title AS AlbumTitle,
+        u.username AS ArtistName,  -- Retrieve the artist's username
         s.genre AS Genre,
         s.country AS Country,
         s.Age_category AS AgeCategory,
         s.lyrics AS Lyrics,
-        s.address_of_picture AS PictureAddress  -- Add the picture address
+        s.address_of_picture AS PictureAddress
     FROM Songs s
-    JOIN Albums a ON s.album_id = a.album_id OR s.album_id IS NULL
+    LEFT JOIN Albums a ON s.album_id = a.album_id
+    LEFT JOIN Artists ar ON s.artist_id_added = ar.artist_id
+    LEFT JOIN Users u ON ar.artist_id = u.user_id  -- Assuming Artists table has a column user_id referring to Users table
     WHERE s.song_id = @song_id;
-
-    -- Get all artists for the song
-    SELECT
-        u.username AS ArtistName
-    FROM artist_has_song ahs
-    JOIN Artists ar ON ahs.artist_id = ar.artist_id
-    JOIN Users u ON ar.artist_id = u.user_id
-    WHERE ahs.song_id = @song_id;
 END;
 GO
+
+SELECT *
+FROM Songs
 exec GetSongDetails @song_id=5;
 ------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -812,7 +810,7 @@ CREATE PROCEDURE AddSong
     @lyrics VARCHAR(MAX),
     @Age_category CHAR(2),
     @country VARCHAR(50),
-  @address_of_picture VARCHAR(100),
+  @address_of_picture VARCHAR(200),
   @can_be_added BIT ,
   @release_date DATETIME
 AS
@@ -835,7 +833,7 @@ CREATE PROCEDURE AddSongWithAllArtist
     @lyrics VARCHAR(MAX),
     @Age_category CHAR(2),
     @country VARCHAR(50),
-    @address_of_picture VARCHAR(100),
+    @address_of_picture VARCHAR(200),
     @can_be_added BIT,
     @other_artists ArtistIdTableType READONLY -- Table-valued parameter for other artists
 AS
@@ -864,24 +862,21 @@ END;
 GO
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --________________________________________________________________________________________________________________________________
---ADD ALBUM WHIT ALL ARTIST:
-CREATE TYPE ArtistIdTableType AS TABLE 
-(
-    artist_id INT
-);
+--ADD ALBUM :
+DROP PROCEDURE AddAlbumAndArtists
 CREATE PROCEDURE AddAlbumAndArtists
     @artist_name VARCHAR(50),
     @album_title VARCHAR(100),
     @genre VARCHAR(50),
     @age_category CHAR(2),
     @country VARCHAR(50),
-    @address_of_picture VARCHAR(100),
+    @address_of_picture VARCHAR(200),
   @artist_id INT,
-  @release_date DATETIME
+ï¿½ @release_date DATETIME
 AS
 BEGIN
     INSERT INTO Albums (title, artist_id_added, genre, release_date, Age_category, country, address_of_picture)
-    VALUES (@album_title, @artist_id, @genre,    @release_date, @age_category, @country, @address_of_picture);
+    VALUES (@album_title, @artist_id, @genre,  ï¿½ @release_date, @age_category, @country, @address_of_picture);
 END;
 GO
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -978,7 +973,18 @@ BEGIN
     END CATCH
 END;
 GO
+DROP PROCEDURE GetSongsByAlbumID
+CREATE PROCEDURE GetSongsByAlbumID
+    @AlbumID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
 
+    SELECT song_id AS ID , address_of_picture AS addr,title As song_title
+    FROM Songs
+    WHERE album_id = @AlbumID;
+END;
+GO
 
 --__________________________________________________________________________________________________________________
 --CANCEL CONCER AND RETURN MONEY:
@@ -2168,6 +2174,8 @@ INSERT INTO Tickets (user_id, artist_id, price, Expiration, is_sold, date_concer
 --__________________________________________________________________check___________________________________________________________--
 SELECT*
 FROM Comment_song;
+SELECT *
+FROM Songs
 exec GetCommentsForSong @song_id=48;
 exec GetCommentsForSong @song_id=6;
 exec AddCommentToSong @user_id= 2, @song_id = 6,@text='kjhkjhgju';
@@ -2184,5 +2192,15 @@ exec InsertUserGenreLikes
 exec LikeSong  @user_id=3,
     @song_id =5;
 SELECT *
-FROM Like_song
-exec InsertUserArtistLikes
+FROM Like_song;
+exec InsertUserArtistLikes;
+SELECT *
+FROM Albums;
+exec AddAlbumAndArtists
+    @artist_name =asal,
+    @album_title= 'aaa',
+    @genre ='ddd',
+    @age_category ='po',
+    @country ='kp',
+    @address_of_picture ='ijuh',
+	@artist_id=1;
