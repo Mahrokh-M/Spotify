@@ -4,6 +4,8 @@
 #include "qsqlquery.h"
 #include "qurlquery.h"
 #include "ui_premium.h"
+#include "register.h"
+#include <QTimer>
 
 int songId;
 int albumid;
@@ -48,7 +50,6 @@ void Premium::setstyle(){
 
 void Premium::setUserID(const QString &userType){
    Type=userType;
-    // if is premium
     if(userType=="Premium User"){
    ui->tabWidget->removeTab(7);
     ui->tabWidget->removeTab(7);}
@@ -1885,8 +1886,9 @@ void Premium::on_premiumBuy_clicked()
                     qDebug() << "Error accepting friend request:" << query.lastError().text();
                     return;
                 }
-               if (query.exec()) {
-                        QMessageBox::information(this, "Success", "Operation completed successfully.");}
+
+               //QMessageBox::information(this, "Success", "Operation completed successfully. The Program will close now, You need to restart");
+
 
         if (ui->Imartist->isChecked()) {
                 QSqlQuery query2(db);
@@ -1898,11 +1900,12 @@ void Premium::on_premiumBuy_clicked()
                     qDebug() << "Error accepting friend request:" << query2.lastError().text();
                     return;
                 }
-                if (query2.exec()) {
-                        QMessageBox::information(this, "Success", "Operation completed successfully.");}
 
-                QMessageBox::information(this, "Checkbox Checked", "The checkbox is checked.");
-            }
+                 QMessageBox::information(this, "Success", "Operation completed successfully. The Program will close now, You need to restart");}
+
+
+                 emit Logout();
+
 
         //////////////////////////////////////
 
