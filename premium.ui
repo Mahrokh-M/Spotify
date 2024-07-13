@@ -1211,15 +1211,15 @@ font: 700 15pt &quot;UD Digi Kyokasho NP-B&quot;;</string>
       </rect>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="add_single">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>100</width>
-        <height>30</height>
+        <width>1251</width>
+        <height>576</height>
        </rect>
       </property>
       <attribute name="label">

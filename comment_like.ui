@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(255, 255, 255);</string>
+    <string notr="true">background-color: rgb(0 0, 0);</string>
    </property>
    <property name="text">
     <string/>
@@ -39,8 +39,8 @@
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">color: rgb(0, 0, 0);
-background-color: rgb(255, 255, 255);</string>
+    <string notr="true">border-radius: 10px; 
+font: 15pt &quot;Segoe UI Historic&quot;;</string>
    </property>
    <property name="text">
     <string/>
@@ -56,7 +56,8 @@ background-color: rgb(255, 255, 255);</string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">color: rgb(0, 0, 0);</string>
+    <string notr="true">font: 15pt &quot;Segoe UI Historic&quot;;
+color: rgb(255, 255, 255);</string>
    </property>
    <property name="widgetResizable">
     <bool>true</bool>
@@ -81,6 +82,9 @@ background-color: rgb(255, 255, 255);</string>
      <height>61</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">font: 15pt &quot;Segoe UI Historic&quot;;</string>
+   </property>
    <property name="text">
     <string>Like</string>
    </property>
@@ -93,6 +97,9 @@ background-color: rgb(255, 255, 255);</string>
      <width>121</width>
      <height>51</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 10pt &quot;Segoe UI Historic&quot;;</string>
    </property>
    <property name="text">
     <string>Add Comment</string>
@@ -107,6 +114,9 @@ background-color: rgb(255, 255, 255);</string>
      <height>51</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">font: 15pt &quot;Segoe UI Historic&quot;;</string>
+   </property>
   </widget>
   <widget class="QLabel" name="background">
    <property name="geometry">
@@ -118,7 +128,7 @@ background-color: rgb(255, 255, 255);</string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(46, 47, 51);</string>
+    <string notr="true">background-color: rgb(21, 21, 21);</string>
    </property>
    <property name="text">
     <string/>
@@ -146,6 +156,9 @@ background-color: rgb(255, 255, 255);</string>
      <height>61</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">font: 10pt &quot;Segoe UI Historic&quot;;</string>
+   </property>
    <property name="text">
     <string>Add Favorite</string>
    </property>
@@ -158,6 +171,9 @@ background-color: rgb(255, 255, 255);</string>
      <width>131</width>
      <height>61</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 10pt &quot;Segoe UI Historic&quot;;</string>
    </property>
    <property name="text">
     <string>Add To Playlist</string>
@@ -173,7 +189,7 @@ background-color: rgb(255, 255, 255);</string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">color: rgb(255, 255, 255);</string>
+    <string notr="true">color: rgb(255, 255, 255);background-color: rgb(21, 21, 21);</string>
    </property>
    <property name="text">
     <string>Which Play List You want to add the song to?</string>
@@ -200,6 +216,10 @@ background-color: rgb(255, 255, 255);</string>
       <height>229</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">
+font: 15pt &quot;Segoe UI Historic&quot;;</string>
+    </property>
    </widget>
   </widget>
   <widget class="QLabel" name="Song_Artist">
@@ -212,9 +232,8 @@ background-color: rgb(255, 255, 255);</string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">
-color: rgb(0, 0, 0);
-background-color: rgb(255, 255, 255);</string>
+    <string notr="true">font: 15pt &quot;Segoe UI Historic&quot;;
+border-radius: 10px; </string>
    </property>
    <property name="text">
     <string/>
@@ -230,9 +249,8 @@ background-color: rgb(255, 255, 255);</string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">
-background-color: rgb(255, 255, 255);
-color: rgb(0, 0, 0);</string>
+    <string notr="true">border-radius: 10px; 
+font: 15pt &quot;Segoe UI Historic&quot;;</string>
    </property>
    <property name="text">
     <string/>
@@ -248,8 +266,8 @@ color: rgb(0, 0, 0);</string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(255, 255, 255);
-color: rgb(0, 0, 0);</string>
+    <string notr="true">border-radius: 10px; 
+font: 15pt &quot;Segoe UI Historic&quot;;</string>
    </property>
    <property name="text">
     <string/>
@@ -265,8 +283,8 @@ color: rgb(0, 0, 0);</string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(255, 255, 255);
-color: rgb(0, 0, 0);</string>
+    <string notr="true">border-radius: 10px; 
+font: 15pt &quot;Segoe UI Historic&quot;;</string>
    </property>
    <property name="text">
     <string/>
@@ -282,8 +300,8 @@ color: rgb(0, 0, 0);</string>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">color: rgb(0, 0, 0);
-background-color: rgb(255, 255, 255);</string>
+    <string notr="true">border-radius: 10px; 
+font: 15pt &quot;Segoe UI Historic&quot;;</string>
    </property>
    <property name="text">
     <string/>
@@ -298,6 +316,9 @@ background-color: rgb(255, 255, 255);</string>
      <height>61</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">font: 15pt &quot;Segoe UI Historic&quot;;</string>
+   </property>
    <property name="text">
     <string>Lyrics</string>
    </property>
@@ -310,6 +331,10 @@ background-color: rgb(255, 255, 255);</string>
      <width>371</width>
      <height>271</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">
+font: 15pt &quot;Segoe UI Historic&quot;;</string>
    </property>
   </widget>
   <zorder>background</zorder>

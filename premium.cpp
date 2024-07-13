@@ -1662,7 +1662,6 @@ void Premium::on_UploadPhoto_2_clicked()
 
 
 void Premium::displaySearchResults(const QList<QVariantMap> &results) {
-    // Create a new content widget for the scroll area
     QWidget *contentWidget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(contentWidget);
     layout->setAlignment(Qt::AlignLeft); // Align content to the left
@@ -1671,6 +1670,7 @@ void Premium::displaySearchResults(const QList<QVariantMap> &results) {
     for (const QVariantMap &result : results) {
         QString type = result["Type"].toString();
         QString title = result["Title"].toString();
+        QString id=result["ID"].toString();
         QString address_of_picture = result["address_of_picture"].toString();
 
         // Create a vertical layout to hold image and title/button
@@ -1695,10 +1695,15 @@ void Premium::displaySearchResults(const QList<QVariantMap> &results) {
 
         // Create button for song/album name
         QString labelText = QString("%1: %2").arg(type == "Song" ? "Song" : "Album").arg(title);
-        QPushButton *button = new QPushButton(labelText, frame);
-        button->setProperty("ID", result["ID"]);
-        button->setProperty("Type", type);
-        connect(button, &QPushButton::clicked, this, &Premium::addComment_like);
+        QPushButton *button = new QPushButton(title, frame);
+        button->setProperty("ID",id);
+        //button->setProperty("Type", type);
+        if(type=="Song"){
+            connect(button, &QPushButton::clicked, this, &Premium::addComment_like);
+        }
+        else{
+            connect(button, &QPushButton::clicked, this, &Premium:: show_album_page);
+        }
         vLayout->addWidget(button);
 
         // Add vertical layout to frame and frame to the horizontal layout
