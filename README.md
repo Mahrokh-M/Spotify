@@ -14,6 +14,6 @@ Here are some pictures of this application:
 
 ![Spotify](https://s8.uupload.ir/files/screenshot_2024-07-29_112502_8kom.png)
 
-![Spotify](https://s8.uupload.ir/files/screenshot_2024-07-29_112502_nhcy.png)
+![Spotify](https://s8.uupload.ir/files/screenshot_2024-07-29_112521_wian.png)
 
 ![Spotify](https://s8.uupload.ir/files/screenshot_2024-07-29_112549_fqle.png)
